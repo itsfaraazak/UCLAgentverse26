@@ -9,6 +9,8 @@ import {
   introducedCommits,
   isAllowedMerge,
   recordSignoff,
+  resolveSignoff,
+  signoffRefusalReason,
 } from './index';
 import type { CheckRun, CheckRunStatus, MergeDecision } from './index';
 
@@ -35,6 +37,7 @@ function checkRun(
     readonly signoffRole?: string;
     readonly signedOffBy?: string;
     readonly reasons?: readonly string[];
+    readonly blockedAtGate?: boolean;
   } = {},
 ): CheckRun {
   return {
@@ -45,6 +48,7 @@ function checkRun(
     reasons: extra.reasons ?? [],
     ...(extra.signoffRole !== undefined ? { signoffRole: extra.signoffRole } : {}),
     ...(extra.signedOffBy !== undefined ? { signedOffBy: extra.signedOffBy } : {}),
+    ...(extra.blockedAtGate !== undefined ? { blockedAtGate: extra.blockedAtGate } : {}),
   };
 }
 
@@ -678,5 +682,137 @@ describe('checkRunFromPipeline', () => {
     expect(check.requiresSignoff).toBe(true);
     expect(check.signoffRole).toBe('institutional_biosafety_committee');
     expect(check.signedOffBy).toBeUndefined();
+  });
+});
+
+describe('resolveSignoff is the only path to a signed check (SPEC §7.5)', () => {
+  const oid = 'a'.repeat(64);
+
+  it('derives the role from the policy, so a caller cannot name it', () => {
+    const escalated = checkRun(oid, 'escalated', {
+      requiresSignoff: true,
+      signoffRole: 'institutional_biosafety_committee',
+    });
+    const result = resolveSignoff(escalated, 'dr-reviewer');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.role).toBe('institutional_biosafety_committee');
+    expect(result.check.signedOffBy).toBe('dr-reviewer');
+    // The signed check carries no role the caller chose.
+    expect(result.check.signoffRole).toBe('institutional_biosafety_committee');
+  });
+
+  it('refuses a blocked run outright — a refusal has no sign-off path', () => {
+    const blocked = checkRun(oid, 'failed', {
+      requiresSignoff: true,
+      signoffRole: 'principal_investigator',
+      reasons: ['Biosafety gate blocked this edit.'],
+      // A gate refusal now says so explicitly, because a verifier failure is
+      // also `failed` and the UI was announcing it as a gate refusal. The
+      // refusal is unchanged either way; only the wording is narrowed.
+      blockedAtGate: true,
+    });
+    const result = resolveSignoff(blocked, 'dr-reviewer');
+    expect(result).toEqual({ ok: false, reason: 'blocked' });
+    expect(signoffRefusalReason({ ok: false, reason: 'blocked' })).toMatch(/cannot be signed/i);
+  });
+
+  it('refuses a run that is not awaiting a sign-off', () => {
+    const passed = checkRun(oid, 'passed');
+    expect(resolveSignoff(passed, 'dr-reviewer')).toEqual({
+      ok: false,
+      reason: 'not-escalated',
+    });
+  });
+
+  it('refuses an escalation the policy gave no role', () => {
+    const noRole = checkRun(oid, 'escalated', { requiresSignoff: true });
+    expect(resolveSignoff(noRole, 'dr-reviewer')).toEqual({ ok: false, reason: 'no-role' });
+  });
+
+  it('refuses an unnamed actor and a double sign-off', () => {
+    const escalated = checkRun(oid, 'escalated', {
+      requiresSignoff: true,
+      signoffRole: 'reviewer',
+    });
+    expect(resolveSignoff(escalated, '   ')).toEqual({ ok: false, reason: 'unnamed-actor' });
+    const signed = resolveSignoff(escalated, 'dr-reviewer');
+    expect(signed.ok).toBe(true);
+    if (!signed.ok) return;
+    expect(resolveSignoff(signed.check, 'someone-else')).toEqual({
+      ok: false,
+      reason: 'already-signed',
+    });
+  });
+
+  it('a resolved sign-off actually opens the gate, and a refused one does not', () => {
+    const { repo, ours } = diverged();
+    const theirs = theirsSyn(repo, 7, 'esc-check');
+    repo.checkout('main');
+    const escalated = checkRun(theirs, 'escalated', {
+      id: 'esc-check',
+      requiresSignoff: true,
+      signoffRole: 'principal_investigator',
+    });
+
+    const beforeSignoff = evaluateMerge({ repo, ours, theirs, checks: checksOf(escalated) });
+    expect(beforeSignoff.allowed).toBe(false);
+
+    const resolved = resolveSignoff(escalated, 'dr-okonjo');
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) return;
+    expect(
+      isAllowedMerge(evaluateMerge({ repo, ours, theirs, checks: checksOf(resolved.check) })),
+    ).toBe(true);
+  });
+});
+
+describe('a verifier failure is not reported as a biosafety refusal', () => {
+  // Both are `status: 'failed'` and neither is signable, but the UI announced
+  // both as "refused at the biosafety gate" — the one place the app said
+  // something false about the safety boundary. Wording is the only difference;
+  // these tests pin that the refusal itself is unchanged.
+  const base = {
+    id: 'check-1',
+    commit: 'a'.repeat(64),
+    requiresSignoff: false,
+    reasons: ['Independent hypoxic run: occlusion is substantially higher than the reference.'],
+  } as const;
+
+  it('words a failed check as a failed check, and says it was not the gate', () => {
+    const refusal = resolveSignoff({ ...base, status: 'failed' }, 'A. Reviewer');
+    expect(refusal.ok).toBe(false);
+    if (refusal.ok) return;
+    expect(refusal.reason).toBe('check-failed');
+    const text = signoffRefusalReason(refusal);
+    expect(text).toMatch(/did not pass its checks/);
+    expect(text).toMatch(/not refused at the biosafety gate/);
+  });
+
+  it('still words a gate refusal as a gate refusal', () => {
+    const refusal = resolveSignoff(
+      { ...base, status: 'failed', blockedAtGate: true, reasons: ['Biosafety gate blocked this edit.'] },
+      'A. Reviewer',
+    );
+    expect(refusal.ok).toBe(false);
+    if (refusal.ok) return;
+    expect(refusal.reason).toBe('blocked');
+    expect(signoffRefusalReason(refusal)).toMatch(/refused at the biosafety gate/);
+  });
+
+  it('refuses the sign-off either way — the distinction is wording only', () => {
+    for (const check of [
+      { ...base, status: 'failed' as const },
+      { ...base, status: 'failed' as const, blockedAtGate: true },
+      // Even if a crafted check claims a role and a sign-off requirement.
+      {
+        ...base,
+        status: 'failed' as const,
+        requiresSignoff: true,
+        signoffRole: 'institutional_biosafety_committee',
+      },
+    ]) {
+      expect(resolveSignoff(check, 'A. Reviewer').ok).toBe(false);
+    }
   });
 });

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 120" width="440" height="120" role="img" aria-label="SigmaFold">
+  <title>SigmaFold</title>
+  <!--
+    Horizontal lockup: the folded sigma, then "Fold" set in Poppins.
+
+    The sigma stands in for the word "Sigma" rather than sitting beside it, so
+    the mark is doing work instead of decorating. Read it and you read the name.
+  -->
+  <defs>
+    <linearGradient id="lk-upper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#BBF7D0"/>
+      <stop offset="1" stop-color="#6EE7A0"/>
+    </linearGradient>
+    <linearGradient id="lk-lower" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#34D07A"/>
+      <stop offset="1" stop-color="#5BE08F"/>
+    </linearGradient>
+  </defs>
+
+  <g>
+    <path d="M 93 21 L 31 21 L 64 60"
+          fill="none" stroke="url(#lk-upper)"
+          stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 64 60 L 31 99 L 93 99"
+          fill="none" stroke="url(#lk-lower)"
+          stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 64 60 L 52 60"
+          fill="none" stroke="#0B3B22" stroke-opacity="0.22"
+          stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!--
+    currentColor so the wordmark inverts with the theme while the mark keeps
+    its green. Poppins is the project's display face; the stack degrades to a
+    geometric sans anywhere it has not loaded.
+  -->
+  <text x="124" y="78"
+        font-family="Poppins, 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif"
+        font-size="62" font-weight="600" letter-spacing="-1.5"
+        fill="currentColor">Fold</text>
+</svg>

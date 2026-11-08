@@ -7,8 +7,12 @@
  * repaired by guesswork (SPEC.md §4.6 #13/#14).
  *
  * Framework-free and pure — no I/O, no DOM, no network. Callers are
- * responsible for screening the raw text through `lib/safety` *before* calling
- * this; see `lib/ai/upload` for the server-side ordering.
+ * responsible for screening the raw text through `lib/safety` *before*
+ * calling this. The upload path in `components/genome-upload/screening.ts`
+ * does so, and states plainly that its screen runs in the browser and governs
+ * only what that tab displays: an upload cannot become a branch or reach a
+ * merge, so it never crosses a trust boundary on the strength of that check.
+ * (`lib/ai/upload`, named here previously, does not exist.)
  */
 
 import { InvalidBaseError, PartialCodonError, GenomeInputError } from './errors';

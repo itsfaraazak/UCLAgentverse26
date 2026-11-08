@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="SigmaFold">
+  <title>SigmaFold</title>
+  <!--
+    The mark is a Greek capital sigma drawn as a single folded ribbon.
+
+    Sigma is already a folded form — two arms meeting at a crease — so the
+    logo does not illustrate the name, it *is* the name. The upper and lower
+    arms are separate paths in two tones of the same green, the way one sheet
+    of paper reads as two shades once you fold it toward a light source.
+  -->
+  <defs>
+    <linearGradient id="sf-upper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#BBF7D0"/>
+      <stop offset="1" stop-color="#6EE7A0"/>
+    </linearGradient>
+    <linearGradient id="sf-lower" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#34D07A"/>
+      <stop offset="1" stop-color="#5BE08F"/>
+    </linearGradient>
+  </defs>
+
+  <!-- upper arm: the face catching the light -->
+  <path d="M 93 21 L 31 21 L 64 60"
+        fill="none" stroke="url(#sf-upper)"
+        stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- lower arm: the face turned away -->
+  <path d="M 64 60 L 31 99 L 93 99"
+        fill="none" stroke="url(#sf-lower)"
+        stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- the crease itself -->
+  <path d="M 64 60 L 52 60"
+        fill="none" stroke="#0B3B22" stroke-opacity="0.22"
+        stroke-width="3" stroke-linecap="round"/>
+</svg>

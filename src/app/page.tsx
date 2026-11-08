@@ -1,69 +1,119 @@
-import Image from "next/image";
+/**
+ * The SigmaFold workspace.
+ *
+ * A server component whose only job is composition: build the workspace from
+ * the real modules and hand it to the client shell. Resolving the data here
+ * rather than in the browser is not an optimisation — `lib/vcs`, `lib/agents`
+ * and `lib/safety` reach `node:crypto` and cannot run client-side at all.
+ *
+ * Created genotype lines arrive as repeated `line` search params and are
+ * replayed here, so they survive a navigation to another surface and a
+ * reload. See `components/shell/model/overlay-url.ts` for the form and the
+ * rules. Reading `searchParams` makes this route request-dependent, so the
+ * part that reads it sits under a `<Suspense>` boundary: the chrome around it
+ * still prerenders, and the boundary's fallback is one line of text rather
+ * than a mock-up of the shell.
+ */
 
-export default function Home() {
+import { Suspense } from 'react';
+
+import { AppShell } from '@/components/shell/app-shell';
+import { buildWorkspace } from '@/components/shell/model/workspace';
+import {
+  OVERLAY_PARAM,
+  parseOverlay,
+  type OverlayParse,
+} from '@/components/shell/model/overlay-url';
+import type { BranchSpec, WorkspaceView } from '@/components/shell/model/types';
+
+type SearchParams = Record<string, string | string[] | undefined>;
+
+export default function Home({
+  searchParams,
+}: {
+  readonly searchParams: Promise<SearchParams>;
+}) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <Suspense fallback={<Restoring />}>
+      <Workspace searchParams={searchParams} />
+    </Suspense>
   );
+}
+
+/**
+ * The boundary's fallback. Deliberately not a skeleton of the three-pane
+ * shell: a frame with placeholder rows would read as content that is there,
+ * which is the one thing it is not.
+ */
+function Restoring() {
+  return (
+    <main className="flex h-dvh items-center justify-center p-8 text-center">
+      <p className="work__sub">Building the workspace…</p>
+    </main>
+  );
+}
+
+async function Workspace({
+  searchParams,
+}: {
+  readonly searchParams: Promise<SearchParams>;
+}) {
+  // The base workspace is both the vocabulary the URL is checked against and
+  // the thing a bad URL degrades to. `seeded()` inside the model memoises the
+  // fixture build, so having it in hand before the overlay is replayed is
+  // cheap.
+  const base = buildWorkspace();
+  const parsed = parseOverlay(
+    (await searchParams)[OVERLAY_PARAM],
+    vocabulary(base),
+  );
+
+  const { workspace, overlay, note } = replay(base, parsed);
+
+  return <AppShell workspace={workspace} overlay={overlay} overlayNote={note} />;
+}
+
+function vocabulary(base: WorkspaceView) {
+  const variants = new Set<string>();
+  for (const variant of base.variants) {
+    if (variant.variantId !== null) variants.add(variant.variantId);
+  }
+  return {
+    branches: new Set(base.branches.map((b) => b.name)),
+    variants,
+  };
+}
+
+/**
+ * Replay the validated specs, degrading to the base workspace rather than
+ * letting anything throw into the page.
+ *
+ * Every entry here has already been shape-checked and resolved against the
+ * fixture, so `buildWorkspace` is not expected to refuse them. It is still
+ * wrapped: it is the module that owns what a legal overlay is, and a URL that
+ * gets past the parser but not past the model must produce a workspace and a
+ * note, never a half-built render or a server error. The specs are not
+ * re-listed in the note — the reason is reported by category only.
+ */
+function replay(
+  base: WorkspaceView,
+  parsed: OverlayParse,
+): {
+  readonly workspace: WorkspaceView;
+  readonly overlay: readonly BranchSpec[];
+  readonly note: string | null;
+} {
+  const note = parsed.kind === 'degraded' ? parsed.note : null;
+  if (parsed.specs.length === 0) {
+    return { workspace: base, overlay: [], note };
+  }
+  try {
+    return { workspace: buildWorkspace(parsed.specs), overlay: parsed.specs, note };
+  } catch {
+    return {
+      workspace: base,
+      overlay: [],
+      note: 'The created lines in this link could not be rebuilt, so this is the base workspace. Create the line again to get it back.',
+    };
+  }
 }

@@ -240,11 +240,90 @@ export function isAllowedMerge(
   return decision.allowed;
 }
 
-/** Record an explicit human sign-off. Never called by the pipeline. */
+/**
+ * Record an explicit human sign-off. Never called by the pipeline.
+ *
+ * Low-level and deliberately permissive about status: stamping a name onto a
+ * `failed` check is allowed because it does not clear the failure —
+ * `classify` still reports it as failed. Callers that are acting on a user's
+ * sign-off action should use `resolveSignoff`, which refuses the cases a
+ * human sign-off must not reach.
+ */
 export function recordSignoff(check: CheckRun, signedOffBy: string): CheckRun {
   const actor = signedOffBy.trim();
   if (actor.length === 0) {
     throw new Error('merge-gate: sign-off requires a named actor');
   }
   return { ...check, signedOffBy: actor };
+}
+
+export type SignoffRefusal =
+  | { readonly ok: false; readonly reason: 'not-escalated' }
+  | { readonly ok: false; readonly reason: 'blocked' }
+  | { readonly ok: false; readonly reason: 'check-failed' }
+  | { readonly ok: false; readonly reason: 'no-role' }
+  | { readonly ok: false; readonly reason: 'unnamed-actor' }
+  | { readonly ok: false; readonly reason: 'already-signed' };
+
+export type SignoffResult =
+  | { readonly ok: true; readonly check: CheckRun; readonly role: string }
+  | SignoffRefusal;
+
+/**
+ * The single place a human sign-off is constructed (SPEC §7.5).
+ *
+ * Three properties, and the reason this is one function rather than a check
+ * repeated per surface:
+ *
+ * 1. **The role is derived, never supplied.** It is read from the check's own
+ *    `signoffRole`, which `checkRunFromPipeline` copies from the policy's
+ *    verdict. A caller cannot name the role that satisfies the gate, so a
+ *    crafted request cannot invent one that matches.
+ * 2. **A refusal has no sign-off path at all.** A `failed` check — which is
+ *    what a `block` verdict becomes — is refused here outright, rather than
+ *    being signed and then rejected downstream.
+ * 3. **Only an escalation is signable.** A check that does not require a
+ *    sign-off cannot acquire one, so the trail cannot show approvals that
+ *    nothing asked for.
+ *
+ * Callers must not accept a role from their own caller. If a wire type
+ * carries a `role` field, that is the bypass this function exists to remove.
+ */
+export function resolveSignoff(check: CheckRun, signedOffBy: string): SignoffResult {
+  // Both a gate refusal and a verifier failure are `failed`, and neither is
+  // signable. Only the wording differs, so a check that does not say it was
+  // blocked is reported as a failed check rather than as a refusal.
+  if (check.status === 'failed') {
+    return { ok: false, reason: check.blockedAtGate === true ? 'blocked' : 'check-failed' };
+  }
+  if (check.status !== 'escalated' && !check.requiresSignoff) {
+    return { ok: false, reason: 'not-escalated' };
+  }
+  if (hasSignoff(check)) return { ok: false, reason: 'already-signed' };
+
+  const role = check.signoffRole;
+  if (role === undefined || role.length === 0) return { ok: false, reason: 'no-role' };
+
+  const actor = signedOffBy.trim();
+  if (actor.length === 0) return { ok: false, reason: 'unnamed-actor' };
+
+  return { ok: true, check: { ...check, signedOffBy: actor }, role };
+}
+
+/** Human-readable refusal text, so each surface words it the same way. */
+export function signoffRefusalReason(refusal: SignoffRefusal): string {
+  switch (refusal.reason) {
+    case 'blocked':
+      return 'This run was refused at the biosafety gate. A refusal cannot be signed off.';
+    case 'check-failed':
+      return 'This run did not pass its checks, so there is nothing to sign off. It was not refused at the biosafety gate.';
+    case 'not-escalated':
+      return 'This run is not awaiting a sign-off.';
+    case 'no-role':
+      return 'The policy named no sign-off role for this escalation.';
+    case 'unnamed-actor':
+      return 'A sign-off requires the name of the person accepting it.';
+    case 'already-signed':
+      return 'This run is already signed off.';
+  }
 }

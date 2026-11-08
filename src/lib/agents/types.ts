@@ -1,5 +1,8 @@
 import type { PolicyCategory, Verdict } from '@/lib/safety/policy';
 import type { SimMetrics, SimParams } from '@/lib/cellsim';
+import type { AcmgClassification, AcmgCriterion } from '@/lib/acmg/types';
+import type { FixtureProvenance } from '@/lib/acmg/registry';
+import type { TherapyEntry, TherapyLookup } from '@/lib/acmg/therapy';
 
 export type DeltaKind =
   | 'intent'
@@ -9,7 +12,10 @@ export type DeltaKind =
   | 'assay'
   | 'offtarget'
   | 'verdict'
-  | 'signoff';
+  | 'signoff'
+  | 'classification'
+  | 'conflict'
+  | 'therapy_match';
 
 export interface Delta {
   readonly id: string;
@@ -111,11 +117,59 @@ export interface VerdictPayload {
   };
 }
 
+/**
+ * `classified: false` means no ACMG evidence record exists for the planned
+ * variant. Nothing is scored and nothing is fabricated.
+ */
+export interface ClassificationPayload {
+  readonly classified: boolean;
+  readonly gene: string | null;
+  readonly variantId: string | null;
+  readonly hgvs: string | null;
+  readonly provenance: FixtureProvenance | null;
+  readonly classification: AcmgClassification | null;
+  readonly points: number | null;
+  readonly criteria: readonly AcmgCriterion[];
+  readonly priorClassification: AcmgClassification | null;
+  readonly note: string;
+  /** ACMG_SCOPE_LIMITATION. Render it wherever the classification appears. */
+  readonly limitation: string;
+  readonly citation: string;
+}
+
+export interface ConflictPayload {
+  readonly assessed: boolean;
+  readonly conflict: boolean;
+  readonly priorClassification: AcmgClassification | null;
+  readonly newClassification: AcmgClassification | null;
+  readonly crossesActionableThreshold: boolean;
+  readonly note: string;
+  /** ACMG_PRIOR_CALL_LIMITATION: the prior call is simulated, not ClinVar. */
+  readonly limitation: string;
+}
+
+export interface TherapyMatchPayload {
+  readonly gene: string;
+  readonly variantId: string;
+  readonly classification: AcmgClassification;
+  readonly result: TherapyLookup['kind'];
+  readonly therapies: readonly TherapyEntry[];
+  readonly note: string;
+  readonly disclaimer: string;
+  readonly limitation: string;
+}
+
 export interface PipelineInput {
   readonly text: string;
   readonly pO2?: number;
   readonly seed?: number;
   readonly assaySteps?: number;
+  /**
+   * Opt in to the ACMG stage (classification -> conflict before the verifier,
+   * therapy after a passing run). Off by default so the seven-agent run in
+   * SPEC §4.3 is unchanged.
+   */
+  readonly classify?: boolean;
 }
 
 export interface PipelineResult {
@@ -127,6 +181,15 @@ export interface PipelineResult {
   readonly requiresSignoff: boolean;
   readonly signoffRole?: string;
   readonly headId: string;
+  /**
+   * Whether this run included the ACMG stage.
+   *
+   * Reported rather than inferred from the deltas: a blocked run terminates at
+   * the gate and emits no classification, so a surface that guessed from the
+   * output would show a refused classified run as a seven-agent pipeline and
+   * hide the three stages the gate prevented from running.
+   */
+  readonly classified: boolean;
 }
 
 export interface DeltaDAGView {
@@ -174,4 +237,20 @@ export function isOffTargetPayload(value: unknown): value is OffTargetPayload {
 
 export function isVerdictPayload(value: unknown): value is VerdictPayload {
   return isRecord(value) && typeof value.passed === 'boolean' && Array.isArray(value.reasons);
+}
+
+export function isClassificationPayload(value: unknown): value is ClassificationPayload {
+  return isRecord(value) && typeof value.classified === 'boolean' && Array.isArray(value.criteria);
+}
+
+export function isConflictPayload(value: unknown): value is ConflictPayload {
+  return (
+    isRecord(value) &&
+    typeof value.assessed === 'boolean' &&
+    typeof value.crossesActionableThreshold === 'boolean'
+  );
+}
+
+export function isTherapyMatchPayload(value: unknown): value is TherapyMatchPayload {
+  return isRecord(value) && typeof value.result === 'string' && Array.isArray(value.therapies);
 }

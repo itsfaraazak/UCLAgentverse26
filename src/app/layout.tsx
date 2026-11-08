@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Poppins, JetBrains_Mono } from "next/font/google";
+import { ThemeScript } from "@/components/shell/theme-script";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 /**
@@ -47,17 +49,29 @@ export const metadata: Metadata = {
   applicationName: "SigmaFold",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f8f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#1b1c20" },
+  ],
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${sans.variable} ${mono.variable} ${display.variable} h-full antialiased`}
-      // The theme follows the OS until a variant's toggle sets an explicit
-      // class, so suppress the hydration warning that toggle will cause.
+      // `ThemeScript` writes the theme class before first paint, so the
+      // server-rendered markup and the first client render can disagree.
       suppressHydrationWarning
     >
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <TooltipProvider delay={250}>{children}</TooltipProvider>
       </body>
     </html>
   );

@@ -1,5 +1,15 @@
 export { DeltaDAG, deltaIdFor } from './dag';
 export {
+  ACMG_RECLASSIFICATION_SIGNOFF_ROLE,
+  AcmgClassificationAgent,
+  ClassificationConflictAgent,
+  TherapyLookupAgent,
+  classificationCandidates,
+  classifyPlan,
+  conflictFromClassification,
+  therapyFromClassification,
+} from './classification';
+export {
   BiosafetyGateAgent,
   EditPlannerAgent,
   FunctionalAssayAgent,
@@ -11,6 +21,7 @@ export {
   offTargetFromIntent,
   parseIntent,
   planEdit,
+  classifiedPipelineAgentOrder,
   pipelineAgentOrder,
   readAssay,
   readIntent,
@@ -26,6 +37,9 @@ export {
 export type {
   AssayAssessment,
   AssayPayload,
+  ClassificationPayload,
+  ConflictPayload,
+  TherapyMatchPayload,
   Delta,
   DeltaDAGView,
   DeltaInput,
@@ -40,8 +54,12 @@ export type {
   StructuralPayload,
   VerdictPayload,
 } from './types';
+export type { PipelineDeps } from './pipeline';
 export {
   isAssayPayload,
+  isClassificationPayload,
+  isConflictPayload,
+  isTherapyMatchPayload,
   isEditPlanPayload,
   isIntentPayload,
   isOffTargetPayload,

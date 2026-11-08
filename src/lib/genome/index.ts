@@ -19,6 +19,7 @@ export type { ParsedUpload, ParseUploadOptions } from './fasta';
 export { applyVariant, applyVariants } from './variant';
 export { diffSequences } from './diff';
 export {
+  FIXTURE_DISCLAIMER,
   loadLoci,
   getLocus,
   getLocusVariant,

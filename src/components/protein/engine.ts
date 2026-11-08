@@ -137,7 +137,7 @@ export async function mountProteinEngine(
     createRenderer = selectRenderer,
   } = options;
 
-  // ---- Parse first: a bad file should fail before we touch the GPU. -------
+  // Parse first: a bad file should fail before we touch the GPU.
   let geometryAtoms: BufferGeometry;
   let geometryBonds: BufferGeometry;
   try {
@@ -173,7 +173,7 @@ export async function mountProteinEngine(
   const ligands = ligandAtomIndices(records);
   const carrier = new Set(selection.matchedChains);
 
-  // ---- Renderer ----------------------------------------------------------
+  // Renderer.
   const selected = await createRenderer({ prefer, signal });
   if (signal?.aborted) {
     selected.release();

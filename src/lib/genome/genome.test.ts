@@ -6,6 +6,7 @@ import {
   codons,
   applyVariant,
   diffSequences,
+  FIXTURE_DISCLAIMER,
   loadLoci,
   getLocus,
   getLocusVariant,
@@ -381,5 +382,21 @@ describe('SPEC §4.6 sequence and variant validation', () => {
       label: 'ins',
     });
     expect(codons(result.bases)).toEqual(['AAA', 'GGG', 'TTT', 'CCC']);
+  });
+});
+
+describe('fixture disclosure (SPEC §7.6, §7.7)', () => {
+  it('loads the fixture disclaimer verbatim, so no surface has to paraphrase it', () => {
+    expect(FIXTURE_DISCLAIMER).toContain('No real patient data');
+    expect(FIXTURE_DISCLAIMER).toContain('not predictions');
+  });
+
+  it('labels every fixture entry with its provenance', () => {
+    for (const locus of loadLoci()) {
+      expect(['public-reference', 'synthetic-illustrative']).toContain(locus.provenance);
+      for (const variant of locus.variants) {
+        expect(['public-reference', 'synthetic-illustrative']).toContain(variant.provenance);
+      }
+    }
   });
 });

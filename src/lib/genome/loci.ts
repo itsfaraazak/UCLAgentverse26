@@ -75,17 +75,16 @@ function requireString(value: unknown, field: string): string {
 }
 
 /**
- * `refCodon` is validated against the variant's `kind`, mirroring
- * `applyVariant` (SPEC.md §4.6 #15).
+ * Validates `refCodon` against the variant's `kind`, mirroring `applyVariant`
+ * (SPEC.md §4.6 #15).
  *
- * An insertion has no reference codon to check, so its `refCodon` must be the
- * empty string — and `applyVariant` throws if a non-empty one is supplied, so
- * that nobody believes a check happened that did not. A fixture is therefore
- * rejected at load time rather than at apply time, which is where a malformed
- * fixture is cheapest to notice.
+ * An insertion has no reference codon to check, so its `refCodon` must be
+ * empty; `applyVariant` throws on a non-empty one so nobody believes a check
+ * happened that did not. Rejecting here means a malformed fixture fails at load
+ * time rather than at apply time.
  *
- * Without this, `requireString`'s non-empty rule made an insertion fixture
- * impossible to express at all, even though `kind: 'insertion'` is supported.
+ * `requireString`'s non-empty rule would otherwise make an insertion fixture
+ * impossible to express, even though `kind: 'insertion'` is supported.
  */
 function requireRefCodon(value: unknown, kind: VariantKind, field: string): string {
   if (kind === 'insertion') {
@@ -288,6 +287,26 @@ function parseLociFile(raw: unknown): readonly Locus[] {
 
 const LOCI: readonly Locus[] = parseLociFile(rawLoci);
 
+function parseDisclaimer(raw: unknown): string {
+  if (!isRecord(raw)) throw new Error('loci.json: not an object');
+  const value = raw._disclaimer;
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error('loci.json: _disclaimer must be a non-empty string');
+  }
+  return value;
+}
+
+/**
+ * The fixture's own statement of what it is and is not.
+ *
+ * SPEC §7.7 requires the UI to state the model's limits where the numbers
+ * appear, and §7.6 requires every fixture to carry its provenance. The text
+ * is authored in `loci.json` beside the data it describes, so it is loaded
+ * from there and rendered verbatim rather than paraphrased per surface — a
+ * paraphrase is how a disclosure quietly weakens.
+ */
+export const FIXTURE_DISCLAIMER: string = parseDisclaimer(rawLoci);
+
 const LOCI_BY_GENE: ReadonlyMap<string, Locus> = new Map(
   LOCI.map((locus) => [locus.gene.toUpperCase(), locus]),
 );
@@ -324,10 +343,7 @@ export function variantById(locus: Locus, variantId: string): LocusVariant | und
   return locus.variants.find((v) => v.id === variantId);
 }
 
-/**
- * Apply a genotype's variant list, in order, to the locus reference allele.
- * The resulting sequence is labelled with the genotype's label.
- */
+/** Applies a genotype's variant list, in order, to the locus reference allele. */
 export function sequenceForGenotype(locus: Locus, genotype: LocusGenotype): Sequence {
   let seq = referenceSequence(locus);
   for (const id of genotype.appliedVariants) {
