@@ -217,3 +217,33 @@ describe('mountGenomeEngine — teardown', () => {
     expect(classifyFailure(err)).toBe('renderer');
   });
 });
+
+describe('mountGenomeEngine — a throw partway through mount', () => {
+  it('releases the GPU context and every tracked resource, rather than stranding them', async () => {
+    const fake = createFakeRenderer();
+    const geometryDispose = vi.spyOn(BufferGeometry.prototype, 'dispose');
+
+    // Fail after the renderer is acquired and the scene is built: setSize is
+    // reached from attachViewport, by which point the context and a dozen
+    // geometries are live. Before the unwind stack existed, the throw
+    // propagated with `handle` still null in the shell, so nothing could
+    // free them.
+    const boom = new Error('device lost during mount');
+    fake.surface.setSize = () => {
+      throw boom;
+    };
+
+    const container = host();
+    const err = await mountGenomeEngine({
+      container,
+      model: buildLocusModel({ variantId: 'HBB_HbS' }),
+      onContextLost: () => undefined,
+      createRenderer: async () => fake,
+    }).catch((e: unknown) => e);
+
+    expect(err).toBe(boom);
+    expect(fake.calls.release).toBe(1);
+    expect(geometryDispose.mock.calls.length).toBeGreaterThanOrEqual(5);
+    expect(container.querySelector('canvas')).toBeNull();
+  });
+});

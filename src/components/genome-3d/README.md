@@ -84,7 +84,7 @@ deletion so it cannot regress silently.
 
 ## Instancing
 
-147 codons and 93 base pairs are drawn from a handful of geometries:
+Every codon and base pair is drawn from a handful of geometries:
 
 | mesh | instances (HBB) |
 |---|---|
@@ -93,11 +93,12 @@ deletion so it cannot regress silently.
 | edit halo + axis ring | one per edited codon |
 | backbone ribbons | 2 plain meshes (`TubeGeometry` along each strand) |
 
-`engine.test.ts` asserts the tracked-resource count stays in single figures
-while the whole locus is on screen, which is what proves these are instanced
-rather than a mesh per codon. Counts are derived from `loci.json` in the
-tests rather than hardcoded — the genome refresh above broke ten assertions
-that had the old numbers baked in.
+`engine.test.ts` asserts the tracked-resource count stays **under 20** while
+the whole locus is on screen — the real figure is in the teens, against 148
+codons — which is what proves these are instanced rather than a mesh per
+codon. Counts are derived from `loci.json` in the tests rather than
+hardcoded: the genome refresh above broke ten assertions that had the old
+numbers baked in.
 
 ## Disposal
 
@@ -108,10 +109,17 @@ viewport (dropping the `ResizeObserver` and the context-lost listener) and
 releases the GPU context. It is idempotent.
 
 `engine.test.ts` asserts `trackedResourceCount()` drops to **0** after
-`dispose()`, that `forceContextLoss` ran, that the canvas left the DOM, and
-that the auto-rotate loop is dead rather than merely paused. A leaked WebGL
-context across route switches would eventually evict the live one, so this is
-tested rather than assumed.
+`dispose()`, that the renderer's `release()` ran exactly once, that the canvas
+left the DOM, and that the auto-rotate loop is dead rather than merely paused.
+A separate test fails the mount partway — after the context is acquired —
+and asserts the same teardown runs, because a throw there used to strand the
+context with no reference left to free it.
+
+What is **not** covered: the real `forceContextLoss()` inside
+`runtime/renderer.ts`. Every test substitutes a fake renderer whose `release`
+only counts calls, so that line is exercised by no test in the repo. A leaked
+WebGL context across route switches would eventually evict the live one, so
+this is the gap worth closing next.
 
 ## Failure behaviour
 

@@ -211,3 +211,28 @@ describe('GenomeUpload — friendly inline validation, never a stack trace', () 
     );
   });
 });
+
+describe('GenomeUpload — how outcomes are announced', () => {
+  it('announces a policy refusal assertively', async () => {
+    render(<GenomeUpload />);
+    paste(`>HBB primer order\n${HBB_REF}`);
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('CONSTRUCT_DESIGN_REQUEST');
+  });
+
+  it('does not call a malformed sequence "Refused" — that word is for policy', async () => {
+    render(<GenomeUpload />);
+    paste('ATGGTGCA');
+    const alert = await screen.findByRole('alert');
+    // Colour is shared with the block tone, but the screen-reader label is not.
+    expect(alert.textContent).toContain('Not usable');
+    expect(alert.textContent).not.toContain('Refused');
+  });
+
+  it('does not interrupt on success', async () => {
+    render(<GenomeUpload />);
+    paste(HBB_REF);
+    await waitFor(() => expect(screen.getByText(/Loaded/)).toBeTruthy());
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+});

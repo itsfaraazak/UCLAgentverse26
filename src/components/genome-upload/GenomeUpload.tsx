@@ -152,7 +152,27 @@ export function GenomeUpload({
       }
 
       // ---- 1. The gate, before anything else touches the input. ----------
-      const screened = screenUpload({ text: raw, targetGene: locus.gene, fileName });
+      // Wrapped so that if screening itself ever fails — a bundling problem
+      // that leaves its digest unavailable, say — the upload is refused
+      // rather than thrown past React into a blank panel. Fail closed.
+      let screened;
+      try {
+        screened = screenUpload({ text: raw, targetGene: locus.gene, fileName });
+      } catch {
+        setText('');
+        if (fileInput.current !== null) fileInput.current.value = '';
+        setState({
+          phase: 'invalid',
+          problem: {
+            kind: 'parse',
+            message:
+              'The biosafety screen could not run, so this upload was refused. ' +
+              'Nothing was loaded and the text was discarded.',
+          },
+        });
+        emit(null, null);
+        return;
+      }
 
       if (!screened.accepted) {
         // Discard the input entirely: not stored, not echoed, not logged.
@@ -244,7 +264,10 @@ export function GenomeUpload({
         });
         return;
       }
+      // Clear downstream before reading: otherwise the header flips to the
+      // demo while the parent still holds the previous uploaded model.
       setState({ phase: 'working' });
+      emit(null, null);
       void file
         .text()
         .then((contents) => submit(contents, file.name))
@@ -255,7 +278,7 @@ export function GenomeUpload({
           });
         });
     },
-    [submit],
+    [submit, emit],
   );
 
   const onDrop = (event: DragEvent<HTMLDivElement>): void => {
@@ -407,7 +430,12 @@ export function GenomeUpload({
       <div id={ids.status} role="status" aria-live="polite" className="mt-3 empty:mt-0">
         {state.phase === 'blocked' && <BlockedPanel screening={state.screening} />}
         {state.phase === 'invalid' && (
-          <Notice tone="block" icon={<TriangleAlert aria-hidden="true" className="size-3.5" />} title="That sequence cannot be used">
+          <Notice
+            tone="invalid"
+            assertive
+            icon={<TriangleAlert aria-hidden="true" className="size-3.5" />}
+            title="That sequence cannot be used"
+          >
             <p>{state.problem.message}</p>
           </Notice>
         )}
@@ -480,6 +508,7 @@ function BlockedPanel({ screening }: { readonly screening: UploadScreening }) {
       tone="block"
       icon={<ShieldAlert aria-hidden="true" className="size-3.5" />}
       title={`Refused · ${screening.category}`}
+      assertive
     >
       <p>{screening.reason}</p>
       {screening.flaggedGenes.length > 0 && (
@@ -523,6 +552,9 @@ const TONE = {
   pass: { token: 'var(--verdict-pass)', label: 'Passed' },
   escalate: { token: 'var(--verdict-escalate)', label: 'Needs review' },
   block: { token: 'var(--verdict-block)', label: 'Refused' },
+  // A malformed sequence is not a policy refusal. Reusing the block tone's
+  // label made a screen reader announce "Refused" for a typo like ATGGTGCA.
+  invalid: { token: 'var(--verdict-block)', label: 'Not usable' },
 } as const;
 
 /**
@@ -533,20 +565,30 @@ function Notice({
   tone,
   icon,
   title,
+  assertive = false,
   children,
 }: {
   readonly tone: keyof typeof TONE;
   readonly icon: ReactNode;
   readonly title: string;
+  /** Refusals and errors interrupt; a success does not. */
+  readonly assertive?: boolean;
   readonly children: ReactNode;
 }) {
   const { token, label } = TONE[tone];
   return (
     <div
+      {...(assertive ? { role: 'alert' as const } : {})}
       className="rounded-md px-3 py-2.5 text-xs leading-relaxed"
       style={{ background: `color-mix(in oklab, ${token} 10%, transparent)` }}
     >
-      <p className="flex items-center gap-1.5 font-medium" style={{ color: token }}>
+      <p
+        className="flex items-center gap-1.5 font-medium"
+        // R-09: the pure token sits at 2.25:1 on its own 10% tint in the light
+        // theme. Mixing toward the foreground darkens it in light and lightens
+        // it in dark, so the icon stays legible in both.
+        style={{ color: `color-mix(in oklab, ${token} 72%, var(--foreground))` }}
+      >
         {icon}
         <span className="text-foreground">{title}</span>
         <span className="sr-only">({label})</span>
