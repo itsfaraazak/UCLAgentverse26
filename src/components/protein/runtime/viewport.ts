@@ -41,21 +41,38 @@ export function attachViewport(options: ViewportOptions): () => void {
     surface.setSize(width, height, false);
     onResize(width, height);
   };
-  resize();
 
   let observer: ResizeObserver | null = null;
-  if (typeof ResizeObserver !== 'undefined') {
-    observer = new ResizeObserver(resize);
-    observer.observe(container);
-  } else if (typeof window !== 'undefined') {
-    window.addEventListener('resize', resize);
-  }
-
   const lost = (event: Event): void => {
     event.preventDefault();
     onContextLost(new ContextLostError());
   };
-  canvas.addEventListener('webglcontextlost', lost);
+
+  // The canvas is already in the DOM, so anything that throws from here on
+  // would strand it there with no detach function ever returned to the
+  // caller. Undo our own partial setup before rethrowing: the caller cannot,
+  // because it has nothing to call. `surface.setSize` is the realistic
+  // thrower — a renderer whose device was lost between init() and mount.
+  try {
+    resize();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(resize);
+      observer.observe(container);
+    } else if (typeof window !== 'undefined') {
+      window.addEventListener('resize', resize);
+    }
+
+    canvas.addEventListener('webglcontextlost', lost);
+  } catch (err) {
+    observer?.disconnect();
+    if (observer === null && typeof window !== 'undefined') {
+      window.removeEventListener('resize', resize);
+    }
+    canvas.removeEventListener('webglcontextlost', lost);
+    canvas.remove();
+    throw err;
+  }
 
   return () => {
     observer?.disconnect();

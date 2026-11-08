@@ -163,6 +163,27 @@ export interface BranchView {
   readonly run: RunView | null;
 }
 
+/**
+ * A branch the user created, as an instruction to replay rather than a record
+ * of one.
+ *
+ * The server holds no session state: it rebuilds the repository from
+ * `data/loci.json` on every call, which is only sound because `lib/vcs` oids
+ * are deterministic. A created branch therefore cannot live on the server
+ * between requests. Instead the client keeps the list of specs and re-sends
+ * it, and the server replays each one with `Repo.branch()` and a real
+ * `applyVariant` commit. The branch is genuinely in the repository for the
+ * duration of the request that needs it, and replaying the same specs
+ * reproduces the same oids, so short hashes stay stable across requests.
+ */
+export interface BranchSpec {
+  readonly name: string;
+  /** The branch whose head the new line starts from. */
+  readonly from: string;
+  /** A curated variant id from `data/loci.json`, applied as its first edit. */
+  readonly variantId: string;
+}
+
 export type MergeDecisionView =
   | { readonly kind: 'allowed'; readonly oid: string; readonly short: string }
   | {
@@ -210,26 +231,48 @@ export interface DiffView {
 }
 
 /** The result of screening free text. Never carries refused input. */
-export interface ScreenView {
+interface ScreenBase {
   readonly category: PolicyCategory;
   readonly verdict: Verdict;
   readonly reason: string;
   readonly requiresSignoff: boolean;
   readonly signoffRole: string | null;
   readonly flaggedGenes: readonly string[];
-  readonly requestDigest: string;
-  readonly redacted: boolean;
   /**
-   * The request text, echoed back **only** when policy permits it. `null` for
-   * every `redacted` verdict — the field is nulled on the server, so a
-   * block-class request cannot reach the client at all (SPEC §7.3).
+   * sha256 prefix of the request. One-way, so an entry stays auditable
+   * without the request being retained.
    */
-  readonly echo: string | null;
+  readonly requestDigest: string;
   /** Logical sequence number within the console session. */
   readonly seq: number;
-  /** Set when the screen also produced a full pipeline run. */
-  readonly run: RunView | null;
 }
+
+/**
+ * The result of screening free text.
+ *
+ * A discriminated union rather than a flat record with `redacted: boolean`,
+ * because SPEC §7.3 is binding: a refused request must not be echoed, logged
+ * or restated. With independent fields, `{ redacted: true, echo: '...' }`
+ * type-checks, and the invariant survives only as long as every author
+ * remembers it. Split this way, a redacted result *cannot carry* the text —
+ * `echo` is `null` in that arm, so the leak is unrepresentable rather than
+ * merely absent, and the compiler enforces what a comment used to ask for.
+ *
+ * The run is nulled on the same arm because a blocked request terminates at
+ * the gate: there is no downstream agent output to show, and projecting the
+ * DAG would reintroduce a path from the request to the screen.
+ */
+export type ScreenView =
+  | (ScreenBase & {
+      readonly redacted: true;
+      readonly echo: null;
+      readonly run: null;
+    })
+  | (ScreenBase & {
+      readonly redacted: false;
+      readonly echo: string;
+      readonly run: RunView;
+    });
 
 export interface SimulationDefaultsView {
   readonly seed: number;
@@ -246,6 +289,19 @@ export interface WorkspaceView {
   readonly locus: LocusView;
   readonly branches: readonly BranchView[];
   readonly defaultBranch: string;
+  /**
+   * Every curated variant in the locus, offered as the edit a newly created
+   * branch applies. Derived from the fixture, so the picker gains an entry
+   * when `data/loci.json` does and cannot offer an edit the planner has no
+   * annotation for.
+   */
+  readonly variants: readonly EditView[];
+  /**
+   * An example request for the red-team console's empty field, built from the
+   * locus by `requestFor` — the same derivation the branch check runs use, so
+   * the hint cannot drift from what the pipeline actually resolves.
+   */
+  readonly exampleRequest: string;
   readonly agentOrder: readonly string[];
   readonly simulation: SimulationDefaultsView;
   readonly fixtureDisclaimer: string;

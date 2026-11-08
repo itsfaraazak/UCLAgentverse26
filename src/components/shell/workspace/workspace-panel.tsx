@@ -31,6 +31,7 @@ import type { LucideIcon } from 'lucide-react';
 
 import { diffAction } from '@/app/actions';
 import type {
+  BranchSpec,
   BranchView,
   DiffView,
   LocusView,
@@ -75,6 +76,8 @@ export interface WorkspacePanelProps {
   readonly locus: LocusView;
   readonly branches: readonly BranchView[];
   readonly branch: BranchView;
+  /** Replay list for branches the user created; the server needs it to see them. */
+  readonly overlay: readonly BranchSpec[];
   readonly defaultBranch: string;
   readonly simulation: SimulationDefaultsView;
   readonly fixtureDisclaimer: string;
@@ -86,6 +89,7 @@ export function WorkspacePanel({
   locus,
   branches,
   branch,
+  overlay,
   defaultBranch,
   simulation,
   fixtureDisclaimer,
@@ -148,7 +152,9 @@ export function WorkspacePanel({
 
         {/* Keyed by branch: a branch switch remounts with empty state rather
             than resetting it from an effect. */}
-        {tab === 'diff' ? <DiffTab key={branch.name} branch={branch} /> : null}
+        {tab === 'diff' ? (
+          <DiffTab key={branch.name} branch={branch} overlay={overlay} />
+        ) : null}
 
         {tab === 'track' ? (
           <div className="work__pad">
@@ -217,7 +223,12 @@ export function WorkspacePanel({
         ) : null}
 
         {tab === 'merge' ? (
-          <MergeView branches={branches} into={branch.name} defaultBranch={defaultBranch} />
+          <MergeView
+            branches={branches}
+            into={branch.name}
+            overlay={overlay}
+            defaultBranch={defaultBranch}
+          />
         ) : null}
       </div>
     </>
@@ -225,7 +236,13 @@ export function WorkspacePanel({
 }
 
 /** Loads the diff for the active branch from the server action. */
-function DiffTab({ branch }: { readonly branch: BranchView }) {
+function DiffTab({
+  branch,
+  overlay,
+}: {
+  readonly branch: BranchView;
+  readonly overlay: readonly BranchSpec[];
+}) {
   const [diff, setDiff] = useState<DiffView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -234,7 +251,7 @@ function DiffTab({ branch }: { readonly branch: BranchView }) {
     let live = true;
     startTransition(async () => {
       try {
-        const next = await diffAction(branch.name);
+        const next = await diffAction(branch.name, overlay);
         if (live) {
           setDiff(next);
           // Cleared on success, including after a branch switch. Without it a
@@ -252,7 +269,7 @@ function DiffTab({ branch }: { readonly branch: BranchView }) {
     return () => {
       live = false;
     };
-  }, [branch.name]);
+  }, [branch.name, overlay]);
 
   if (error !== null) {
     return (

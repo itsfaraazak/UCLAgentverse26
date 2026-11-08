@@ -479,7 +479,25 @@ export function GeneTrack({ locus, edit, marks, className }: GeneTrackProps): Re
   /* ── Text equivalents ── */
 
   const modelledExonCount = locus.exons.filter((e) => e.modelled).length;
-  const exonSentence = `${locus.exons.length} exon${locus.exons.length === 1 ? "" : "s"} spanning codons 1–${domain.lastCodon}${
+
+  // The exon extent, derived from the exons themselves. `domain.lastCodon` is
+  // the *axis* domain — max(last exon end, end of the modelled window) — and
+  // with the current fixture that is codon 148, the terminator, which lies
+  // outside every annotated exon. Reporting it as the exon span overstated
+  // the fixture by a codon, and the leading `1` was a literal that merely
+  // happened to match the first exon's start.
+  const exonFirst =
+    locus.exons.length === 0
+      ? null
+      : Math.min(...locus.exons.map((e) => e.codonStart));
+  const exonLast =
+    locus.exons.length === 0 ? null : Math.max(...locus.exons.map((e) => e.codonEnd));
+  const exonSpanText =
+    exonFirst === null || exonLast === null
+      ? "no annotated exons"
+      : `codons ${exonFirst}–${exonLast}`;
+
+  const exonSentence = `${locus.exons.length} exon${locus.exons.length === 1 ? "" : "s"} spanning ${exonSpanText}${
     locus.exons.length > 0
       ? ` (${locus.exons.map((e) => `${e.label}: codons ${e.codonStart}–${e.codonEnd}`).join("; ")})`
       : ""
@@ -1000,7 +1018,8 @@ export function GeneTrack({ locus, edit, marks, className }: GeneTrackProps): Re
         <dd>{locus.chromosome}</dd>
         <dt className="text-muted-foreground">Exons</dt>
         <dd>
-          {locus.exons.length}, codons 1–{domain.lastCodon}; {modelledExonCount} overlap the modelled window
+          {locus.exons.length}, {exonSpanText}; {modelledExonCount} overlap the modelled
+          window
         </dd>
         <dt className="text-muted-foreground">Modelled</dt>
         <dd>

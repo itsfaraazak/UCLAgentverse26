@@ -33,7 +33,11 @@ export interface MountSlotProps {
 
 export function MountSlot({ title, path, expects, purpose }: MountSlotProps) {
   return (
-    <div className="slot" role="status">
+    // Deliberately not role="status". This is static descriptive prose, and a
+    // live region would announce the whole block — heading, purpose, path and
+    // prop list — every time the tab is opened. The surrounding tabpanel
+    // already gives it context.
+    <div className="slot">
       <p className="slot__head">
         <PlugZap className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
         {title} — mount point ready

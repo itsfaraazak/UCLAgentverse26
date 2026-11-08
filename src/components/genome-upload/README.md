@@ -47,7 +47,7 @@ component is props-driven and layout-agnostic; it works down to ~320px wide.
 3. An **`escalate`** verdict does not auto-approve. The sequence is held
    behind an explicit *"Acknowledge and load anyway"* action, with the
    required sign-off role named (SPEC §7.5).
-4. Only then: `parseFasta` → `validateSequence` → `buildGenomeModel`.
+4. Only then: `parseSequenceUpload` → `validateUpload` → `buildGenomeModel`.
 
 ### Refused input cannot be echoed, by construction
 
@@ -92,8 +92,10 @@ never a stack trace, never an error class name:
 | over the cap | states the limit and the observed size |
 
 Non-fatal observations are surfaced as warnings and still load: no `ATG`
-start codon, an internal stop codon, no stop codon (the 31-codon HBB fixture
-legitimately has none), and a codon count differing from the reference.
+start codon, an internal stop codon, no stop codon (worded as an observation,
+since a partial coding region legitimately has none — the current HBB fixture
+is the full CDS and does end in one), and a codon count differing from the
+reference.
 
 ## Caps
 

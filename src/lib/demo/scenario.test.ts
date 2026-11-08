@@ -236,26 +236,40 @@ describe('the verifier reads the measurement, not the prose', () => {
   });
 
   /**
-   * The real pipeline threads its deltas as a chain — each delta's parent is
-   * the one before it — so the verifier has a single parent rather than one
-   * edge per claim it checked. The audit trail is still complete: `history()`
-   * walks back through every upstream claim.
+   * `runVerifierAgent` calls `dag.history(parentId)` to find the claims it
+   * cross-checks, so the verifier's *ancestry* is what makes disagreement
+   * possible — not its immediate parent. Asserted that way because the
+   * immediate parent legitimately moves when a stage is inserted (it is the
+   * off-target delta on a seven-agent run and the conflict delta on a
+   * classified one), while the claims must stay reachable either way. An
+   * orphaned or mis-threaded verifier would read an empty history and could
+   * no longer contradict anything.
    */
-  /**
-   * The DAG is a chain: each delta's parent is the one before it, so the
-   * verifier has a single parent rather than one edge per claim it checked.
-   * On a classified run that parent is the conflict delta, not the off-target
-   * one — asserted positionally so adding a stage does not silently break the
-   * threading it is meant to check.
-   */
-  it('threads the verifier delta onto the delta immediately before it', () => {
+  it('threads the verifier onto the run it verified, with the claims reachable', () => {
     const silent = commitAt('experiment/silent-marker');
     const deltas = silent.run?.deltas ?? [];
-    const at = deltas.findIndex((d) => d.kind === 'verdict');
-    expect(at).toBeGreaterThan(0);
-    const verifier = deltas[at];
-    expect(verifier?.parents).toHaveLength(1);
-    expect(verifier?.parents[0]).toBe(deltas[at - 1]?.id);
+    const byId = new Map(deltas.map((d) => [d.id, d]));
+    const verifier = deltas.find((d) => d.kind === 'verdict');
+    expect(verifier).toBeDefined();
+    if (verifier === undefined) return;
+
+    // Walk the parent chain the way `history()` does.
+    const ancestry: string[] = [];
+    let cursor = verifier.parents[0];
+    while (cursor !== undefined) {
+      const parent = byId.get(cursor);
+      if (parent === undefined) break;
+      ancestry.push(parent.kind);
+      cursor = parent.parents[0];
+    }
+
+    expect(verifier.parents).toHaveLength(1);
+    // The claims it cross-checks, and the gate's own verdict, are all upstream.
+    for (const kind of ['structural', 'assay', 'edit_plan', 'screen', 'intent']) {
+      expect(ancestry, `expected ${kind} upstream of the verifier`).toContain(kind);
+    }
+    // Reaches the root rather than dangling off a detached delta.
+    expect(ancestry.at(-1)).toBe('intent');
   });
 });
 
