@@ -99,7 +99,7 @@ function BaseRegister({
   readonly tone: string;
 }) {
   if (codon === null) {
-    return <span className="text-muted-foreground/60">···</span>;
+    return <span className="text-muted-foreground">···</span>;
   }
   return (
     <span className="tracking-[0.18em]">
@@ -153,12 +153,12 @@ export function DiffStack({
       {/* Register key — the header row of a three-register diff. */}
       <div className="flex shrink-0 items-center gap-4 border-b border-border bg-gutter px-3 py-1.5 text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5 font-mono">
-          <span className="text-muted-foreground/70">ref</span>
+          <span className="text-muted-foreground">ref</span>
           <span className="text-foreground">{refLabel}</span>
         </span>
         <ArrowRight className="size-3 shrink-0" aria-hidden />
         <span className="inline-flex items-center gap-1.5 font-mono">
-          <span className="text-muted-foreground/70">alt</span>
+          <span className="text-muted-foreground">alt</span>
           <span className="text-foreground">{altLabel}</span>
         </span>
         <span className="ml-auto nums font-mono">

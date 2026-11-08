@@ -1,14 +1,28 @@
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
 import { cn } from "cn"
 
+// Local amendment to the generated primitive (SPEC §5: labelled controls).
+// Base UI puts role="slider" on the nested input inside Slider.Thumb, and that
+// input takes its accessible name from the Thumb's own aria-label — not from
+// anything passed to Slider.Root, which renders a role="group" div. Without a
+// way to reach the thumb, the control is announced unnamed. `thumbProps`
+// forwards aria-* down to each thumb; nothing else about the primitive changes.
+type SliderProps = SliderPrimitive.Root.Props & {
+  thumbProps?: Pick<
+    SliderPrimitive.Thumb.Props,
+    "aria-label" | "aria-labelledby" | "aria-valuetext" | "getAriaValueText"
+  >
+}
+
 function Slider({
   className,
   defaultValue,
   value,
   min = 0,
   max = 100,
+  thumbProps,
   ...props
-}: SliderPrimitive.Root.Props) {
+}: SliderProps) {
   const _values = Array.isArray(value)
     ? value
     : Array.isArray(defaultValue)
@@ -41,6 +55,7 @@ function Slider({
             data-slot="slider-thumb"
             key={index}
             className="relative block size-3 shrink-0 rounded-full border border-ring bg-white ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50"
+            {...thumbProps}
           />
         ))}
       </SliderPrimitive.Control>

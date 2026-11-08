@@ -194,9 +194,26 @@ export function Workbench({ workspace }: WorkbenchProps) {
       if (!mod) return;
       const key = event.key.toLowerCase();
 
+      // ⌘K opens the palette from anywhere, including a text field.
       if (key === 'k') {
         event.preventDefault();
         setPaletteOpen((v) => !v);
+        return;
+      }
+
+      // Every other shortcut yields to the field the user is typing in. The
+      // red-team console binds ⌘↵ to "screen this text"; without this guard
+      // the same keystroke would also start a pipeline run on the branch's
+      // default request, so a blocked verdict and a passing run would appear
+      // side by side — exactly the impression SPEC §7.4 forbids.
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT')
+      ) {
         return;
       }
       if (key === 'enter') {
@@ -309,7 +326,12 @@ export function Workbench({ workspace }: WorkbenchProps) {
                       value={[zoom]}
                       onValueChange={(value) => {
                         const next = Array.isArray(value) ? value[0] : value;
-                        if (next === 'locus' || next === 'exon' || next === 'codon') setZoom(next);
+                        if (next !== 'locus' && next !== 'exon' && next !== 'codon') return;
+                        setZoom(next);
+                        // The compact strip is pinned to the whole locus, so
+                        // choosing a zoom has to open the full track or the
+                        // control does nothing visible.
+                        setTrackExpanded(true);
                       }}
                       className="ml-auto shrink-0"
                       aria-label="Gene track zoom"

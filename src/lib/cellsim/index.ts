@@ -87,8 +87,13 @@ export const SICKLING_ONSET_PO2 = 60;
 const BASE_SPEED = 0.006;
 /** A jammed cell creeps rather than stopping dead, so jams can clear. */
 const CREEP_SPEED = 0.0004;
-/** Share of the gap a deformable discoid cell occupies. */
-const DISCOID_FOOTPRINT = 0.12;
+/**
+ * Occlusion measures *pathological* blockage, so a deformable discoid cell
+ * contributes nothing to it: a genotype with no sickled cells reads 0 by
+ * construction, however narrow the channel is. Geometric narrowing is the
+ * constriction's own property and is already in the denominator.
+ */
+const DISCOID_FOOTPRINT = 0;
 /** Share of the gap a stiff sickled cell occupies. */
 const SICKLED_FOOTPRINT = 1;
 

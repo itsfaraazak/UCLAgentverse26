@@ -51,9 +51,13 @@ describe('determinism', () => {
 
 describe('genotype separates the two cases', () => {
   it('a reference genotype never sickles, at any pO2', () => {
-    const m = runHeadless({ ...base, pO2: 10, polymerizationTendency: 0 }, 400);
-    expect(m.sickledFraction).toBe(0);
-    expect(m.occlusion).toBeLessThan(0.4);
+    for (const pO2 of [10, 24, 60, 95, 100]) {
+      const m = runHeadless({ ...base, pO2, polymerizationTendency: 0 }, 400);
+      expect(m.sickledFraction).toBe(0);
+      // Occlusion is pathological blockage, not geometric narrowing: with no
+      // sickled cells it must read exactly zero, however tight the channel.
+      expect(m.occlusion).toBe(0);
+    }
   });
 
   it('a high-tendency genotype sickles and occludes at low pO2', () => {

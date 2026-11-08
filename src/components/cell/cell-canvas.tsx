@@ -12,10 +12,9 @@
  */
 
 import { Droplet, Gauge, Pause, Play, RotateCcw, Waves } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import {
   channelHalfHeight,
@@ -72,6 +71,7 @@ export function CellCanvas({
   const [running, setRunning] = useState(true);
   const [metrics, setMetrics] = useState<SimMetrics>(ZERO);
   const [tick, setTick] = useState(0);
+  const po2LabelId = useId();
 
   const params: SimParams = useMemo(
     () => ({
@@ -250,19 +250,23 @@ export function CellCanvas({
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex min-w-[15rem] flex-1 items-center gap-2">
-          <Label htmlFor="po2-slider" className="shrink-0 text-[11px] text-muted-foreground">
+          <span id={po2LabelId} className="shrink-0 text-[11px] text-muted-foreground">
             {pO2Control.label}
-          </Label>
+          </span>
           <Slider
-            id="po2-slider"
             value={pO2}
             onValueChange={(v) => setPO2(typeof v === 'number' ? v : (v[0] ?? pO2))}
             min={pO2Control.min}
             max={pO2Control.max}
             step={1}
             className="flex-1"
-            aria-label={`${pO2Control.label} in ${pO2Control.unit}`}
-            aria-valuetext={`${pO2} ${pO2Control.unit}`}
+            // The name has to reach the thumb: that is where role="slider"
+            // lives. See the note in components/ui/slider.tsx.
+            thumbProps={{
+              'aria-label': `${pO2Control.label} in ${pO2Control.unit}`,
+              'aria-valuetext': `${pO2} ${pO2Control.unit}`,
+            }}
+            aria-labelledby={po2LabelId}
           />
           <span className="nums w-[5.5rem] shrink-0 font-mono text-[11px]">
             {pO2} {pO2Control.unit}

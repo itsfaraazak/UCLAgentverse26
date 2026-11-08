@@ -11,6 +11,9 @@
  *   * the request text is a parameter and never a return value,
  *   * nothing derived from it is returned except an allow-listed gene-symbol
  *     list and the one-way digest from `lib/safety`,
+ *   * the one other free-text field in the app — the escalation approver's
+ *     name — never passes through the screen, so it is constrained to a name
+ *     shape here before it can reach the delta trail,
  *   * pipeline runs are held server-side in `RUNS` and addressed by id, so the
  *     merge gate decides from the run the server computed rather than from a
  *     run shape the client hands back. The client cannot forge a passing run.
@@ -65,7 +68,9 @@ export async function runPipelineAction(
 ): Promise<RunPipelineResult> {
   const workspace = buildWorkspace();
   const branch = workspace.branches.find((b) => b.name === branchName);
-  if (branch === undefined) throw new Error(`no such branch: ${branchName}`);
+  // The requested name is not echoed back: error strings are logged by the
+  // framework, and nothing client-supplied belongs in a log (SPEC §7.3).
+  if (branch === undefined) throw new Error('no such branch on this workspace');
 
   const run = runPipeline({
     requestText: clamp(requestText ?? branch.defaultRequest),
@@ -96,12 +101,19 @@ export async function signOffAction(
     throw new Error('a blocked run cannot be signed off');
   }
   if (!existing.requiresSignoff) throw new Error('that run does not require sign-off');
+  if (existing.signoff !== null) throw new Error('that run is already signed off');
 
-  const name = approver.trim();
-  if (name === '') throw new Error('sign-off requires a named approver');
+  // The approver is the one free-text field that is persisted and rendered, so
+  // it is constrained to a name shape at the boundary rather than merely
+  // trimmed. Without this, someone refused by the gate could paste the refused
+  // text into this box and have it written to the append-only delta trail.
+  const name = approver.trim().slice(0, 120);
+  if (!/^[\p{L}\p{M}][\p{L}\p{M}'’. -]{1,119}$/u.test(name)) {
+    throw new Error('sign-off requires a person’s name');
+  }
 
   const signed = recordSignoff(existing, {
-    approver: name.slice(0, 120),
+    approver: name,
     role: existing.signoffRole ?? 'human_reviewer',
     at: Date.now(),
   });
@@ -152,7 +164,10 @@ export async function attemptMergeAction(runId: string): Promise<MergeAttempt> {
   const repo = new Repo();
   const ourBlob = repo.write({ kind: 'blob', sequence: branch.altSequence });
   const theirBlob = repo.write({ kind: 'blob', sequence: targetBranch.altSequence });
-  const baseBlob = repo.write({ kind: 'blob', sequence: targetBranch.refSequence });
+  // The merge base is the genotype this branch forked from — not the target's
+  // own parent. Using the target's parent makes both sides look changed and
+  // produces a spurious conflict on a branch that merges cleanly.
+  const baseBlob = repo.write({ kind: 'blob', sequence: branch.refSequence });
 
   const baseTree = repo.write({ kind: 'tree', entries: { [rebuilt.gene]: baseBlob } });
   repo.branch('base');
