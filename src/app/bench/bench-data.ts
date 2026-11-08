@@ -43,7 +43,7 @@ import {
 } from '@/lib/merge-gate';
 import {
   ASSAY_MODEL_LIMITATION,
-  DEFAULT_ASSAY_STEPS,
+  CHALLENGE_STEPS,
   PO2_RANGE,
   SIMULATION_DEFAULTS,
   runAssay,
@@ -481,11 +481,14 @@ export function benchData(): BenchData {
       pO2Unit: PO2_RANGE.unit,
       pO2Label: PO2_RANGE.label,
       sicklingOnsetBelow: PO2_RANGE.sicklingOnsetBelow,
-      assaySteps: DEFAULT_ASSAY_STEPS,
+      // The duration the pipeline's checks actually ran, not the module
+      // default: the panel reported 260 while every check it displays ran
+      // CHALLENGE_STEPS, which is a real figure from the wrong constant.
+      assaySteps: CHALLENGE_STEPS,
       modelLimitation: ASSAY_MODEL_LIMITATION,
       referenceMeanFlow: runAssay({
         polymerizationTendency: 0,
-        steps: DEFAULT_ASSAY_STEPS,
+        steps: CHALLENGE_STEPS,
       }).meanFlow,
     },
     disclaimer:

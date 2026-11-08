@@ -12,8 +12,6 @@ import { Separator } from '@/components/ui/separator';
 import { attemptMerge, signOff } from '@/app/graph/actions';
 import type { ConsoleRunView, MergeOutcome, ScenarioView } from '@/lib/demo/view';
 
-const SIGNOFF_ACTOR = 'ibc.chair@sigmafold.example';
-
 export interface WorkspaceProps {
   readonly initial: ScenarioView;
 }
@@ -79,9 +77,9 @@ export function Workspace({ initial }: WorkspaceProps) {
   }, [comparedBranch, headBranch, session]);
 
   const onSignOff = useCallback(
-    (branch: string) => {
+    (branch: string, by: string) => {
       startTransition(async () => {
-        const result = await signOff(session, branch, SIGNOFF_ACTOR);
+        const result = await signOff(session, branch, by);
         if (result.ok) {
           setScenario(result.scenario);
           setOutcome(null);

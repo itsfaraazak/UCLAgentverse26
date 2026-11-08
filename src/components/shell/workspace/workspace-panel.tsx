@@ -235,7 +235,14 @@ function DiffTab({ branch }: { readonly branch: BranchView }) {
     startTransition(async () => {
       try {
         const next = await diffAction(branch.name);
-        if (live) setDiff(next);
+        if (live) {
+          setDiff(next);
+          // Cleared on success, including after a branch switch. Without it a
+          // single failed load wedges the pane for the rest of the session:
+          // the error short-circuits the render before the new diff is
+          // reached, so a later good branch never displays.
+          setError(null);
+        }
       } catch (cause) {
         if (live) {
           setError(cause instanceof Error ? cause.message : 'Could not load the diff.');

@@ -411,7 +411,9 @@ function stepFor(position: number, agent: string, deltas: readonly Delta[]): Age
       { label: 'Request digest', value: payload.requestDigest },
       { label: 'Input retained', value: payload.redacted ? 'no — redacted' : 'yes' },
     ];
-    if (payload.flaggedGenes.length > 0) {
+    // Withheld for a refused verdict: the flagged symbols describe what was
+    // asked, and SPEC §7.3 allows only the category and a generic reason.
+    if (!payload.redacted && payload.flaggedGenes.length > 0) {
       detail.push({ label: 'Flagged loci', value: payload.flaggedGenes.join(', ') });
     }
     if (payload.signoffRole !== undefined) {
@@ -913,7 +915,7 @@ export function screenConsoleRequest(args: {
     reason: verdict.reason,
     requiresSignoff: verdict.requiresSignoff,
     signoffRole: verdict.signoffRole ?? null,
-    flaggedGenes: [...verdict.flaggedGenes],
+    flaggedGenes: verdict.redacted ? [] : [...verdict.flaggedGenes],
     requestDigest: verdict.requestDigest,
     seq: args.seq,
   };

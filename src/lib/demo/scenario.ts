@@ -344,20 +344,36 @@ function policyView(screen: ScreenResult | RunProjection['screen']): PolicyView 
     reason: screen.reason,
     requiresSignoff: screen.requiresSignoff,
     signoffRole: screen.signoffRole ?? null,
-    flaggedGenes: [...screen.flaggedGenes],
+    // Dropped for a refused verdict: the flagged symbols describe the request
+    // (SPEC §7.3). `run-view` applies the same guard.
+    flaggedGenes: screen.redacted ? [] : [...screen.flaggedGenes],
     requestDigest: screen.requestDigest,
     redacted: screen.redacted,
   };
 }
 
-function deltaViews(deltas: readonly Delta[]): DeltaView[] {
+/**
+ * Kinds whose payload describes the request rather than a derived result.
+ * `intent` carries the parsed targets and operation, `screen` the flagged
+ * loci; for a refusal those describe what was asked, and SPEC §7.3 permits
+ * only the category and a generic reason.
+ */
+const REQUEST_SHAPED_KINDS: readonly Delta['kind'][] = ['intent', 'screen'];
+
+function deltaViews(deltas: readonly Delta[], redacted: boolean): DeltaView[] {
   return deltas.map((delta) => ({
     id: delta.id,
     kind: delta.kind,
     author: delta.author,
     createdAt: delta.createdAt,
     parents: [...delta.parents],
-    fields: fieldsOf(delta),
+    // The trail's shape stays visible on a refusal; its request-shaped
+    // payloads do not. `policyView` drops flaggedGenes for the same reason,
+    // and dumping the fields here put them straight back.
+    fields:
+      redacted && REQUEST_SHAPED_KINDS.includes(delta.kind)
+        ? [{ label: 'Payload', value: 'withheld — this request was refused and is not retained' }]
+        : fieldsOf(delta),
   }));
 }
 
@@ -500,7 +516,7 @@ function isMergeable(
 
 function runView(run: PipelineRun, signoff: Signoff | undefined): RunView {
   const gate = isMergeable(run, signoff === undefined ? [] : [signoff]);
-  const deltas = deltaViews(run.deltas);
+  const deltas = deltaViews(run.deltas, run.screen.redacted);
   return {
     id: run.id,
     verdict: run.verdict,

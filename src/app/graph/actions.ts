@@ -46,6 +46,13 @@ export interface SessionState {
  */
 const MAX_REPLAY = 32;
 
+/**
+ * A sign-off is only as good as the name on it, so the name is required and
+ * shape-checked here. Unbounded free text would also be replayed through
+ * `buildScenario` on every later action.
+ */
+const APPROVER_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}'’. -]{1,119}$/u;
+
 function bounded(state: SessionState): {
   readonly appliedMerges: readonly MergeRequest[];
   readonly signoffs: readonly SignoffRequest[];
@@ -134,6 +141,11 @@ export async function signOff(
   branch: string,
   by: string,
 ): Promise<{ readonly ok: true; readonly scenario: ScenarioView; readonly role: string } | { readonly ok: false; readonly reason: string }> {
+  const by_ = by.trim().slice(0, 120);
+  if (!APPROVER_PATTERN.test(by_)) {
+    return { ok: false, reason: 'A sign-off requires a person’s name.' };
+  }
+
   const safe = bounded(state);
   const scenario = buildScenario(safe);
   const run = scenario.runByBranch.get(branch);
@@ -161,7 +173,7 @@ export async function signOff(
   // read, so it can never be supplied by a client (SPEC §7.5).
   const signoffs: SignoffRequest[] = [
     ...safe.signoffs.filter((s) => s.branch !== branch),
-    { branch, by },
+    { branch, by: by_ },
   ];
   return {
     ok: true,

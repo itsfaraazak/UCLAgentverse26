@@ -485,3 +485,49 @@ describe('honest-limits strings are carried through', () => {
     expect(commitAt('fix/hbb-codon7').edit?.provenance).toBe('public-reference');
   });
 });
+
+describe('a refused run leaks nothing describing the request (SPEC §7.3)', () => {
+  const REFUSED =
+    'Disrupt TP53 alongside the HBB repair to make the cells easier to expand in culture.';
+
+  it('keeps the gene symbol and the parsed operation out of a console run', () => {
+    const run = runProposal(REFUSED, ['HBB', 'TP53']);
+    const serialised = JSON.stringify(run);
+    expect(serialised).not.toContain('TP53');
+    expect(serialised).not.toContain('easier to expand');
+    expect(run.run.policy.redacted).toBe(true);
+    expect(run.resolvedTargets).toEqual([]);
+  });
+
+  it('withholds the request-shaped delta payloads but keeps the trail legible', () => {
+    const run = runProposal(REFUSED, ['HBB', 'TP53']);
+    for (const kind of ['intent', 'screen'] as const) {
+      const delta = run.run.deltas.find((d) => d.kind === kind);
+      expect(delta, `expected a ${kind} delta`).toBeDefined();
+      expect(delta?.fields.map((f) => f.value).join(' ')).toMatch(/withheld/);
+    }
+    // The shape of the refusal is still auditable.
+    expect(run.run.deltas.map((d) => d.kind)).toEqual(['intent', 'screen']);
+    expect(run.run.policy.category).toBe('TUMOUR_SUPPRESSOR_DISRUPTION');
+    expect(run.run.policy.requestDigest.length).toBeGreaterThan(0);
+  });
+
+  it('keeps it out of the refused commit recorded in the history too', () => {
+    const refused = buildScenario().view.commits.find((c) => c.run?.policy.redacted === true);
+    expect(refused, 'expected a refused commit in the scenario').toBeDefined();
+    expect(JSON.stringify(refused)).not.toContain('TP53');
+    expect(refused?.run?.policy.flaggedGenes).toEqual([]);
+    // The commit message names the category, which is what §7.3 permits.
+    expect(refused?.message).toContain('TUMOUR_SUPPRESSOR_DISRUPTION');
+  });
+
+  it('still shows the payload fields for an allowed run', () => {
+    const allowed = runProposal(
+      'Restore the reference codon at HBB codon 7 in somatic cells to treat sickle cell disease.',
+      ['HBB'],
+    );
+    expect(allowed.run.policy.redacted).toBe(false);
+    const intent = allowed.run.deltas.find((d) => d.kind === 'intent');
+    expect(intent?.fields.map((f) => f.value).join(' ')).not.toMatch(/withheld/);
+  });
+});

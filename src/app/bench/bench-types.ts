@@ -148,8 +148,16 @@ export interface SimFixtureView {
   modelLimitation: string;
   /**
    * Mean flow for a genotype with no polymerization tendency, measured by
-   * `runAssay`. Every "% of reference" reading on the bench is against this
-   * one figure, so the gauges and the verifier cannot disagree.
+   * `runAssay` over `assaySteps` at the fixture's default pO₂.
+   *
+   * Every "% of reference" reading on the bench is against this one figure.
+   * It is **not** the verifier's denominator: `verifyEdit` measures wildtype
+   * at `PO2_RANGE.min`, because a hypoxic challenge is what distinguishes the
+   * genotypes. So the gauge and the verifier can legitimately differ — the
+   * gauge answers "how does this genotype flow at the pO₂ on the slider",
+   * the verifier answers "does it still occlude under hypoxia". Reading one
+   * as a prediction of the other is the mistake this comment exists to
+   * prevent; an earlier version of it claimed they could not disagree.
    */
   referenceMeanFlow: number;
 }

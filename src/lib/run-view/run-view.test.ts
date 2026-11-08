@@ -179,3 +179,52 @@ describe('PIPELINE_STEPS describes the pipeline that actually runs', () => {
     for (const spec of PIPELINE_STEPS) expect(spec.role.length).toBeGreaterThan(0);
   });
 });
+
+describe('the audit trail withholds the request-shaped payloads on a refusal', () => {
+  const marker = 'easier to expand in culture';
+  const view = runView(
+    runPipeline({ text: `Disrupt TP53 alongside the HBB repair to make the cells ${marker}.` }),
+  );
+
+  it('refuses the request and marks it redacted', () => {
+    expect(view.screen.redacted).toBe(true);
+    expect(view.conclusion).toBe('blocked');
+  });
+
+  it('withholds the intent and screen payloads rather than dumping them', () => {
+    for (const kind of ['intent', 'screen'] as const) {
+      const delta = view.deltas.find((d) => d.kind === kind);
+      expect(delta, `expected a ${kind} delta`).toBeDefined();
+      expect(delta?.payload).toMatch(/withheld/);
+    }
+  });
+
+  it('leaks neither the flagged loci nor the parsed operation anywhere', () => {
+    // The gene symbol is drawn from an allow-list, but naming it still
+    // describes the request, and `operation` is a paraphrase of the ask.
+    const serialised = JSON.stringify(view);
+    expect(serialised).not.toContain('TP53');
+    expect(serialised).not.toContain(marker);
+    expect(serialised).not.toContain('"operation"');
+  });
+
+  it('withholds the resolved targets on the intent step too', () => {
+    const intentStep = view.steps[0];
+    expect(intentStep?.details.find((d) => d.label === 'targets')?.value).toBe('withheld');
+  });
+
+  it('still shows the shape of the trail, so the refusal is auditable', () => {
+    expect(view.deltas).toHaveLength(2);
+    expect(view.deltas.map((d) => d.kind)).toEqual(['intent', 'screen']);
+    expect(view.deltas[1]?.author).toBe('BiosafetyGateAgent');
+    expect(view.screen.category).toBe('TUMOUR_SUPPRESSOR_DISRUPTION');
+    expect(view.screen.requestDigest).toMatch(/^[0-9a-f]{8,}$/);
+  });
+
+  it('keeps dumping payloads for an allowed run, where that is the audit trail', () => {
+    const allowed = runView(runPipeline({ text: REPAIR, assaySteps: 80 }));
+    const intent = allowed.deltas.find((d) => d.kind === 'intent');
+    expect(intent?.payload).toContain('HBB');
+    expect(intent?.payload).not.toMatch(/withheld/);
+  });
+});

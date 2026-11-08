@@ -26,6 +26,7 @@ import { AGENT_ORDER, agentDeltaKind } from './steps';
 import {
   isAssayPayload,
   isEditPlanPayload,
+  isIntentPayload,
   isOffTargetPayload,
   isScreenPayload,
   isStructuralPayload,
@@ -141,14 +142,17 @@ function screenView(result: PipelineResult): ScreenView {
   };
 }
 
-function intentStep(delta: Delta, screen: ScreenView): Omit<StepView, 'agent' | 'step' | 'kind'> {
-  const targets =
-    typeof delta.payload === 'object' &&
-    delta.payload !== null &&
-    'targets' in delta.payload &&
-    Array.isArray((delta.payload as { targets: unknown[] }).targets)
-      ? ((delta.payload as { targets: string[] }).targets as readonly string[])
-      : [];
+function intentStep(
+  delta: Delta,
+  screen: ScreenView,
+): Omit<StepView, 'agent' | 'step' | 'kind'> | null {
+  // `isIntentPayload` is the module's own guard. Asserting the shape with a
+  // cast would prove the array exists but not that its elements are strings,
+  // and they are rendered with `join`.
+  if (!isIntentPayload(delta.payload)) return null;
+  const targets = delta.payload.targets.filter(
+    (target): target is string => typeof target === 'string',
+  );
   return {
     status: targets.length > 0 ? 'passed' : 'warning',
     summary:
@@ -156,7 +160,13 @@ function intentStep(delta: Delta, screen: ScreenView): Omit<StepView, 'agent' | 
         ? `Resolved ${targets.length} curated target${targets.length === 1 ? '' : 's'}.`
         : 'No curated target locus could be resolved from the request.',
     details: [
-      { label: 'targets', value: targets.length > 0 ? targets.join(', ') : '—' },
+      // Withheld for a refused request: the resolved symbols are a description
+      // of what was asked (SPEC §7.3). The `screen` step's flagged-loci row is
+      // gated the same way.
+      {
+        label: 'targets',
+        value: screen.redacted ? 'withheld' : targets.length > 0 ? targets.join(', ') : '—',
+      },
       { label: 'request digest', value: screen.requestDigest },
     ],
     limitation:
@@ -192,8 +202,11 @@ function stepFor(
   const base = { agent, step, kind };
 
   switch (kind) {
-    case 'intent':
-      return { ...base, ...intentStep(delta, screen) };
+    case 'intent': {
+      const projected = intentStep(delta, screen);
+      if (projected === null) break;
+      return { ...base, ...projected };
+    }
 
     case 'screen': {
       const status: StepStatus =
@@ -376,7 +389,28 @@ function conclusionOf(result: PipelineResult): RunConclusion {
   return result.passed ? 'passed' : 'failed';
 }
 
-function deltaViews(deltas: readonly Delta[]): readonly DeltaView[] {
+/**
+ * Kinds whose payload describes the request rather than a derived result.
+ *
+ * `intent` carries the parsed targets and operation; `screen` carries the
+ * flagged loci. For an allowed request those are exactly the audit trail a
+ * reviewer wants. For a refused one they are a description of what was asked —
+ * `operation: 'repair'` is a paraphrase of the ask, not a policy category — and
+ * SPEC §7.3 permits only the category and a generic reason.
+ */
+const REQUEST_SHAPED_KINDS: readonly DeltaKind[] = ['intent', 'screen'];
+
+const WITHHELD = '"payload withheld — this request was refused and is not retained"';
+
+/**
+ * Project a delta for display.
+ *
+ * `screenView` drops `flaggedGenes` on redaction, and dumping the raw payload
+ * here would put them straight back on screen — which is what it did. The
+ * structure of the trail stays visible either way: a reviewer can still see
+ * that seven deltas exist, who emitted them and how they are threaded.
+ */
+function deltaViews(deltas: readonly Delta[], redacted: boolean): readonly DeltaView[] {
   return deltas.map((d) => ({
     id: d.id,
     kind: d.kind,
@@ -384,7 +418,10 @@ function deltaViews(deltas: readonly Delta[]): readonly DeltaView[] {
     subject: d.subject,
     parents: [...d.parents],
     createdAt: d.createdAt,
-    payload: JSON.stringify(d.payload, null, 2),
+    payload:
+      redacted && REQUEST_SHAPED_KINDS.includes(d.kind)
+        ? WITHHELD
+        : JSON.stringify(d.payload, null, 2),
   }));
 }
 
@@ -405,7 +442,7 @@ export function runView(result: PipelineResult): RunView {
   return {
     id: result.headId,
     steps,
-    deltas: deltaViews(deltas),
+    deltas: deltaViews(deltas, screen.redacted),
     screen,
     conclusion: conclusionOf(result),
     blocked: result.blocked,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import {
   ArrowRight,
   BadgeCheck,
@@ -12,9 +12,61 @@ import {
   Split,
   XCircle,
 } from 'lucide-react';
+
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { BranchView, MergeOutcome } from '@/lib/demo/view';
+
+/**
+ * Sign-off control.
+ *
+ * The name is the sign-off (SPEC §7.5), so it is collected rather than
+ * assumed. The server re-derives the role from the policy and refuses anything
+ * that is not a name, so nothing typed here can widen what the policy allows.
+ */
+function SignoffControl({
+  branch,
+  role,
+  pending,
+  onSignOff,
+}: {
+  readonly branch: string;
+  readonly role: string | null;
+  readonly pending: boolean;
+  readonly onSignOff: (branch: string, by: string) => void;
+}) {
+  const [by, setBy] = useState('');
+  const inputId = useId();
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <Label htmlFor={inputId} className="sr-only">
+        Name of the person accepting this escalation
+        {role === null ? '' : ` as ${role}`}
+      </Label>
+      <Input
+        id={inputId}
+        value={by}
+        onChange={(event) => setBy(event.currentTarget.value)}
+        placeholder={role === null ? 'Accepting reviewer' : `Accepting ${role}`}
+        autoComplete="off"
+        spellCheck={false}
+        className="h-7 w-44 text-xs"
+      />
+      <Button
+        variant="outline"
+        size="xs"
+        onClick={() => onSignOff(branch, by)}
+        disabled={pending || by.trim().length < 2}
+      >
+        <BadgeCheck aria-hidden="true" />
+        Record sign-off
+      </Button>
+    </div>
+  );
+}
 
 export interface MergeGateProps {
   readonly into: BranchView;
@@ -22,7 +74,7 @@ export interface MergeGateProps {
   readonly outcome: MergeOutcome | null;
   readonly pending: boolean;
   readonly onMerge: () => void;
-  readonly onSignOff: (branch: string) => void;
+  readonly onSignOff: (branch: string, by: string) => void;
   readonly onDismiss: () => void;
 }
 
@@ -68,15 +120,12 @@ export function MergeGate({
 
         <div className="ml-auto flex items-center gap-2">
           {from !== null && blockedReason !== null && from.status === 'escalated' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onSignOff(from.name)}
-              disabled={pending}
-            >
-              <BadgeCheck aria-hidden="true" />
-              Record sign-off
-            </Button>
+            <SignoffControl
+              branch={from.name}
+              role={null}
+              pending={pending}
+              onSignOff={onSignOff}
+            />
           )}
           <Button size="sm" onClick={onMerge} disabled={!canAttempt}>
             {pending ? (
@@ -159,7 +208,7 @@ function Outcome({
 }: {
   readonly outcome: MergeOutcome;
   readonly onDismiss: () => void;
-  readonly onSignOff: (branch: string) => void;
+  readonly onSignOff: (branch: string, by: string) => void;
 }) {
   if (outcome.kind === 'blocked') {
     // Only a gate verdict is attributed to the policy category. A `fail` came
@@ -187,10 +236,12 @@ function Outcome({
         </p>
         <div className="mt-2 flex gap-2">
           {outcome.requiresSignoffBy !== null && (
-            <Button variant="outline" size="xs" onClick={() => onSignOff(outcome.from)}>
-              <BadgeCheck aria-hidden="true" />
-              Sign off as {outcome.requiresSignoffBy}
-            </Button>
+            <SignoffControl
+              branch={outcome.from}
+              role={outcome.requiresSignoffBy}
+              pending={false}
+              onSignOff={onSignOff}
+            />
           )}
           <Button variant="ghost" size="xs" onClick={onDismiss}>
             Dismiss
