@@ -164,6 +164,40 @@ describe('verdictForCategory', () => {
     ).toBe('escalate');
   });
 
+  it('never reports an unrecognised label as the category it narrowed to', () => {
+    const lexical = screen({
+      text: 'repair HBB to treat the sickle substitution',
+      targets: ['HBB'],
+    });
+    expect(lexical.verdict).toBe('allow');
+
+    // Model output is untrusted data of arbitrary shape, bounded only by the
+    // feature's response size cap. It may narrow the verdict — that is the
+    // invariant — but it is not a category, and a field documented as "the
+    // category the final verdict came from" must not carry it.
+    const invented = `NOT_A_POLICY_CATEGORY_${'x'.repeat(200)}`;
+    const combined = combineScreen(lexical, { concern: true, category: invented });
+
+    expect(combined.verdict).toBe('escalate');
+    expect(combined.narrowedByModel).toBe(true);
+    expect(combined.category).toBe(lexical.category);
+    expect(combined.category).not.toBe(invented);
+    // Every category this can report is one the frozen table defines.
+    expect(Object.keys(POLICY)).toContain(combined.category);
+    // The held-for-review wording is the policy's own, not the model's label.
+    expect(combined.reasons.join(' ')).not.toContain(invented);
+    expect(combined.reasons.some((r) => /human review/i.test(r))).toBe(true);
+
+    // A recognised label still moves the category, which is the behaviour
+    // this must not break.
+    const recognised = combineScreen(lexical, {
+      concern: true,
+      category: 'GERMLINE_HERITABLE',
+    });
+    expect(recognised.category).toBe('GERMLINE_HERITABLE');
+    expect(recognised.verdict).toBe(POLICY.GERMLINE_HERITABLE.verdict);
+  });
+
   it('reads the verdict from the frozen POLICY table and never accepts a caller-supplied verdict', () => {
     expect(Object.isFrozen(POLICY)).toBe(true);
 

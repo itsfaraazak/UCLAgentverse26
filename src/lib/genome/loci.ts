@@ -97,7 +97,42 @@ function requireRefCodon(value: unknown, kind: VariantKind, field: string): stri
         `reference codon to verify (got ${JSON.stringify(value)})`,
     );
   }
-  return requireString(value, field).toUpperCase();
+  return requireCodon(value, field);
+}
+
+/**
+ * A codon field is three DNA bases, and is checked for it here.
+ *
+ * `altCodon` is the field that needs this. Nothing downstream verifies it:
+ * `applyVariant` matches `refCodon` against the sequence and so fails closed on
+ * a malformed one, but it splices `altCodon` into the codon list unchecked. A
+ * two-base `altCodon` therefore shortens the sequence by one base and shifts
+ * the reading frame of every codon after it — silently, since the result is
+ * still a valid string of bases and `translate` happily reads the new frame.
+ * That is the §4.6 #13 failure mode (silent truncation in a tool whose pitch is
+ * auditability), so it is refused at the boundary with the offending value
+ * named, rather than left to produce a plausible wrong protein.
+ *
+ * `refCodon` gets the same check. It is self-checking against the sequence, so
+ * this only moves the failure from a confusing `refCodon mismatch` at apply
+ * time to a fixture error at load time, naming the real problem.
+ *
+ * Deliberately not ratifying what a *deletion*'s `altCodon` must be: nothing
+ * replaces the deleted codon, so `applyVariant` ignores the field entirely.
+ * Whether it should then be required empty — mirroring §4.6 #15's rule for an
+ * insertion's `refCodon` — is unspecified, and no fixture reaches it (SPEC §4.8
+ * records the missing indel fixture as a follow-up). `requireString`'s
+ * non-empty rule is left in place for it rather than inventing policy here.
+ */
+function requireCodon(value: unknown, field: string): string {
+  const codon = requireString(value, field).toUpperCase();
+  if (!/^[ACGT]{3}$/.test(codon)) {
+    throw new Error(
+      `loci.json: ${field} must be three DNA bases from A, C, G, T — got ` +
+        `${JSON.stringify(codon)}`,
+    );
+  }
+  return codon;
 }
 
 function requireNumber(value: unknown, field: string): number {
@@ -149,6 +184,20 @@ function parseStructural(raw: unknown, field: string): StructuralAnnotation {
   };
 }
 
+/**
+ * Exported so the fixture boundary's rules are assertable on inputs the
+ * shipped file does not contain, as `parseAcmgRecord` is. The bundled fixture
+ * is clean, so without this the refusals below are unreachable from a test and
+ * the boundary is only claimed rather than checked.
+ */
+export function parseVariantRecord(
+  raw: unknown,
+  gene: string,
+  field = 'variant',
+): LocusVariant {
+  return parseVariant(raw, gene, field);
+}
+
 function parseVariant(raw: unknown, gene: string, field: string): LocusVariant {
   if (!isRecord(raw)) {
     throw new Error(`loci.json: ${field} must be an object`);
@@ -161,7 +210,10 @@ function parseVariant(raw: unknown, gene: string, field: string): LocusVariant {
     gene,
     codonIndex: requireNumber(raw.codonIndex, `${field}.codonIndex`),
     refCodon: requireRefCodon(raw.refCodon, kind, `${field}.refCodon`),
-    altCodon: requireString(raw.altCodon, `${field}.altCodon`).toUpperCase(),
+    altCodon:
+      kind === 'deletion'
+        ? requireString(raw.altCodon, `${field}.altCodon`).toUpperCase()
+        : requireCodon(raw.altCodon, `${field}.altCodon`),
     kind,
     label: requireString(raw.label, `${field}.label`),
     structural: parseStructural(raw.structural, `${field}.structural`),

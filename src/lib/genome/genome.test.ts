@@ -8,6 +8,7 @@ import {
   diffSequences,
   FIXTURE_DISCLAIMER,
   loadLoci,
+  parseVariantRecord,
   getLocus,
   getLocusVariant,
   getGenotype,
@@ -396,6 +397,117 @@ describe('fixture disclosure (SPEC §7.6, §7.7)', () => {
       expect(['public-reference', 'synthetic-illustrative']).toContain(locus.provenance);
       for (const variant of locus.variants) {
         expect(['public-reference', 'synthetic-illustrative']).toContain(variant.provenance);
+      }
+    }
+  });
+});
+
+/**
+ * V-03. The fixture boundary shape-checks a codon field.
+ *
+ * `altCodon` is the one that matters. `applyVariant` verifies `refCodon`
+ * against the sequence and so fails closed on a malformed one, but it splices
+ * `altCodon` in unchecked — so a two-base value shortens the sequence by a
+ * base and shifts the reading frame of every codon after it, silently, since
+ * the result is still a valid base string that `translate` reads in the new
+ * frame. That is §4.6 #13's silent-truncation failure, which the spec says to
+ * reject at the boundary with the offending value named.
+ *
+ * The shipped fixture is clean, which is why these cases are constructed here
+ * rather than read from the file: a boundary whose refusals are unreachable
+ * from a test is claimed, not checked.
+ */
+describe('loci.json variant parsing refuses a malformed codon (V-03)', () => {
+  const VALID = {
+    id: 'TEST_variant',
+    provenance: 'synthetic-illustrative',
+    codonIndex: 7,
+    refCodon: 'GAG',
+    altCodon: 'GTG',
+    kind: 'substitution',
+    label: 'synthetic test variant',
+    structural: {
+      refAa: 'E',
+      altAa: 'V',
+      refAaName: 'Glutamate',
+      altAaName: 'Valine',
+      summary: 'summary',
+      consequence: 'consequence',
+      polymerizationTendency: 0.5,
+      confidence: 'illustrative',
+      limitation: 'curated summary, not a prediction',
+    },
+  } as const;
+
+  it('accepts a well-formed record and normalises case', () => {
+    const parsed = parseVariantRecord({ ...VALID, altCodon: 'gtg' }, 'HBB');
+    expect(parsed.altCodon).toBe('GTG');
+    expect(parsed.refCodon).toBe('GAG');
+  });
+
+  it.each([
+    ['a two-base altCodon', { altCodon: 'GT' }],
+    ['a four-base altCodon', { altCodon: 'GTGA' }],
+    ['an altCodon with a non-DNA base', { altCodon: 'GNG' }],
+    ['an RNA altCodon', { altCodon: 'GUG' }],
+    ['a whitespace-padded altCodon', { altCodon: ' GTG' }],
+    ['a two-base refCodon', { refCodon: 'GA' }],
+    ['a refCodon with a non-DNA base', { refCodon: 'GNG' }],
+  ])('refuses %s', (_label, patch) => {
+    expect(() => parseVariantRecord({ ...VALID, ...patch }, 'HBB')).toThrow(
+      /three DNA bases/,
+    );
+  });
+
+  it('names the offending value so a bad fixture is findable', () => {
+    expect(() => parseVariantRecord({ ...VALID, altCodon: 'GT' }, 'HBB')).toThrow(
+      /"GT"/,
+    );
+  });
+
+  it('still refuses a non-empty refCodon on an insertion (SPEC §4.6 #15)', () => {
+    // The insertion branch skips the codon check for `refCodon` because an
+    // insertion has none to verify; it must not skip the refusal.
+    expect(() =>
+      parseVariantRecord({ ...VALID, kind: 'insertion', refCodon: 'GAG' }, 'HBB'),
+    ).toThrow(/must be empty for an insertion/);
+    // And an insertion's `altCodon` is still a codon: it becomes one.
+    expect(() =>
+      parseVariantRecord(
+        { ...VALID, kind: 'insertion', refCodon: '', altCodon: 'GT' },
+        'HBB',
+      ),
+    ).toThrow(/three DNA bases/);
+    const ok = parseVariantRecord(
+      { ...VALID, kind: 'insertion', refCodon: '', altCodon: 'GTG' },
+      'HBB',
+    );
+    expect(ok.refCodon).toBe('');
+    expect(ok.altCodon).toBe('GTG');
+  });
+
+  it('leaves a deletion altCodon unratified rather than inventing a rule', () => {
+    // `applyVariant` ignores a deletion's `altCodon` — nothing replaces the
+    // deleted codon. Whether it must therefore be empty, mirroring §4.6 #15,
+    // is unspecified and no fixture reaches it (SPEC §4.8). The existing
+    // non-empty rule is asserted as-is so the gap stays visible instead of
+    // being closed by invention here.
+    const parsed = parseVariantRecord({ ...VALID, kind: 'deletion' }, 'HBB');
+    expect(parsed.kind).toBe('deletion');
+    expect(() =>
+      parseVariantRecord({ ...VALID, kind: 'deletion', altCodon: '' }, 'HBB'),
+    ).toThrow();
+  });
+
+  it('holds for every variant the shipped fixture actually carries', () => {
+    const loci = loadLoci();
+    expect(loci.length).toBeGreaterThan(0);
+    for (const locus of loci) {
+      for (const variant of locus.variants) {
+        expect(variant.altCodon).toMatch(/^[ACGT]{3}$/);
+        if (variant.kind !== 'insertion') {
+          expect(variant.refCodon).toMatch(/^[ACGT]{3}$/);
+        }
       }
     }
   });

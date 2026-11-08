@@ -104,6 +104,31 @@ function kindOf(value: string, field: string): Variant['kind'] {
   throw new Error(`loci.json: ${field} is not a supported variant kind`);
 }
 
+/**
+ * Three DNA bases, or a load-time fixture error.
+ *
+ * This reader takes its field types from the JSON import, so a malformed codon
+ * would have reached `applyVariant` with no runtime check at all. Nothing
+ * downstream catches a bad `altCodon`: it is spliced into the codon list as-is,
+ * so a two-base value shifts the reading frame of every codon after it and
+ * still translates, to a plausible wrong protein.
+ *
+ * Kept in step with `lib/genome/loci.ts`, which carries the same rule and the
+ * reasoning in full. That this rule now lives in two places is the cost of the
+ * two fixture readers GOALS §6 records as duplication worth collapsing — the
+ * collapse is the fix, not dropping the check from one of them.
+ */
+function codonOf(value: string, field: string): string {
+  const codon = value.toUpperCase();
+  if (!/^[ACGT]{3}$/.test(codon)) {
+    throw new Error(
+      `loci.json: ${field} must be three DNA bases from A, C, G, T — got ` +
+        `${JSON.stringify(codon)}`,
+    );
+  }
+  return codon;
+}
+
 const LOCI: readonly Locus[] = Object.freeze(
   raw.loci.map((locus): Locus => {
     const bases = locus.cdsReference.bases.toUpperCase();
@@ -144,14 +169,23 @@ const LOCI: readonly Locus[] = Object.freeze(
         partiallyModelled: exon.codonStart <= codonCount && exon.codonEnd > codonCount,
       })),
       variants: locus.variants.map((variant): LocusVariant => {
+        const kind = kindOf(variant.kind, `${variant.id}.kind`);
         const base: LocusVariant = {
           id: variant.id,
           provenance: provenanceOf(variant.provenance, `${variant.id}.provenance`),
           gene: locus.gene,
           codonIndex: variant.codonIndex,
-          refCodon: variant.refCodon.toUpperCase(),
-          altCodon: variant.altCodon.toUpperCase(),
-          kind: kindOf(variant.kind, `${variant.id}.kind`),
+          // An insertion has no reference codon to verify (SPEC §4.6 #15), and
+          // a deletion's `altCodon` is unused — neither is shape-checked here.
+          refCodon:
+            kind === 'insertion'
+              ? variant.refCodon.toUpperCase()
+              : codonOf(variant.refCodon, `${variant.id}.refCodon`),
+          altCodon:
+            kind === 'deletion'
+              ? variant.altCodon.toUpperCase()
+              : codonOf(variant.altCodon, `${variant.id}.altCodon`),
+          kind,
           label: variant.label,
           structural: { ...variant.structural },
         };

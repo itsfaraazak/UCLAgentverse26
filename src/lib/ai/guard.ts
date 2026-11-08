@@ -187,12 +187,17 @@ export function combineScreen(
   const combined = combineVerdicts(lexical.verdict, modelVerdict);
   const narrowed = restrictionRank(combined) > restrictionRank(lexical.verdict);
 
+  // Resolved against the frozen table, not taken on trust. An unrecognised
+  // label still narrows the *verdict* — `verdictForCategory` gave it the
+  // restrictive default above — but it is not itself a category, so it must
+  // not be reported as one.
+  const known = (Object.keys(POLICY) as PolicyCategory[]).find(
+    (c) => c === opinion.category,
+  );
+
   if (narrowed) {
     // The reason shown is the *policy's* generic reason for the category, not
     // the model's prose, so refused text can never be echoed through it.
-    const known = (Object.keys(POLICY) as PolicyCategory[]).find(
-      (c) => c === opinion.category,
-    );
     reasons.push(
       known === undefined
         ? 'A second-opinion classifier flagged this request but did not name a ' +
@@ -204,8 +209,13 @@ export function combineScreen(
   return {
     lexical,
     verdict: combined,
-    // The category only moves when the model actually narrowed the outcome.
-    category: narrowed && opinion.category !== undefined ? opinion.category : lexical.category,
+    // The category only moves when the model actually narrowed the outcome,
+    // and only to a label the frozen table defines. Passing an unrecognised
+    // label through would put untrusted model output — bounded only by the
+    // response size cap — into a field documented as the category the verdict
+    // came from, and render it as one. The closed set is the whole point of
+    // having the model name a label rather than mint a verdict (SPEC §6).
+    category: narrowed && known !== undefined ? known : lexical.category,
     narrowedByModel: narrowed,
     modelConsulted: true,
     requiresSignoff: lexical.requiresSignoff || combined === 'escalate',

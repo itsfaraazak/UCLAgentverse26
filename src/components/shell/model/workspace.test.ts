@@ -19,6 +19,16 @@ import {
   translate,
 } from '@/lib/genome';
 import { PO2_RANGE, SIMULATION_DEFAULTS } from '@/lib/cellsim';
+import {
+  ACMG_CITATION,
+  ACMG_CLASSIFICATIONS,
+  ACMG_PRIOR_CALL_LIMITATION,
+  ACMG_SCOPE_LIMITATION,
+  ACMG_VARIANT_RECORDS,
+  THERAPY_TABLE_DISCLAIMER,
+  bandForPoints,
+  scoreAcmg,
+} from '@/lib/acmg';
 import { pipelineAgentOrder } from '@/lib/agents';
 import { pipelineStepsFor } from '@/lib/run-view';
 import { POLICY } from '@/lib/safety/policy';
@@ -535,5 +545,227 @@ describe('a sign-off cannot launder text or widen the policy (SPEC §7.3, §7.5)
     expect(buildMergeProposal({ into: 'main', incoming: failing }).decision.kind).toBe(
       'check-failed',
     );
+  });
+});
+
+/**
+ * R-02. The run log must not attribute an absence to the gate on a run the
+ * gate allowed.
+ *
+ * `stepFor` words a `not-run` row two ways: one names the gate, one does not.
+ * Picking the gate wording unconditionally is the defect this pins — it would
+ * have the shell report a refusal that never happened, on every run where a
+ * later stage simply had no work to do (the therapy lookup only runs on a
+ * merge-allowed run). A UI that invents a refusal is as dishonest as one that
+ * hides one, and this surface's whole claim is that the gate is structural.
+ *
+ * The direction asserted is `blocked === false ⇒ no row mentions the gate`.
+ * The fixture branch set is entirely non-blocked, so the implication is
+ * exercised on every row of every run without needing a refused request.
+ */
+describe('R-02 — a run the gate allowed never reads as gate-refused', () => {
+  it('mentions the gate in no step headline of any non-blocked run', () => {
+    const workspace = buildWorkspace();
+    let rowsChecked = 0;
+
+    for (const branch of workspace.branches) {
+      const run = branch.run;
+      if (run === null) continue;
+      // The fixture set is non-blocked by construction; if that ever changes
+      // this guard keeps the test honest instead of silently vacuous.
+      expect(run.blocked).toBe(false);
+
+      for (const step of run.steps) {
+        expect(step.headline).not.toMatch(/gate/i);
+        rowsChecked += 1;
+      }
+    }
+
+    // Guard against the whole loop being skipped: an empty branch set or an
+    // all-null run set would otherwise pass this test by doing nothing.
+    expect(rowsChecked).toBeGreaterThan(0);
+  });
+
+  it('still has rows with nothing to report, which is what made the wording reachable', () => {
+    const workspace = buildWorkspace();
+    const absent = workspace.branches
+      .flatMap((b) => (b.run === null ? [] : b.run.steps))
+      .filter((s) => s.deltaId === null);
+
+    // If no row were ever absent the test above could not fail, so the defect
+    // it guards would be untestable here. These rows say only 'Not executed.'
+    expect(absent.length).toBeGreaterThan(0);
+    for (const step of absent) {
+      expect(step.outcome).toBe('not-run');
+      expect(step.headline).toBe('Not executed.');
+    }
+  });
+});
+
+/**
+ * R-03 and V-02. The ACMG rows are asserted on their *content*, not only on
+ * their position in the run.
+ *
+ * Position-only assertions are why a whole stage once rendered as empty stubs
+ * and shipped unnoticed: three rows appeared, in the right order, after the
+ * gate, carrying nothing. These tests read the rows the way the panel does —
+ * by label — and check that a classification, its points, and the scope
+ * caveat are actually there, with the caveat compared against the constant
+ * `lib/acmg` exports rather than against a copy of its prose.
+ */
+describe('R-03 / V-02 — the ACMG rows carry their content', () => {
+  /**
+   * The criterion codes the rule engine evaluates, read off the engine rather
+   * than listed here. `scoreAcmg` marks every code on every call, so any
+   * record's inputs yield the full set.
+   */
+  const ENGINE_CODES: readonly string[] = (() => {
+    const record = ACMG_VARIANT_RECORDS[0];
+    if (record === undefined) throw new Error('ACMG fixture has no records');
+    return scoreAcmg(record.acmgInputs).criteria.map((c) => c.code);
+  })();
+
+  const workspace = buildWorkspace();
+  const runs = workspace.branches.flatMap((b) => (b.run === null ? [] : [b.run]));
+
+  const rowFor = (
+    run: (typeof runs)[number],
+    agent: string,
+  ): NonNullable<(typeof runs)[number]['steps'][number]> => {
+    const step = run.steps.find((s) => s.agent === agent);
+    if (step === undefined) throw new Error(`no ${agent} row in the run log`);
+    return step;
+  };
+
+  const valueOf = (
+    step: (typeof runs)[number]['steps'][number],
+    label: string,
+  ): string | undefined => step.detail.find((d) => d.label === label)?.value;
+
+  it('gives every classification row a classification, points and the scope limitation', () => {
+    expect(runs.length).toBeGreaterThan(0);
+
+    for (const run of runs) {
+      const step = rowFor(run, 'AcmgClassificationAgent');
+      // Not a stub: the row ran and carries detail rows.
+      expect(step.deltaId).not.toBeNull();
+      expect(step.detail.length).toBeGreaterThan(0);
+      expect(step.kind).toBe('classification');
+
+      // The three fields R-03 names, by label, as the panel reads them.
+      const classified = valueOf(step, 'Classified');
+      const classification = valueOf(step, 'Classification');
+      const points = valueOf(step, 'Points');
+      expect(classified).toBeDefined();
+      expect(classification).toBeDefined();
+      expect(points).toBeDefined();
+
+      // The caveat is the imported constant, not prose that could drift from
+      // it — `ACMG_SCOPE_LIMITATION` must appear wherever a call is shown.
+      expect(valueOf(step, 'Limitation')).toBe(ACMG_SCOPE_LIMITATION);
+      expect(valueOf(step, 'Citation')).toBe(ACMG_CITATION);
+
+      if (classified === 'yes') {
+        // A scored row names a real band and a numeric point total, and the
+        // headline is derived from both rather than written.
+        expect(ACMG_CLASSIFICATIONS).toContain(classification);
+        expect(Number.isFinite(Number(points))).toBe(true);
+        expect(step.headline).toBe(`${classification} · ${points} points`);
+        // Each criterion the engine evaluates is a row, so the trail is
+        // replayable. The expected code list is read off `scoreAcmg` rather
+        // than written out, so it tracks the engine.
+        const codes = step.detail.filter((d) => ENGINE_CODES.includes(d.label));
+        expect(codes.length).toBe(ENGINE_CODES.length);
+      } else {
+        // Nothing scored, and nothing fabricated in its place.
+        expect(classified).toBe('no');
+        expect(classification).toBe('none');
+        expect(points).toBe('none');
+        expect(step.headline).toBe('Not classified');
+      }
+      // No row renders blank, whatever the branch.
+      for (const row of step.detail) {
+        expect(row.value.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('actually scores at least one branch, so the suite cannot pass on empty rows', () => {
+    // The assertions above hold for an unscored row too. This is the one that
+    // fails if the whole stage degrades to 'Not classified' everywhere.
+    const scored = runs
+      .map((run) => rowFor(run, 'AcmgClassificationAgent'))
+      .filter((step) => valueOf(step, 'Classified') === 'yes');
+    expect(scored.length).toBeGreaterThan(0);
+
+    for (const step of scored) {
+      const points = Number(valueOf(step, 'Points'));
+      const classification = valueOf(step, 'Classification');
+      // A band and its total have to agree: `bandForPoints` is the authority,
+      // so this fails if the row's two fields were produced independently.
+      // BA1 is the documented exception — it acts as a stand-alone override
+      // rather than through points (lib/acmg/score.ts), so the row's own BA1
+      // criterion decides which rule applies.
+      if (valueOf(step, 'BA1')?.startsWith('met') === true) {
+        expect(classification).toBe('Benign');
+      } else {
+        expect(bandForPoints(points)).toBe(classification);
+      }
+    }
+  });
+
+  it('gives the conflict row its prior call, its new call and its own caveat', () => {
+    for (const run of runs) {
+      const step = rowFor(run, 'ClassificationConflictAgent');
+      expect(step.deltaId).not.toBeNull();
+      expect(step.kind).toBe('conflict');
+
+      const assessed = valueOf(step, 'Assessed');
+      expect(assessed === 'yes' || assessed === 'no').toBe(true);
+      expect(valueOf(step, 'Prior call')).toBeDefined();
+      expect(valueOf(step, 'New call')).toBeDefined();
+      expect(valueOf(step, 'Crosses actionable threshold')).toBeDefined();
+      // A separate caveat from the classification's: the prior call is
+      // simulated rather than read from ClinVar, and that has to be said.
+      expect(valueOf(step, 'Limitation')).toBe(ACMG_PRIOR_CALL_LIMITATION);
+
+      // Crossing the threshold holds the merge, so the row must not read as
+      // passed while it is doing so.
+      if (valueOf(step, 'Crosses actionable threshold')?.startsWith('yes')) {
+        expect(step.outcome).toBe('escalated');
+      }
+      for (const row of step.detail) {
+        expect(row.value.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('gives the therapy row its disclaimer when it ran, and claims nothing when it did not', () => {
+    const rows = runs.map((run) => rowFor(run, 'TherapyLookupAgent'));
+    const ran = rows.filter((step) => step.deltaId !== null);
+
+    // The lookup only runs on a merge-allowed run (SPEC §7.5: an approved
+    // therapy must never render beside a call still under review), so at
+    // least one branch must reach it or this assertion is vacuous.
+    expect(ran.length).toBeGreaterThan(0);
+
+    for (const step of ran) {
+      expect(step.kind).toBe('therapy_match');
+      expect(valueOf(step, 'Classification')).toBeDefined();
+      expect(valueOf(step, 'Result')).toBeDefined();
+      expect(valueOf(step, 'Therapies')).toBeDefined();
+      expect(valueOf(step, 'Disclaimer')).toBe(THERAPY_TABLE_DISCLAIMER);
+      expect(valueOf(step, 'Limitation')).toBe(ACMG_SCOPE_LIMITATION);
+      for (const row of step.detail) {
+        expect(row.value.length).toBeGreaterThan(0);
+      }
+    }
+
+    for (const step of rows) {
+      if (step.deltaId !== null) continue;
+      // No therapy, no row claiming one — and no gate wording either (R-02).
+      expect(step.detail).toEqual([]);
+      expect(step.headline).toBe('Not executed.');
+    }
   });
 });

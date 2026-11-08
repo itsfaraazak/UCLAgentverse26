@@ -21,6 +21,7 @@ export { diffSequences } from './diff';
 export {
   FIXTURE_DISCLAIMER,
   loadLoci,
+  parseVariantRecord,
   getLocus,
   getLocusVariant,
   getGenotype,
