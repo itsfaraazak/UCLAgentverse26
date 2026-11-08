@@ -21,6 +21,16 @@ Every AI-proposed sequence change is checked in code, traced to real sources, ve
 
 ---
 
+## Run it in one line
+
+```sh
+git clone -b proposed-new-app https://github.com/itsfaraazak/UCLAgentverse26.git && cd UCLAgentverse26 && ./run.sh
+```
+
+That checks your machine, asks for your Gemini key (hidden input, optional), starts the app and opens **http://127.0.0.1:8000**. Needs only Python 3.9+ and Git. Nothing to `pip install`. More options in [Run it in two minutes](#run-it-in-two-minutes).
+
+---
+
 ## The problem, and who it is for
 
 > Bringing a new treatment to patients takes over a decade and billions of pounds, and most candidates fail along the way. *(Biotech track brief)*
@@ -219,33 +229,71 @@ Full operational and security notes: [SECURITY.md](SECURITY.md).
 
 ## Run it in two minutes
 
-**Requirements:** Python 3.9+, Git, and a WebGL-capable browser. The backend uses only the Python standard library: **no `pip install`**.
+**Requirements:** Python 3.9+, Git, and a WebGL-capable browser (Chrome, Edge, Firefox, Safari). The backend uses only the Python standard library: **no `pip install`, no `npm install`, no build step.** Node is only needed to run the JS tests.
+
+### Fastest: the setup script
 
 ```sh
-git clone https://github.com/itsfaraazak/UCLAgentverse26.git
+git clone -b proposed-new-app https://github.com/itsfaraazak/UCLAgentverse26.git
 cd UCLAgentverse26
-git checkout proposed-new-app
+./run.sh
+```
 
+[`run.sh`](run.sh) does everything for you:
+
+1. Checks Python 3.9+ and Git, with a clear message and download link if either is missing.
+2. Finds your Gemini key, in this order: your shell (`GEMINI_API_KEY`), a local `.env` file, or a hidden prompt (press Enter to skip). It can save the key to `.env` (permissions `600`, git-ignored) if you say yes. The key is never printed or logged.
+3. Picks a free port (8000, or the next free one if an older server is still running).
+4. Starts the server, waits until it answers, and opens your browser.
+
+| Command | What it does |
+| --- | --- |
+| `./run.sh` | Check, configure and start the app |
+| `./run.sh --no-open` | Same, without opening a browser |
+| `./run.sh --test` | Run the full Python and JS test suites plus the evaluation |
+| `PORT=9000 ./run.sh` | Start on a specific port |
+| `./run.sh --help` | Show usage |
+
+Press **Ctrl+C** to stop. On Windows, run it from WSL, or use the manual steps below.
+
+### Manual (no script)
+
+```sh
+git clone -b proposed-new-app https://github.com/itsfaraazak/UCLAgentverse26.git
+cd UCLAgentverse26
 export GEMINI_API_KEY='your-key-here'   # your own key; stays in your shell
 python3 backend/server.py
 ```
 
-Open **http://127.0.0.1:8000**.
+Then open **http://127.0.0.1:8000**.
 
+### Good to know
+
+- **Get a key** at [Google AI Studio](https://aistudio.google.com/). At the hackathon, claim your onsite credits at the Google DeepMind booth.
 - **Without a key**, everything except the agent works (manual edits, history, diff, merge, 3D, ESMFold). Agent requests return a clear "Gemini is not configured" message. There is deliberately no scripted fake fallback.
-- **Never commit a key.** `.env` files are git-ignored; the key is read only by the server process.
-- Stop any older server process before restarting after code changes.
+- **Never commit a key.** `.env` files are git-ignored; the key is read only by the server process and never reaches the browser.
+- **The server is local-only.** It binds to `127.0.0.1` and has no authentication. Do not expose it to a network ([SECURITY.md](SECURITY.md)).
+- **Your data stays local.** Versions live in `research-notes.git/` and `store.sqlite3` in the project folder (both git-ignored). Delete them to start fresh.
+- **Troubleshooting:** if the page shows old behaviour after a code change, stop any older server process and re-run. If the 3D viewer is blank, check that WebGL is enabled in your browser.
+
+### Configuration
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `GEMINI_API_KEY` | unset | Enables the agent. Server-side only. |
-| `PORT` | `8000` | Loopback port (`0` = OS-assigned, printed at startup) |
+| `PORT` | `8000` | Loopback port (`python3 backend/server.py` accepts `0` for an OS-assigned port; `run.sh` needs a real port) |
 | `STORE_DB_PATH` | `store.sqlite3` | SQLite workspace file |
 | `GIT_HISTORY_PATH` | `research-notes.git` | App-owned bare Git repo for versions. Do **not** point at an existing repository |
 | `EDITVERSE_FOLD_PROVIDER` | `atlas` | `atlas` (ESM Atlas) or `modal` (your worker) |
 | `EDITVERSE_FOLD_AUTOMATIC` | unset | `1` = auto-predict with Modal (**can incur charges**) |
 
 **Run the checks:**
+
+```sh
+./run.sh --test
+```
+
+Or by hand:
 
 ```sh
 STORE_DB_PATH=:memory: python3 -m unittest discover -s tests   # ~100 s
