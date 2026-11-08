@@ -1,0 +1,202 @@
+{
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=HBB+AND+%28%22p.Glu7Val%22+OR+%22c.20A%3ET%22+OR+%22rs334%22%29&format=json&pageSize=5&resultType=lite",
+  "fetchedAt": "2026-11-08T08:33:27.439Z",
+  "status": 200,
+  "body": {
+    "version": "6.9",
+    "hitCount": 507,
+    "nextCursorMark": "AoIIQN3LCCg1NTA3MzQzMA==",
+    "nextPageUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=HBB+AND+%28%22p.Glu7Val%22+OR+%22c.20A%3ET%22+OR+%22rs334%22%29&cursorMark=AoIIQN3LCCg1NTA3MzQzMA%3D%3D&resultType=lite&pageSize=5&format=json",
+    "request": {
+      "queryString": "HBB AND (\"p.Glu7Val\" OR \"c.20A>T\" OR \"rs334\")",
+      "resultType": "lite",
+      "cursorMark": "*",
+      "pageSize": 5,
+      "sort": "",
+      "synonym": false
+    },
+    "resultList": {
+      "result": [
+        {
+          "id": "42540824",
+          "source": "MED",
+          "pmid": "42540824",
+          "pmcid": "PMC13426378",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13426378"
+            ]
+          },
+          "doi": "10.47895/amp.vi0.13830",
+          "title": "Genetic Heterogeneity of β-thalassemia Variants in Affected Filipinos.",
+          "authorString": "Silao CLT, Manuel MCC, Davila RAE, Fabella TDF, Laude RP, Desengaño TGH, Estrada CAS, Barnuevo MM, Poblete JMS, Padilla CD, Naranjo MLT, Yuson ED.",
+          "journalTitle": "Acta Med Philipp",
+          "issue": "11",
+          "journalVolume": "60",
+          "pubYear": "2026",
+          "journalIssn": "0001-6071; 2094-9278; ",
+          "pageInfo": "49-55",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refseq",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2026-06-15",
+          "firstIndexDate": "2026-08-03"
+        },
+        {
+          "id": "42247988",
+          "source": "MED",
+          "pmid": "42247988",
+          "doi": "10.1016/j.compbiolchem.2026.109162",
+          "title": "Comparative in silico analysis of hemoglobin subunits HBB, HbS (p.Glu7Val), and HBA: Sequence-structure insights into sickle cell anemia.",
+          "authorString": "Kamel MD, Ibrahim RK, Obaead WR.",
+          "journalTitle": "Comput Biol Chem",
+          "issue": "pt 1",
+          "journalVolume": "124",
+          "pubYear": "2026",
+          "journalIssn": "1476-9271; 1476-928x; ",
+          "pageInfo": "109162",
+          "pubType": "comparative study; journal article",
+          "isOpenAccess": "N",
+          "inEPMC": "N",
+          "inPMC": "N",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "N",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-06-04",
+          "firstIndexDate": "2026-06-06"
+        },
+        {
+          "id": "PPR1247442",
+          "source": "PPR",
+          "doi": "10.21203/rs.3.rs-9820820/v1",
+          "title": "Association of HBB Gene Polymorphisms rs10768683, rs1609812 and rs334 with Transfusion-Dependent Beta-Thalassemia (TDT): A Case-Control Study",
+          "authorString": "Piroozan Y, Arabshahi A, Akbar-Abad MS, Majidpour M, Pazouki MM, Shahriari H, Naderi M, Abbasi-Malati Z, Azizi SG.",
+          "pubYear": "2026",
+          "pubType": "preprint",
+          "bookOrReportDetails": {
+            "publisher": "Research Square",
+            "yearOfPublication": 2026
+          },
+          "isOpenAccess": "N",
+          "inEPMC": "N",
+          "inPMC": "N",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "N",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp"
+            ]
+          },
+          "firstPublicationDate": "2026-06-07",
+          "firstIndexDate": "2026-06-08",
+          "versionNumber": 1
+        },
+        {
+          "id": "42018765",
+          "source": "MED",
+          "pmid": "42018765",
+          "pmcid": "PMC13102170",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13102170"
+            ]
+          },
+          "doi": "10.1093/labmed/lmag019",
+          "title": "High-performance liquid chromatography screening reveals HbS/β+-thalassemia double heterozygosity as a pediatric muscular dystrophy mimic.",
+          "authorString": "López-Medina C, Portell-Rigo IM, González-Iribarren V, González-Oller C, Sánchez-Crespo A, Molina-Arrebola MA.",
+          "journalTitle": "Lab Med",
+          "issue": "3",
+          "journalVolume": "57",
+          "pubYear": "2026",
+          "journalIssn": "0007-5027; 1943-7730; ",
+          "pageInfo": "lmag019",
+          "pubType": "journal article; case reports; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-04-01",
+          "firstIndexDate": "2026-04-23"
+        },
+        {
+          "id": "41798403",
+          "source": "MED",
+          "pmid": "41798403",
+          "pmcid": "PMC12965731",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12965731"
+            ]
+          },
+          "doi": "10.7759/cureus.102980",
+          "title": "Autism Spectrum Disorder Associated With a CACNA1I Variant of Uncertain Significance: A Case Report.",
+          "authorString": "Al Medawi MA, Alshehri MM, Asiri MSA, Alsubaie S.",
+          "journalTitle": "Cureus",
+          "issue": "2",
+          "journalVolume": "18",
+          "pubYear": "2026",
+          "journalIssn": "2168-8184",
+          "pageInfo": "e102980",
+          "pubType": "journal article; case reports; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "omim"
+            ]
+          },
+          "firstPublicationDate": "2026-02-04",
+          "firstIndexDate": "2026-03-10"
+        }
+      ]
+    }
+  }
+}

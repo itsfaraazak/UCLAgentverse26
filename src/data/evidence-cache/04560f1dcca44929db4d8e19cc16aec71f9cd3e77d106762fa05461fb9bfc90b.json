@@ -1,0 +1,223 @@
+{
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=CFTR+AND+%28%22p.Phe508del%22+OR+%22c.1521_1523del%22+OR+%22rs113993960%22%29&format=json&pageSize=5&resultType=lite",
+  "fetchedAt": "2026-11-08T08:33:31.124Z",
+  "status": 200,
+  "body": {
+    "version": "6.9",
+    "hitCount": 664,
+    "nextCursorMark": "AoIIQQfNeSg1NDUwMzIzNA==",
+    "nextPageUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=CFTR+AND+%28%22p.Phe508del%22+OR+%22c.1521_1523del%22+OR+%22rs113993960%22%29&cursorMark=AoIIQQfNeSg1NDUwMzIzNA%3D%3D&resultType=lite&pageSize=5&format=json",
+    "request": {
+      "queryString": "CFTR AND (\"p.Phe508del\" OR \"c.1521_1523del\" OR \"rs113993960\")",
+      "resultType": "lite",
+      "cursorMark": "*",
+      "pageSize": 5,
+      "sort": "",
+      "synonym": false
+    },
+    "resultList": {
+      "result": [
+        {
+          "id": "42087576",
+          "source": "MED",
+          "pmid": "42087576",
+          "pmcid": "PMC13146133",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13146133"
+            ]
+          },
+          "doi": "10.1002/ppul.71648",
+          "title": "Challenges to Assessing the Prevalence of Cystic Fibrosis in the Caribbean.",
+          "authorString": "Rivera-Figueroa KL, Martin CL, Le CA, Rojas WJ, Oñate LC, Aller SG.",
+          "journalTitle": "Pediatr Pulmonol",
+          "issue": "5",
+          "journalVolume": "61",
+          "pubYear": "2026",
+          "journalIssn": "8755-6863; 1099-0496; ",
+          "pageInfo": "e71648",
+          "pubType": "review-article; review; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "Y",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-05-01",
+          "firstIndexDate": "2026-05-13"
+        },
+        {
+          "id": "42278929",
+          "source": "MED",
+          "pmid": "42278929",
+          "pmcid": "PMC13257817",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13257817"
+            ]
+          },
+          "doi": "10.3390/jcm15114067",
+          "title": "Nucleotide Variant in the &lt;i&gt;SLC26A9&lt;/i&gt; Gene in Two Siblings with Cystic Fibrosis.",
+          "authorString": "Krusiński A, Grenda A, Obara A, Węgrzyn-Szkutnik I, Zygmunt W, Winiarska H, Kuźnar-Kamińska B, Gajek Ł, Siwiec J, Krawczyk P, Milanowski J.",
+          "journalTitle": "J Clin Med",
+          "issue": "11",
+          "journalVolume": "15",
+          "pubYear": "2026",
+          "journalIssn": "2077-0383",
+          "pageInfo": "4067",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "gen",
+              "refsnp",
+              "refseq"
+            ]
+          },
+          "firstPublicationDate": "2026-05-25",
+          "firstIndexDate": "2026-06-12"
+        },
+        {
+          "id": "41595422",
+          "source": "MED",
+          "pmid": "41595422",
+          "pmcid": "PMC12841009",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12841009"
+            ]
+          },
+          "doi": "10.3390/genes17010003",
+          "title": "Pilot Study of Preconception Carrier Screening in Russia: Initial Findings and Challenges.",
+          "authorString": "Glotov AS, Nasykhova YA, Lazareva TE, Dvoynova NM, Shabanova ES, Danilova MM, Osinovskaya NS, Barbitoff YA, Maretina MA, Gorodnicheva EE, Tonyan ZN, Kiselev AV, Basipova AA, Bespalova ON, Kogan IY.",
+          "journalTitle": "Genes (Basel)",
+          "issue": "1",
+          "journalVolume": "17",
+          "pubYear": "2025",
+          "journalIssn": "2073-4425",
+          "pageInfo": "3",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 1,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "Y",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "omim",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-12-19",
+          "firstIndexDate": "2026-01-28"
+        },
+        {
+          "id": "41953138",
+          "source": "MED",
+          "pmid": "41953138",
+          "pmcid": "PMC13053646",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13053646"
+            ]
+          },
+          "doi": "10.3389/fgene.2026.1769093",
+          "title": "&lt;i&gt;CFTR&lt;/i&gt; gene variant detection in moroccan individuals via nanopore long-read sequencing.",
+          "authorString": "El Makhzen N, Nater A, Rougier JS, Bokhobza A, Sanz J, Zweier C, Hämmerli AF, Bruggmann R, Bouguenouch L, Lakhdar Idrissi M, Abriel H.",
+          "journalTitle": "Front Genet",
+          "journalVolume": "17",
+          "pubYear": "2026",
+          "journalIssn": "1664-8021",
+          "pageInfo": "1769093",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "gen",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2026-03-24",
+          "firstIndexDate": "2026-04-10"
+        },
+        {
+          "id": "41431510",
+          "source": "MED",
+          "pmid": "41431510",
+          "pmcid": "PMC12718126",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12718126"
+            ]
+          },
+          "doi": "10.7759/cureus.97373",
+          "title": "When 25% Feels Like 100%: Confronting Recurrent Cystic Fibrosis Risk Across Consecutive Pregnancies.",
+          "authorString": "Dasgupta S, Datta D, Pal S, Ghosh K, Sett S.",
+          "journalTitle": "Cureus",
+          "issue": "11",
+          "journalVolume": "17",
+          "pubYear": "2025",
+          "journalIssn": "2168-8184",
+          "pageInfo": "e97373",
+          "pubType": "journal article; case reports; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-11-20",
+          "firstIndexDate": "2025-12-24"
+        }
+      ]
+    }
+  }
+}

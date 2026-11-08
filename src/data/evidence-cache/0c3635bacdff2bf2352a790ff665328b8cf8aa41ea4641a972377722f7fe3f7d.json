@@ -1,0 +1,202 @@
+{
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=MTHFR+AND+%28%22p.Ala222Val%22+OR+%22c.665C%3ET%22+OR+%22rs1801133%22%29&format=json&pageSize=5&resultType=lite",
+  "fetchedAt": "2026-11-08T08:33:41.709Z",
+  "status": 200,
+  "body": {
+    "version": "6.9",
+    "hitCount": 2557,
+    "nextCursorMark": "AoIIQTzBmyg1NjM3ODc1NA==",
+    "nextPageUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=MTHFR+AND+%28%22p.Ala222Val%22+OR+%22c.665C%3ET%22+OR+%22rs1801133%22%29&cursorMark=AoIIQTzBmyg1NjM3ODc1NA%3D%3D&resultType=lite&pageSize=5&format=json",
+    "request": {
+      "queryString": "MTHFR AND (\"p.Ala222Val\" OR \"c.665C>T\" OR \"rs1801133\")",
+      "resultType": "lite",
+      "cursorMark": "*",
+      "pageSize": 5,
+      "sort": "",
+      "synonym": false
+    },
+    "resultList": {
+      "result": [
+        {
+          "id": "40700101",
+          "source": "MED",
+          "pmid": "40700101",
+          "pmcid": "PMC12286041",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12286041"
+            ]
+          },
+          "doi": "10.3390/hematolrep17040034",
+          "title": "Psychotic Disorder Secondary to Cerebral Venous Thrombosis Caused by Primary Thrombophilia in a Pediatric Patient with Protein S Deficiency and an MTHFR p.Ala222Val Variant: A Case Report.",
+          "authorString": "Martínez-Pascual D, Solis-Mendoza AD, Calderon-García J, Sommer B, Calixto E, Martinez-Enriquez ME, Aquino-Gálvez A, Solis-Chagoyan H, Montaño LM, Romero-Martinez BS, Jaimez R, Flores-Soto E.",
+          "journalTitle": "Hematol Rep",
+          "issue": "4",
+          "journalVolume": "17",
+          "pubYear": "2025",
+          "journalIssn": "2038-8322; 2038-8330; ",
+          "pageInfo": "34",
+          "pubType": "journal article; case reports; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-07-03",
+          "firstIndexDate": "2025-07-24"
+        },
+        {
+          "id": "42840159",
+          "source": "MED",
+          "pmid": "42840159",
+          "doi": "10.3389/frph.2026.1943185",
+          "title": "&lt;i&gt;MTHFR&lt;/i&gt; (rs1801133) and &lt;i&gt;SERPINE1&lt;/i&gt;/PAI-1 (-675 4G/5G) gene polymorphisms and their association with spontaneous abortion and missed pregnancy in an ethnic Uzbek population: a case-control study.",
+          "authorString": "Akhmedov F, Axmadjonova G, Axmadaliyeva N, Negmatshayeva H, Kasimova S, Nasimova N.",
+          "journalTitle": "Front Reprod Health",
+          "journalVolume": "8",
+          "pubYear": "2026",
+          "journalIssn": "2673-3153",
+          "pageInfo": "1943185",
+          "pubType": "journal article",
+          "isOpenAccess": "N",
+          "inEPMC": "N",
+          "inPMC": "N",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "N",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-09-22",
+          "firstIndexDate": "2026-10-16"
+        },
+        {
+          "id": "PMC13638649",
+          "source": "PMC",
+          "pmcid": "PMC13638649",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13638649"
+            ]
+          },
+          "title": "MTHFR (rs1801133) and SERPINE1/PAI-1 (−675 4G/5G) gene polymorphisms and their association with spontaneous abortion and missed pregnancy in an ethnic Uzbek population: a case–control study",
+          "authorString": "Akhmedov F, Axmadjonova G, Axmadaliyeva N, Negmatshayeva H, Kasimova S, Nasimova N.",
+          "journalTitle": "Front Reprod Health",
+          "journalVolume": "8",
+          "journalIssn": "2673-3153",
+          "pubType": "brief-report; brief report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "N",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2026-10-07",
+          "firstIndexDate": "2026-10-07"
+        },
+        {
+          "id": "42738962",
+          "source": "MED",
+          "pmid": "42738962",
+          "pmcid": "PMC13566919",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13566919"
+            ]
+          },
+          "doi": "10.3390/nu18172791",
+          "title": "Personalised Nutraceutical Treatment Guided by &lt;i&gt;MTHFR&lt;/i&gt; Genotype in Mental Health: A Retrospective Cohort Study.",
+          "authorString": "Beer C, Rae F, Watt M, Trzaskowski M, Yates C, Semmler A, Voisey J.",
+          "journalTitle": "Nutrients",
+          "issue": "17",
+          "journalVolume": "18",
+          "pubYear": "2026",
+          "journalIssn": "2072-6643",
+          "pageInfo": "2791",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2026-08-26",
+          "firstIndexDate": "2026-09-15"
+        },
+        {
+          "id": "42713553",
+          "source": "MED",
+          "pmid": "42713553",
+          "pmcid": "PMC13553058",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13553058"
+            ]
+          },
+          "doi": "10.3389/fgene.2026.1912912",
+          "title": "Case Report: Persistent isolated hyperhomocysteinemia in an adolescent with celiac disease and homozygous &lt;i&gt;MTHFR&lt;/i&gt; c.665C&gt;T polymorphism: a multifactorial disturbance of one-carbon metabolism.",
+          "authorString": "Al Masseri Z, Marshall CR, Martin N, Cordeiro D, Guilder L, Inbar-Feigenberg M.",
+          "journalTitle": "Front Genet",
+          "journalVolume": "17",
+          "pubYear": "2026",
+          "journalIssn": "1664-8021",
+          "pageInfo": "1912912",
+          "pubType": "journal article; case reports; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-08-26",
+          "firstIndexDate": "2026-09-10"
+        }
+      ]
+    }
+  }
+}

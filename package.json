@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:visual": "vitest run tests/visual",
     "test:watch": "vitest",
+    "snapshot:evidence": "vitest run --config vitest.scripts.config.mts snapshot-evidence",
     "pretypecheck": "next typegen",
     "typecheck": "tsc --noEmit"
   },

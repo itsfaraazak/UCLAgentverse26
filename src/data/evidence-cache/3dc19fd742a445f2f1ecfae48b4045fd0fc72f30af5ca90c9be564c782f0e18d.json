@@ -1,0 +1,142 @@
+{
+  "url": "https://myvariant.info/v1/variant/chr7%3Ag.117559591_117559593del?assembly=hg38&fields=clinvar.rcv.clinical_significance%2Cclinvar.rcv.review_status%2Cclinvar.rcv.preferred_name%2Cclinvar.rsid%2Cclinvar.variant_id%2Cclinvar.gene.symbol%2Cclinvar.hgvs.coding%2Cclinvar.hgvs.protein%2Cdbsnp.rsid%2Cdbsnp.gene.symbol%2Cgnomad_genome.af.af%2Cgnomad_exome.af.af%2Cdbnsfp.alphamissense.score%2Cdbnsfp.genename%2Cdbnsfp.aa.ref%2Cdbnsfp.aa.alt%2Cdbnsfp.aa.pos%2Cdbnsfp.aa.refcodon%2Cdbnsfp.aa.codonpos%2Ccadd.consequence%2Ccadd.phred%2Ccadd.gene.genename%2Csnpeff.ann.effect%2Csnpeff.ann.genename%2Csnpeff.ann.hgvs_c%2Csnpeff.ann.hgvs_p",
+  "fetchedAt": "2026-11-08T08:33:28.208Z",
+  "status": 200,
+  "body": {
+    "_id": "chr7:g.117559591_117559593del",
+    "_version": 2,
+    "clinvar": {
+      "_license": "http://bit.ly/2SQdcI0",
+      "gene": {
+        "symbol": "CFTR"
+      },
+      "hgvs": {
+        "coding": [
+          "LRG_663t1:c.1521_1523del",
+          "NM_000492.3:c.1520_1522del",
+          "NM_000492.3:c.1520_1522delTCT",
+          "NM_000492.3:c.1521_1523delCTT",
+          "NM_000492.4:c.1520_1522del",
+          "NM_000492.4:c.1520_1522delTCT",
+          "NM_000492.4:c.1521_1523del",
+          "NM_000492.4:c.1521_1523delCTT"
+        ],
+        "protein": [
+          "LRG_663p1:p.Phe508del",
+          "NP_000483.3:p.Phe508del",
+          "NP_000483.3:p.Phe508del"
+        ]
+      },
+      "rcv": [
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "practice guideline"
+        },
+        {
+          "clinical_significance": "risk factor",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Likely pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "reviewed by expert panel"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "drug response",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "reviewed by expert panel"
+        },
+        {
+          "clinical_significance": "drug response",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "reviewed by expert panel"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000492.3(CFTR):c.1521_1523del (p.Phe508del)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        }
+      ],
+      "rsid": "rs113993960",
+      "variant_id": 7105
+    },
+    "gnomad_exome": {
+      "_license": "http://bit.ly/2I1cl1I",
+      "af": {
+        "af": 0.00706849
+      }
+    },
+    "gnomad_genome": {
+      "_license": "http://bit.ly/2I1cl1I",
+      "af": {
+        "af": 0.00789017
+      }
+    },
+    "snpeff": {
+      "_license": "http://bit.ly/2suyRKt",
+      "ann": {
+        "effect": "disruptive_inframe_deletion",
+        "genename": "CFTR",
+        "hgvs_c": "c.1521_1523del",
+        "hgvs_p": "p.Phe508del"
+      }
+    }
+  }
+}

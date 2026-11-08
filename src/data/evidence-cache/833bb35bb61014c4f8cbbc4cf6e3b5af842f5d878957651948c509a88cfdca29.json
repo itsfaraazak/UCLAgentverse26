@@ -1,0 +1,211 @@
+{
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=TP53+AND+%28%22p.Pro72Arg%22+OR+%22c.215C%3EG%22+OR+%22rs1042522%22%29&format=json&pageSize=5&resultType=lite",
+  "fetchedAt": "2026-11-08T08:33:41.308Z",
+  "status": 200,
+  "body": {
+    "version": "6.9",
+    "hitCount": 1047,
+    "nextCursorMark": "AoIIQNjClCg1NjY0MzA2MQ==",
+    "nextPageUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=TP53+AND+%28%22p.Pro72Arg%22+OR+%22c.215C%3EG%22+OR+%22rs1042522%22%29&cursorMark=AoIIQNjClCg1NjY0MzA2MQ%3D%3D&resultType=lite&pageSize=5&format=json",
+    "request": {
+      "queryString": "TP53 AND (\"p.Pro72Arg\" OR \"c.215C>G\" OR \"rs1042522\")",
+      "resultType": "lite",
+      "cursorMark": "*",
+      "pageSize": 5,
+      "sort": "",
+      "synonym": false
+    },
+    "resultList": {
+      "result": [
+        {
+          "id": "42938823",
+          "source": "MED",
+          "pmid": "42938823",
+          "pmcid": "PMC13702322",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13702322"
+            ]
+          },
+          "doi": "10.3390/cancers18203286",
+          "title": "Combined &lt;i&gt;TP53&lt;/i&gt; Codon 72 Genotype and p53 Expression in Association with Vitamin D Benefit in Digestive Tract Cancer: A Post-Hoc Study of the AMATERASU Trial.",
+          "authorString": "Fukuzato S, Akutsu T, Ohdaira H, Suzuki Y, Urashima M.",
+          "journalTitle": "Cancers (Basel)",
+          "issue": "20",
+          "journalVolume": "18",
+          "pubYear": "2026",
+          "journalIssn": "2072-6694",
+          "pageInfo": "3286",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp"
+            ]
+          },
+          "firstPublicationDate": "2026-10-12",
+          "firstIndexDate": "2026-10-28"
+        },
+        {
+          "id": "41375830",
+          "source": "MED",
+          "pmid": "41375830",
+          "pmcid": "PMC12692803",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12692803"
+            ]
+          },
+          "doi": "10.3390/jcm14238526",
+          "title": "Diagnostic and Prognostic Implications of FGFR3, TP53 Mutation and Urinary Biomarkers in Urothelial Carcinoma in Pakistani Cohort.",
+          "authorString": "Asif M, Rashid FA, Malik SS, Khan DA, Sajid MT, Gul A, Khadim MT.",
+          "journalTitle": "J Clin Med",
+          "issue": "23",
+          "journalVolume": "14",
+          "pubYear": "2025",
+          "journalIssn": "2077-0383",
+          "pageInfo": "8526",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 2,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "Y",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "refseq",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-12-01",
+          "firstIndexDate": "2025-12-11"
+        },
+        {
+          "id": "42943200",
+          "source": "MED",
+          "pmid": "42943200",
+          "pmcid": "PMC13708335",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13708335"
+            ]
+          },
+          "doi": "10.3390/ph19101504",
+          "title": "Population-Specific Pharmacogenetic Variants Associated with Chemotherapy Response in the Bulgarian Population.",
+          "authorString": "Miteva-Marcheva N, Ivanov H, Sotkova-Ivanova I, Boyanov N, Stoyanova V.",
+          "journalTitle": "Pharmaceuticals (Basel)",
+          "issue": "10",
+          "journalVolume": "19",
+          "pubYear": "2026",
+          "journalIssn": "1424-8247",
+          "pageInfo": "1504",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-09-22",
+          "firstIndexDate": "2026-10-28"
+        },
+        {
+          "id": "39810900",
+          "source": "MED",
+          "pmid": "39810900",
+          "pmcid": "PMC11729137",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC11729137"
+            ]
+          },
+          "doi": "10.3892/br.2025.1920",
+          "title": "Genetic profiling of osteosarcoma in an adolescent using a next‑generation sequencing panel and Sanger sequencing: A case report and review of the literature.",
+          "authorString": "Chantre-Justino M, Silvestre RT, De Castro TL, Luz E, Pinheiro RCES, Caruso A, Lopes ACS, Meohas W, Alves G, Ornellas MHF.",
+          "journalTitle": "Biomed Rep",
+          "issue": "3",
+          "journalVolume": "22",
+          "pubYear": "2025",
+          "journalIssn": "2049-9434; 2049-9442; ",
+          "pageInfo": "42",
+          "pubType": "journal article; case reports; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 1,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "refseq",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-01-03",
+          "firstIndexDate": "2025-01-15"
+        },
+        {
+          "id": "42832476",
+          "source": "MED",
+          "pmid": "42832476",
+          "doi": "10.1371/journal.pone.0359809",
+          "title": "Impact of GST and TP53 gene polymorphisms on susceptibility to end stage renal disease: A case-control analysis.",
+          "authorString": "Mehmood R, Chiang PC, Rasool M, Asif M, Ghafar A, Khalid M, Razaq S, Alam MK, Fatima I, Jabeen I, Ashraf S, Iqbal F, Chen CC.",
+          "journalTitle": "PLoS One",
+          "issue": "10",
+          "journalVolume": "21",
+          "pubYear": "2026",
+          "journalIssn": "1932-6203",
+          "pageInfo": "e0359809",
+          "pubType": "journal article",
+          "isOpenAccess": "N",
+          "inEPMC": "N",
+          "inPMC": "N",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "N",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-10-05",
+          "firstIndexDate": "2026-10-16"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1596 @@
+{
+  "url": "https://myvariant.info/v1/variant/chr17%3Ag.7675088C%3ET?assembly=hg38&fields=clinvar.rcv.clinical_significance%2Cclinvar.rcv.review_status%2Cclinvar.rcv.preferred_name%2Cclinvar.rsid%2Cclinvar.variant_id%2Cclinvar.gene.symbol%2Cclinvar.hgvs.coding%2Cclinvar.hgvs.protein%2Cdbsnp.rsid%2Cdbsnp.gene.symbol%2Cgnomad_genome.af.af%2Cgnomad_exome.af.af%2Cdbnsfp.alphamissense.score%2Cdbnsfp.genename%2Cdbnsfp.aa.ref%2Cdbnsfp.aa.alt%2Cdbnsfp.aa.pos%2Cdbnsfp.aa.refcodon%2Cdbnsfp.aa.codonpos%2Ccadd.consequence%2Ccadd.phred%2Ccadd.gene.genename%2Csnpeff.ann.effect%2Csnpeff.ann.genename%2Csnpeff.ann.hgvs_c%2Csnpeff.ann.hgvs_p",
+  "fetchedAt": "2026-11-08T08:33:31.631Z",
+  "status": 200,
+  "body": {
+    "_id": "chr17:g.7675088C>T",
+    "_version": 2,
+    "clinvar": {
+      "_license": "http://bit.ly/2SQdcI0",
+      "gene": {
+        "symbol": "TP53"
+      },
+      "hgvs": {
+        "coding": [
+          "LRG_321t1:c.524G>A",
+          "NM_000546.6:c.524G>A",
+          "NM_001126112.3:c.524G>A",
+          "NM_001126113.3:c.524G>A",
+          "NM_001126114.1:c.524G>A",
+          "NM_001126114.3:c.524G>A",
+          "NM_001126115.2:c.128G>A",
+          "NM_001126116.2:c.128G>A",
+          "NM_001126117.2:c.128G>A",
+          "NM_001126118.2:c.407G>A",
+          "NM_001276695.3:c.407G>A",
+          "NM_001276696.3:c.407G>A",
+          "NM_001276697.3:c.47G>A",
+          "NM_001276698.3:c.47G>A",
+          "NM_001276699.3:c.47G>A",
+          "NM_001276760.3:c.407G>A",
+          "NM_001276761.3:c.407G>A"
+        ],
+        "protein": [
+          "LRG_321p1:p.Arg175His",
+          "NP_000537.3:p.Arg175His",
+          "NP_000537.3:p.Arg175His",
+          "NP_001119584.1:p.Arg175His",
+          "NP_001119585.1:p.Arg175His",
+          "NP_001119586.1:p.Arg175His",
+          "NP_001119587.1:p.Arg43His",
+          "NP_001119588.1:p.Arg43His",
+          "NP_001119589.1:p.Arg43His",
+          "NP_001119590.1:p.Arg136His",
+          "NP_001263624.1:p.Arg136His",
+          "NP_001263625.1:p.Arg136His",
+          "NP_001263626.1:p.Arg16His",
+          "NP_001263627.1:p.Arg16His",
+          "NP_001263628.1:p.Arg16His",
+          "NP_001263689.1:p.Arg136His",
+          "NP_001263690.1:p.Arg136His",
+          "P04637:p.Arg175His",
+          "p.R175H"
+        ]
+      },
+      "rcv": [
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "reviewed by expert panel"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Likely pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Pathogenic",
+          "preferred_name": "NM_000546.6(TP53):c.524G>A (p.Arg175His)",
+          "review_status": "criteria provided, single submitter"
+        }
+      ],
+      "rsid": "rs28934578",
+      "variant_id": 12374
+    },
+    "dbnsfp": {
+      "_license": "http://bit.ly/2VLnQBz",
+      "aa": {
+        "alt": "H",
+        "codonpos": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "pos": [
+          175,
+          175,
+          43,
+          43,
+          43,
+          16,
+          16,
+          16,
+          136,
+          175,
+          136,
+          175,
+          175,
+          175,
+          136,
+          136,
+          175,
+          136,
+          164,
+          43,
+          82
+        ],
+        "ref": "R",
+        "refcodon": [
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC",
+          "CGC"
+        ]
+      },
+      "alphamissense": {
+        "score": [
+          0.9782,
+          0.9837,
+          0.9682,
+          0.9635,
+          0.9689,
+          0.9766,
+          0.9575,
+          0.9626,
+          0.9854,
+          0.9849,
+          0.9788,
+          0.9842,
+          0.9848,
+          0.9857,
+          0.9725,
+          0.9571,
+          0.9548,
+          0.9731
+        ]
+      },
+      "genename": [
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53",
+        "TP53"
+      ]
+    },
+    "dbsnp": {
+      "_license": "http://bit.ly/2AqoLOc",
+      "gene": {
+        "symbol": "TP53"
+      },
+      "rsid": "rs28934578"
+    },
+    "gnomad_exome": {
+      "_license": "http://bit.ly/2I1cl1I",
+      "af": {
+        "af": 0.00000397969
+      }
+    },
+    "gnomad_genome": {
+      "_license": "http://bit.ly/2I1cl1I",
+      "af": {
+        "af": 0.00000657013
+      }
+    },
+    "snpeff": {
+      "_license": "http://bit.ly/2suyRKt",
+      "ann": [
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "structural_interaction_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A",
+          "hgvs_p": "p.Arg175His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.128G>A",
+          "hgvs_p": "p.Arg43His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.128G>A",
+          "hgvs_p": "p.Arg43His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.128G>A",
+          "hgvs_p": "p.Arg43His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.47G>A",
+          "hgvs_p": "p.Arg16His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.47G>A",
+          "hgvs_p": "p.Arg16His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.47G>A",
+          "hgvs_p": "p.Arg16His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A",
+          "hgvs_p": "p.Arg175His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A",
+          "hgvs_p": "p.Arg175His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.524G>A",
+          "hgvs_p": "p.Arg175His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.407G>A",
+          "hgvs_p": "p.Arg136His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.407G>A",
+          "hgvs_p": "p.Arg136His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.407G>A",
+          "hgvs_p": "p.Arg136His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.407G>A",
+          "hgvs_p": "p.Arg136His"
+        },
+        {
+          "effect": "missense_variant",
+          "genename": "TP53",
+          "hgvs_c": "c.407G>A",
+          "hgvs_p": "p.Arg136His"
+        }
+      ]
+    }
+  }
+}

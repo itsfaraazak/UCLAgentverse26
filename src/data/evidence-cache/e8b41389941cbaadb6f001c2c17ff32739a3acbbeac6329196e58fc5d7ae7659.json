@@ -1,0 +1,159 @@
+{
+  "url": "https://myvariant.info/v1/variant/chr1%3Ag.11796321G%3EA?assembly=hg38&fields=clinvar.rcv.clinical_significance%2Cclinvar.rcv.review_status%2Cclinvar.rcv.preferred_name%2Cclinvar.rsid%2Cclinvar.variant_id%2Cclinvar.gene.symbol%2Cclinvar.hgvs.coding%2Cclinvar.hgvs.protein%2Cdbsnp.rsid%2Cdbsnp.gene.symbol%2Cgnomad_genome.af.af%2Cgnomad_exome.af.af%2Cdbnsfp.alphamissense.score%2Cdbnsfp.genename%2Cdbnsfp.aa.ref%2Cdbnsfp.aa.alt%2Cdbnsfp.aa.pos%2Cdbnsfp.aa.refcodon%2Cdbnsfp.aa.codonpos%2Ccadd.consequence%2Ccadd.phred%2Ccadd.gene.genename%2Csnpeff.ann.effect%2Csnpeff.ann.genename%2Csnpeff.ann.hgvs_c%2Csnpeff.ann.hgvs_p",
+  "fetchedAt": "2026-11-08T08:33:41.664Z",
+  "status": 200,
+  "body": {
+    "_id": "chr1:g.11796321G>A",
+    "_version": 2,
+    "clinvar": {
+      "_license": "http://bit.ly/2SQdcI0",
+      "gene": {
+        "symbol": "MTHFR"
+      },
+      "hgvs": {
+        "coding": [
+          "LRG_726t1:c.665C>T",
+          "NM_001330358.2:c.788C>T",
+          "NM_005957.5:c.665C>T"
+        ],
+        "protein": [
+          "LRG_726p1:p.Ala222Val",
+          "NP_001317287.1:p.Ala263Val",
+          "NP_005948.3:p.Ala222Val",
+          "NP_005948.3:p.Ala222Val",
+          "P42898:p.Ala222Val"
+        ]
+      },
+      "rcv": [
+        {
+          "clinical_significance": "Conflicting interpretations of pathogenicity",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Uncertain significance",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Uncertain significance; association; other",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "criteria provided, multiple submitters, no conflicts"
+        },
+        {
+          "clinical_significance": "Likely benign",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Benign",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "criteria provided, single submitter"
+        },
+        {
+          "clinical_significance": "Uncertain significance",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "no assertion criteria provided"
+        },
+        {
+          "clinical_significance": "Conflicting interpretations of pathogenicity",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "criteria provided, conflicting interpretations"
+        },
+        {
+          "clinical_significance": "drug response",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "reviewed by expert panel"
+        },
+        {
+          "clinical_significance": "Uncertain significance",
+          "preferred_name": "NM_005957.5(MTHFR):c.665C>T (p.Ala222Val)",
+          "review_status": "criteria provided, single submitter"
+        }
+      ],
+      "rsid": "rs1801133",
+      "variant_id": 3520
+    },
+    "dbnsfp": {
+      "_license": "http://bit.ly/2VLnQBz",
+      "aa": {
+        "alt": "V",
+        "codonpos": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "pos": [
+          222,
+          263,
+          263,
+          222,
+          262,
+          222,
+          222
+        ],
+        "ref": "A",
+        "refcodon": [
+          "GCC",
+          "GCC",
+          "GCC",
+          "GCC",
+          "GCC",
+          "GCC",
+          "GCC"
+        ]
+      },
+      "alphamissense": {
+        "score": [
+          0.6345,
+          0.5391,
+          0.6324,
+          0.6262,
+          0.5254,
+          0.6736
+        ]
+      },
+      "genename": [
+        "MTHFR",
+        "MTHFR",
+        "MTHFR",
+        "MTHFR",
+        "MTHFR",
+        "MTHFR",
+        "MTHFR"
+      ]
+    },
+    "dbsnp": {
+      "_license": "http://bit.ly/2AqoLOc",
+      "gene": {
+        "symbol": "MTHFR"
+      },
+      "rsid": "rs1801133"
+    },
+    "gnomad_exome": {
+      "_license": "http://bit.ly/2I1cl1I",
+      "af": {
+        "af": 0.314859
+      }
+    },
+    "gnomad_genome": {
+      "_license": "http://bit.ly/2I1cl1I",
+      "af": {
+        "af": 0.275423
+      }
+    },
+    "snpeff": {
+      "_license": "http://bit.ly/2suyRKt",
+      "ann": {
+        "effect": "missense_variant",
+        "genename": "MTHFR",
+        "hgvs_c": "c.665C>T",
+        "hgvs_p": "p.Ala222Val"
+      }
+    }
+  }
+}

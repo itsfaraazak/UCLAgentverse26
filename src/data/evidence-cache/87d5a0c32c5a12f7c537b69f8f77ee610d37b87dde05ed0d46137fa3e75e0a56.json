@@ -1,0 +1,235 @@
+{
+  "url": "https://myvariant.info/v1/query?assembly=hg38&fields=clinvar.rcv.clinical_significance%2Cclinvar.rcv.review_status%2Cclinvar.rcv.preferred_name%2Cclinvar.rsid%2Cclinvar.variant_id%2Cclinvar.gene.symbol%2Cclinvar.hgvs.coding%2Cclinvar.hgvs.protein%2Cdbsnp.rsid%2Cdbsnp.gene.symbol%2Cgnomad_genome.af.af%2Cgnomad_exome.af.af%2Cdbnsfp.alphamissense.score%2Cdbnsfp.genename%2Cdbnsfp.aa.ref%2Cdbnsfp.aa.alt%2Cdbnsfp.aa.pos%2Cdbnsfp.aa.refcodon%2Cdbnsfp.aa.codonpos%2Ccadd.consequence%2Ccadd.phred%2Ccadd.gene.genename%2Csnpeff.ann.effect%2Csnpeff.ann.genename%2Csnpeff.ann.hgvs_c%2Csnpeff.ann.hgvs_p&q=HBB+c.20A%3ET&size=10",
+  "fetchedAt": "2026-11-08T08:33:31.285Z",
+  "status": 200,
+  "body": {
+    "took": 6,
+    "total": 1,
+    "max_score": 6.4028215,
+    "hits": [
+      {
+        "_id": "chr11:g.5227002T>A",
+        "_score": 6.4028215,
+        "clinvar": {
+          "_license": "http://bit.ly/2SQdcI0",
+          "gene": {
+            "symbol": "LOC106099062"
+          },
+          "hgvs": {
+            "coding": [
+              "LRG_1232t1:c.20A>T",
+              "NM_000518.5:c.20A>T"
+            ],
+            "protein": [
+              "LRG_1232p1:p.Glu7Val",
+              "NP_000509.1:p.Glu7Val",
+              "NP_000509.1:p.Glu7Val",
+              "P68871:p.Glu7Val"
+            ]
+          },
+          "rcv": [
+            {
+              "clinical_significance": "not provided",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "protective",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "other",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "other",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "other",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+              "review_status": "criteria provided, single submitter"
+            }
+          ],
+          "rsid": "rs334",
+          "variant_id": 15333
+        },
+        "dbnsfp": {
+          "_license": "http://bit.ly/2VLnQBz",
+          "aa": {
+            "alt": "V",
+            "codonpos": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "pos": [
+              7,
+              7,
+              7,
+              7
+            ],
+            "ref": "E",
+            "refcodon": [
+              "GAG",
+              "GAG",
+              "GAG",
+              "GAG"
+            ]
+          },
+          "alphamissense": {
+            "score": [
+              0.2271,
+              0.2229,
+              0.211,
+              0.174
+            ]
+          },
+          "genename": [
+            "HBB",
+            "HBB",
+            "HBB",
+            "HBB"
+          ]
+        },
+        "dbsnp": {
+          "_license": "http://bit.ly/2AqoLOc",
+          "gene": {
+            "symbol": "HBB"
+          },
+          "rsid": "rs334"
+        },
+        "gnomad_exome": {
+          "_license": "http://bit.ly/2I1cl1I",
+          "af": {
+            "af": 0.00347958
+          }
+        },
+        "gnomad_genome": {
+          "_license": "http://bit.ly/2I1cl1I",
+          "af": {
+            "af": 0.0126564
+          }
+        },
+        "snpeff": {
+          "_license": "http://bit.ly/2suyRKt",
+          "ann": {
+            "effect": "missense_variant",
+            "genename": "HBB",
+            "hgvs_c": "c.20A>T",
+            "hgvs_p": "p.Glu7Val"
+          }
+        }
+      }
+    ]
+  }
+}

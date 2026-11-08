@@ -1,0 +1,212 @@
+{
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=TP53+AND+%28%22p.Arg175His%22+OR+%22c.524G%3EA%22+OR+%22rs28934578%22%29&format=json&pageSize=5&resultType=lite",
+  "fetchedAt": "2026-11-08T08:33:40.374Z",
+  "status": 200,
+  "body": {
+    "version": "6.9",
+    "hitCount": 380,
+    "nextCursorMark": "AoIIQLgoFyg1NjEwNTYyNA==",
+    "nextPageUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=TP53+AND+%28%22p.Arg175His%22+OR+%22c.524G%3EA%22+OR+%22rs28934578%22%29&cursorMark=AoIIQLgoFyg1NjEwNTYyNA%3D%3D&resultType=lite&pageSize=5&format=json",
+    "request": {
+      "queryString": "TP53 AND (\"p.Arg175His\" OR \"c.524G>A\" OR \"rs28934578\")",
+      "resultType": "lite",
+      "cursorMark": "*",
+      "pageSize": 5,
+      "sort": "",
+      "synonym": false
+    },
+    "resultList": {
+      "result": [
+        {
+          "id": "41836231",
+          "source": "MED",
+          "pmid": "41836231",
+          "pmcid": "PMC12979107",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12979107"
+            ]
+          },
+          "doi": "10.3389/fonc.2026.1656404",
+          "title": "Case Report: &lt;i&gt;KMT2A&lt;/i&gt; amplification in two adult patients with B-cell acute lymphoblastic leukemia.",
+          "authorString": "Gao M, Chen Y, Bachiashvili K, Vachhani PJ, Jamy O, Harada S, Mackinnon AC, Singh N, Ravindran A, Reddy BV, Carroll AJ, Mikhail FM.",
+          "journalTitle": "Front Oncol",
+          "journalVolume": "16",
+          "pubYear": "2026",
+          "journalIssn": "2234-943x",
+          "pageInfo": "1656404",
+          "pubType": "journal article; case reports; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 1,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-02-26",
+          "firstIndexDate": "2026-03-17"
+        },
+        {
+          "id": "42260076",
+          "source": "MED",
+          "pmid": "42260076",
+          "pmcid": "PMC13586324",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13586324"
+            ]
+          },
+          "doi": "10.1038/s41698-026-01544-5",
+          "title": "Independent somatic TP53 mutations in blood and tumor mimicking Li-Fraumeni syndrome in a 94-year-old man.",
+          "authorString": "Gao C, Rai V, Wong D, Yelskaya Z, Ostafi S, Somar J, Cody N, Terraf P, Misyura M, Ceyhan-Birsoy O, Mandelker D.",
+          "journalTitle": "NPJ Precis Oncol",
+          "issue": "1",
+          "journalVolume": "10",
+          "pubYear": "2026",
+          "journalIssn": "2397-768x",
+          "pageInfo": "354",
+          "pubType": "journal article; case-report",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "nct"
+            ]
+          },
+          "firstPublicationDate": "2026-06-08",
+          "firstIndexDate": "2026-06-09"
+        },
+        {
+          "id": "41363274",
+          "source": "MED",
+          "pmid": "41363274",
+          "pmcid": "PMC12922644",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12922644"
+            ]
+          },
+          "doi": "10.1002/ijc.70277",
+          "title": "Detecting TP53 mutations in paired liquid and tissue biopsies from patients with high-grade serous ovarian carcinoma.",
+          "authorString": "Widjaja AO, Micallef P, Lycke M, Österlund T, Santamaría ML, Lindberg JH, Carlsson T, Gyllensten U, Ståhlberg A, Ulfenborg B, Linder A, Sundfeldt K.",
+          "journalTitle": "Int J Cancer",
+          "issue": "8",
+          "journalVolume": "158",
+          "pubYear": "2026",
+          "journalIssn": "0020-7136; 1097-0215; ",
+          "pageInfo": "2043-2050",
+          "pubType": "brief-report; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 1,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "Y",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-12-09",
+          "firstIndexDate": "2025-12-09"
+        },
+        {
+          "id": "41220797",
+          "source": "MED",
+          "pmid": "41220797",
+          "pmcid": "PMC12598524",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12598524"
+            ]
+          },
+          "doi": "10.3892/mco.2025.2906",
+          "title": "High expression of CDKN2A in oral squamous cell carcinoma is associated with distant metastasis: Cell-free DNA as a new prognostic feature.",
+          "authorString": "Eboshida N, Hamada A, Tanigawa A, Higaki M, Obayashi F, Ito N, Yamasaki S, Tani R, Shintani T, Koizumi K, Yanamoto S.",
+          "journalTitle": "Mol Clin Oncol",
+          "issue": "6",
+          "journalVolume": "23",
+          "pubYear": "2025",
+          "journalIssn": "2049-9450; 2049-9469; ",
+          "pageInfo": "111",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 1,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "Y",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-10-17",
+          "firstIndexDate": "2025-11-12"
+        },
+        {
+          "id": "42568049",
+          "source": "MED",
+          "pmid": "42568049",
+          "pmcid": "PMC13451528",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13451528"
+            ]
+          },
+          "doi": "10.1002/gcc.70159",
+          "title": "Complex Genomic Alterations in TP53-Mutated Myelodysplastic Syndrome and Acute Myeloid Leukemia Involving EPOR/JAK2 Amplification, ERG Copy Gains, and TCF3 Deletion.",
+          "authorString": "Gindina TL, Riumin SS, Barkhatov IM, Gracheva TY, Bug DS, Babenko EV, Morozova EV, Tsvetkov NY, Mamaev NN, Kulagin AD.",
+          "journalTitle": "Genes Chromosomes Cancer",
+          "issue": "8",
+          "journalVolume": "65",
+          "pubYear": "2026",
+          "journalIssn": "1045-2257; 1098-2264; ",
+          "pageInfo": "e70159",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "N",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2026-08-01",
+          "firstIndexDate": "2026-08-09"
+        }
+      ]
+    }
+  }
+}

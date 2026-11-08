@@ -1,0 +1,219 @@
+{
+  "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=BRCA1+AND+%28%22p.Gln1756fs%22+OR+%22c.5266dup%22+OR+%22rs80357906%22%29&format=json&pageSize=5&resultType=lite",
+  "fetchedAt": "2026-11-08T08:33:27.888Z",
+  "status": 200,
+  "body": {
+    "version": "6.9",
+    "hitCount": 204,
+    "nextCursorMark": "AoIIQN6M9Sg1MjQ4NjM4OQ==",
+    "nextPageUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=BRCA1+AND+%28%22p.Gln1756fs%22+OR+%22c.5266dup%22+OR+%22rs80357906%22%29&cursorMark=AoIIQN6M9Sg1MjQ4NjM4OQ%3D%3D&resultType=lite&pageSize=5&format=json",
+    "request": {
+      "queryString": "BRCA1 AND (\"p.Gln1756fs\" OR \"c.5266dup\" OR \"rs80357906\")",
+      "resultType": "lite",
+      "cursorMark": "*",
+      "pageSize": 5,
+      "sort": "",
+      "synonym": false
+    },
+    "resultList": {
+      "result": [
+        {
+          "id": "41372292",
+          "source": "MED",
+          "pmid": "41372292",
+          "pmcid": "PMC12774882",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12774882"
+            ]
+          },
+          "doi": "10.1038/s41598-025-30208-w",
+          "title": "Different association of gBRCA1 and gBRCA2 variants with HER2-low status in invasive breast cancer: findings from a Ukrainian study.",
+          "authorString": "Livshun S, Kozakov D, Kruhlykovа A, Koshyk O, Kobyliak N, Seleznov O, Matvieieva A, Shparyk Y, Volodko N, Zavizion V, Khmel A, Kharchenko K, Otchenash N, Andriiv A, Sulaieva O.",
+          "journalTitle": "Sci Rep",
+          "issue": "1",
+          "journalVolume": "16",
+          "pubYear": "2025",
+          "journalIssn": "2045-2322",
+          "pageInfo": "619",
+          "pubType": "research-article; multicenter study; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 2,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "Y",
+          "hasTMAccessionNumbers": "N",
+          "firstPublicationDate": "2025-12-10",
+          "firstIndexDate": "2025-12-11"
+        },
+        {
+          "id": "42015116",
+          "source": "MED",
+          "pmid": "42015116",
+          "pmcid": "PMC13238077",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13238077"
+            ]
+          },
+          "doi": "10.1186/s12885-026-16017-y",
+          "title": "Prevalence of recurrent and non-recurrent BRCA1 and BRCA2 pathogenic variants in Polish breast cancer patients: insights from a regional genetic testing cohort from Lower Silesia.",
+          "authorString": "Matkowski R, Abrahamowska M, Michalowska D, Chrusciel A, Szelachowska J, Blomka D, Lawicka P, Czykalko E, Pietron A, Ekiert M, Doraczynska-Kowalik A, Janus-Szymanska G, Kasprzak P, Szynglarewicz B, Laczmanska I.",
+          "journalTitle": "BMC Cancer",
+          "issue": "1",
+          "journalVolume": "26",
+          "pubYear": "2026",
+          "journalIssn": "1471-2407",
+          "pageInfo": "714",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2026-04-21",
+          "firstIndexDate": "2026-04-22"
+        },
+        {
+          "id": "42135811",
+          "source": "MED",
+          "pmid": "42135811",
+          "pmcid": "PMC13435756",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC13435756"
+            ]
+          },
+          "doi": "10.1186/s40246-026-00983-2",
+          "title": "Broad germline variant spectrum revealed by whole-exome sequencing in an underrepresented Latin American population with hereditary breast cancer.",
+          "authorString": "Morales-González S, Fernández-Ramires R, Gonzalez HCB, Sepúlveda-Perez AE, Silva-Mundaca IA, Seccia L, Campos VF, Júnior PRF, Dutra MJ, Salas-Burgos A, Gischkow-Rucatti G, Morales-Pison S.",
+          "journalTitle": "Hum Genomics",
+          "issue": "1",
+          "journalVolume": "20",
+          "pubYear": "2026",
+          "journalIssn": "1473-9542; 1479-7364; ",
+          "pageInfo": "120",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 0,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp"
+            ]
+          },
+          "firstPublicationDate": "2026-05-14",
+          "firstIndexDate": "2026-05-15"
+        },
+        {
+          "id": "40649708",
+          "source": "MED",
+          "pmid": "40649708",
+          "pmcid": "PMC12249944",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC12249944"
+            ]
+          },
+          "doi": "10.3390/ijms26135928",
+          "title": "Expanding the Genomic Landscape of HBOC and Cancer Risk Among Mutation Carriers.",
+          "authorString": "Vietri MT, Della Pepa C, Caliendo G, Mignano A, Albanese L, Zitiello M, Stilo M, Molinari AM.",
+          "journalTitle": "Int J Mol Sci",
+          "issue": "13",
+          "journalVolume": "26",
+          "pubYear": "2025",
+          "journalIssn": "1422-0067",
+          "pageInfo": "5928",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 3,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "Y",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp",
+              "doi"
+            ]
+          },
+          "firstPublicationDate": "2025-06-20",
+          "firstIndexDate": "2025-07-14"
+        },
+        {
+          "id": "40002208",
+          "source": "MED",
+          "pmid": "40002208",
+          "pmcid": "PMC11853394",
+          "fullTextIdList": {
+            "fullTextId": [
+              "PMC11853394"
+            ]
+          },
+          "doi": "10.3390/cancers17040613",
+          "title": "<i>BRCA1</i> and <i>BRCA2</i> Mutations in Polish Women with Ductal Carcinoma In Situ.",
+          "authorString": "Feszak S, Feszak IJ, Kluźniak W, Wokołorczyk D, Stempa K, Gliniewicz K, Uciński J, Huzarski T, Dębniak T, Gronwald J, Lubiński J, Narod SA, Cybulski C.",
+          "journalTitle": "Cancers (Basel)",
+          "issue": "4",
+          "journalVolume": "17",
+          "pubYear": "2025",
+          "journalIssn": "2072-6694",
+          "pageInfo": "613",
+          "pubType": "research-article; journal article",
+          "isOpenAccess": "Y",
+          "inEPMC": "Y",
+          "inPMC": "Y",
+          "citedByCount": 6,
+          "hasReferences": "Y",
+          "hasTextMinedTerms": "Y",
+          "hasDbCrossReferences": "N",
+          "hasPDF": "Y",
+          "hasBook": "N",
+          "hasSuppl": "N",
+          "hasLabsLinks": "N",
+          "hasTMAccessionNumbers": "Y",
+          "tmAccessionTypeList": {
+            "accessionType": [
+              "refsnp"
+            ]
+          },
+          "firstPublicationDate": "2025-02-11",
+          "firstIndexDate": "2025-02-26"
+        }
+      ]
+    }
+  }
+}

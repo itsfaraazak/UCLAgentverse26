@@ -1,0 +1,856 @@
+{
+  "url": "https://myvariant.info/v1/query?assembly=hg38&fields=clinvar.rcv.clinical_significance%2Cclinvar.rcv.review_status%2Cclinvar.rcv.preferred_name%2Cclinvar.rsid%2Cclinvar.variant_id%2Cclinvar.gene.symbol%2Cclinvar.hgvs.coding%2Cclinvar.hgvs.protein%2Cdbsnp.rsid%2Cdbsnp.gene.symbol%2Cgnomad_genome.af.af%2Cgnomad_exome.af.af%2Cdbnsfp.alphamissense.score%2Cdbnsfp.genename%2Cdbnsfp.aa.ref%2Cdbnsfp.aa.alt%2Cdbnsfp.aa.pos%2Cdbnsfp.aa.refcodon%2Cdbnsfp.aa.codonpos%2Ccadd.consequence%2Ccadd.phred%2Ccadd.gene.genename%2Csnpeff.ann.effect%2Csnpeff.ann.genename%2Csnpeff.ann.hgvs_c%2Csnpeff.ann.hgvs_p&q=dbsnp.rsid%3Ars1042522+OR+clinvar.rsid%3Ars1042522&size=10",
+  "fetchedAt": "2026-11-08T08:33:41.063Z",
+  "status": 200,
+  "body": {
+    "took": 5,
+    "total": 4,
+    "max_score": 27.551144,
+    "hits": [
+      {
+        "_id": "chr17:g.7676154G>A",
+        "_score": 27.551144,
+        "clinvar": {
+          "_license": "http://bit.ly/2SQdcI0",
+          "gene": {
+            "symbol": "TP53"
+          },
+          "hgvs": {
+            "coding": [
+              "LRG_321t1:c.215C>T",
+              "NM_000546.4:c.215C>T",
+              "NM_000546.6:c.215C>T",
+              "NM_001126112.3:c.215C>T",
+              "NM_001126113.3:c.215C>T",
+              "NM_001126114.3:c.215C>T",
+              "NM_001126118.2:c.98C>T",
+              "NM_001276695.3:c.98C>T",
+              "NM_001276696.3:c.98C>T",
+              "NM_001276760.3:c.98C>T",
+              "NM_001276761.3:c.98C>T"
+            ],
+            "protein": [
+              "",
+              "NP_000537.3:p.Pro72Leu",
+              "NP_001119584.1:p.Pro72Leu",
+              "NP_001119585.1:p.Pro72Leu",
+              "NP_001119586.1:p.Pro72Leu",
+              "NP_001119590.1:p.Pro33Leu",
+              "NP_001263624.1:p.Pro33Leu",
+              "NP_001263625.1:p.Pro33Leu",
+              "NP_001263689.1:p.Pro33Leu",
+              "NP_001263690.1:p.Pro33Leu"
+            ]
+          },
+          "rcv": [
+            {
+              "clinical_significance": "Uncertain significance",
+              "preferred_name": "NM_000546.6(TP53):c.215C>T (p.Pro72Leu)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Likely benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>T (p.Pro72Leu)",
+              "review_status": "criteria provided, single submitter"
+            }
+          ],
+          "rsid": "rs1042522",
+          "variant_id": 864652
+        },
+        "dbnsfp": {
+          "_license": "http://bit.ly/2VLnQBz",
+          "aa": {
+            "alt": "L",
+            "codonpos": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "pos": [
+              72,
+              72,
+              33,
+              72,
+              33,
+              72,
+              72,
+              72,
+              33,
+              33,
+              72,
+              33,
+              72,
+              72,
+              72,
+              72
+            ],
+            "ref": "P",
+            "refcodon": [
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC"
+            ]
+          },
+          "alphamissense": {
+            "score": [
+              0.0804,
+              0.0811,
+              0.0793,
+              0.0851,
+              0.0837,
+              0.0908,
+              0.094,
+              0.0795,
+              0.0846,
+              0.0835,
+              0.0816,
+              0.0836,
+              0.0833
+            ]
+          },
+          "genename": [
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53"
+          ]
+        },
+        "dbsnp": {
+          "_license": "http://bit.ly/2AqoLOc",
+          "gene": {
+            "symbol": "TP53"
+          },
+          "rsid": "rs1042522"
+        },
+        "snpeff": {
+          "_license": "http://bit.ly/2suyRKt",
+          "ann": [
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>T",
+              "hgvs_p": "p.Pro72Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>T",
+              "hgvs_p": "p.Pro72Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>T",
+              "hgvs_p": "p.Pro72Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>T",
+              "hgvs_p": "p.Pro72Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>T",
+              "hgvs_p": "p.Pro33Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>T",
+              "hgvs_p": "p.Pro33Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>T",
+              "hgvs_p": "p.Pro33Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>T",
+              "hgvs_p": "p.Pro33Leu"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>T",
+              "hgvs_p": "p.Pro33Leu"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>T"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>T"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>T"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>T"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>T"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>T"
+            }
+          ]
+        }
+      },
+      {
+        "_id": "chr17:g.7676154G>T",
+        "_score": 27.548363,
+        "clinvar": {
+          "_license": "http://bit.ly/2SQdcI0",
+          "gene": {
+            "symbol": "TP53"
+          },
+          "hgvs": {
+            "coding": [
+              "LRG_321t1:c.215C>A",
+              "LRG_321t2:c.215C>A",
+              "NM_000546.6:c.215C>A",
+              "NM_001126112.3:c.215C>A",
+              "NM_001126113.3:c.215C>A",
+              "NM_001126114.3:c.215C>A",
+              "NM_001126118.2:c.98C>A",
+              "NM_001276695.3:c.98C>A",
+              "NM_001276696.3:c.98C>A",
+              "NM_001276760.3:c.98C>A",
+              "NM_001276761.3:c.98C>A"
+            ],
+            "protein": [
+              "",
+              "LRG_321p1:p.Pro72His",
+              "NP_000537.3:p.Pro72His",
+              "NP_000537.3:p.Pro72His",
+              "NP_001119584.1:p.Pro72His",
+              "NP_001119585.1:p.Pro72His",
+              "NP_001119586.1:p.Pro72His",
+              "NP_001119590.1:p.Pro33His",
+              "NP_001263624.1:p.Pro33His",
+              "NP_001263625.1:p.Pro33His",
+              "NP_001263689.1:p.Pro33His",
+              "NP_001263690.1:p.Pro33His",
+              "P04637:p.Pro72His",
+              "p.P72H"
+            ]
+          },
+          "rcv": [
+            {
+              "clinical_significance": "Conflicting interpretations of pathogenicity",
+              "preferred_name": "NM_000546.6(TP53):c.215C>A (p.Pro72His)",
+              "review_status": "criteria provided, conflicting interpretations"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>A (p.Pro72His)",
+              "review_status": "reviewed by expert panel"
+            },
+            {
+              "clinical_significance": "Likely benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>A (p.Pro72His)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Uncertain significance",
+              "preferred_name": "NM_000546.6(TP53):c.215C>A (p.Pro72His)",
+              "review_status": "criteria provided, single submitter"
+            }
+          ],
+          "rsid": "rs1042522",
+          "variant_id": 185120
+        },
+        "dbnsfp": {
+          "_license": "http://bit.ly/2VLnQBz",
+          "aa": {
+            "alt": "H",
+            "codonpos": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "pos": [
+              72,
+              72,
+              33,
+              72,
+              33,
+              72,
+              72,
+              72,
+              33,
+              33,
+              72,
+              33,
+              72,
+              72,
+              72,
+              72
+            ],
+            "ref": "P",
+            "refcodon": [
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC"
+            ]
+          },
+          "alphamissense": {
+            "score": [
+              0.1051,
+              0.0977,
+              0.0961,
+              0.1022,
+              0.1014,
+              0.1152,
+              0.1135,
+              0.0961,
+              0.109,
+              0.1031,
+              0.0943,
+              0.1015,
+              0.1013
+            ]
+          },
+          "genename": [
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53"
+          ]
+        },
+        "dbsnp": {
+          "_license": "http://bit.ly/2AqoLOc",
+          "gene": {
+            "symbol": "TP53"
+          },
+          "rsid": "rs1042522"
+        },
+        "snpeff": {
+          "_license": "http://bit.ly/2suyRKt",
+          "ann": [
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>A",
+              "hgvs_p": "p.Pro72His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>A",
+              "hgvs_p": "p.Pro72His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>A",
+              "hgvs_p": "p.Pro72His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>A",
+              "hgvs_p": "p.Pro72His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>A",
+              "hgvs_p": "p.Pro33His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>A",
+              "hgvs_p": "p.Pro33His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>A",
+              "hgvs_p": "p.Pro33His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>A",
+              "hgvs_p": "p.Pro33His"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>A",
+              "hgvs_p": "p.Pro33His"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>A"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>A"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>A"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>A"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>A"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>A"
+            }
+          ]
+        }
+      },
+      {
+        "_id": "chr17:g.7676154G>C",
+        "_score": 27.53807,
+        "clinvar": {
+          "_license": "http://bit.ly/2SQdcI0",
+          "gene": {
+            "symbol": "TP53"
+          },
+          "hgvs": {
+            "coding": [
+              "LRG_321t1:c.215C>G",
+              "LRG_321t3:c.215C>G",
+              "NM_000546.6:c.215C>G",
+              "NM_001126112.3:c.215C>G",
+              "NM_001126112.3:c.215C>G",
+              "NM_001126113.3:c.215C>G",
+              "NM_001126114.3:c.215C>G",
+              "NM_001126118.2:c.98C>G",
+              "NM_001276695.3:c.98C>G",
+              "NM_001276696.3:c.98C>G",
+              "NM_001276760.3:c.98C>G",
+              "NM_001276761.3:c.98C>G"
+            ],
+            "protein": [
+              "LRG_321p1:p.Pro72Arg",
+              "LRG_321p3:p.Pro72Arg",
+              "NP_000537.3:p.Pro72Arg",
+              "NP_000537.3:p.Pro72Arg",
+              "NP_001119584.1:p.Pro72Arg",
+              "NP_001119585.1:p.Pro72Arg",
+              "NP_001119586.1:p.Pro72Arg",
+              "NP_001119586.1:p.Pro72Arg",
+              "NP_001119590.1:p.Pro33Arg",
+              "NP_001263624.1:p.Pro33Arg",
+              "NP_001263625.1:p.Pro33Arg",
+              "NP_001263689.1:p.Pro33Arg",
+              "NP_001263690.1:p.Pro33Arg",
+              "P04637:p.Pro72Arg",
+              "p.P72R"
+            ]
+          },
+          "rcv": [
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Pathogenic",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "no assertion criteria provided"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "criteria provided, multiple submitters, no conflicts"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "criteria provided, single submitter"
+            },
+            {
+              "clinical_significance": "Benign",
+              "preferred_name": "NM_000546.6(TP53):c.215C>G (p.Pro72Arg)",
+              "review_status": "no assertion criteria provided"
+            }
+          ],
+          "rsid": "rs1042522",
+          "variant_id": 12351
+        },
+        "dbnsfp": {
+          "_license": "http://bit.ly/2VLnQBz",
+          "aa": {
+            "alt": "R",
+            "codonpos": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "pos": [
+              72,
+              72,
+              33,
+              72,
+              33,
+              72,
+              72,
+              72,
+              33,
+              33,
+              72,
+              33,
+              72,
+              72,
+              72,
+              72
+            ],
+            "ref": "P",
+            "refcodon": [
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC",
+              "CCC"
+            ]
+          },
+          "alphamissense": {
+            "score": [
+              0.0866,
+              0.0705,
+              0.0724,
+              0.0689,
+              0.0805,
+              0.0913,
+              0.0851,
+              0.0724,
+              0.0859,
+              0.072,
+              0.0656,
+              0.0672,
+              0.0663
+            ]
+          },
+          "genename": [
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53",
+            "TP53"
+          ]
+        },
+        "dbsnp": {
+          "_license": "http://bit.ly/2AqoLOc",
+          "gene": {
+            "symbol": "TP53"
+          },
+          "rsid": "rs1042522"
+        },
+        "gnomad_exome": {
+          "_license": "http://bit.ly/2I1cl1I",
+          "af": {
+            "af": 0.668165
+          }
+        },
+        "gnomad_genome": {
+          "_license": "http://bit.ly/2I1cl1I",
+          "af": {
+            "af": 0.627324
+          }
+        },
+        "snpeff": {
+          "_license": "http://bit.ly/2suyRKt",
+          "ann": [
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>G",
+              "hgvs_p": "p.Pro72Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>G",
+              "hgvs_p": "p.Pro72Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>G",
+              "hgvs_p": "p.Pro72Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.215C>G",
+              "hgvs_p": "p.Pro72Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>G",
+              "hgvs_p": "p.Pro33Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>G",
+              "hgvs_p": "p.Pro33Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>G",
+              "hgvs_p": "p.Pro33Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>G",
+              "hgvs_p": "p.Pro33Arg"
+            },
+            {
+              "effect": "missense_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.98C>G",
+              "hgvs_p": "p.Pro33Arg"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>G"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>G"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-939C>G"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>G"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>G"
+            },
+            {
+              "effect": "upstream_gene_variant",
+              "genename": "TP53",
+              "hgvs_c": "c.-1020C>G"
+            }
+          ]
+        }
+      },
+      {
+        "_id": "chr17:g.7676154G>G",
+        "_score": 10.375718,
+        "clinvar": {
+          "_license": "http://bit.ly/2SQdcI0",
+          "gene": {
+            "symbol": "TP53"
+          },
+          "hgvs": {
+            "coding": [
+              "NM_000546.5:c.215C=",
+              "NM_000546.6:c.215=",
+              "NM_001126112.3:c.215=",
+              "NM_001126113.3:c.215=",
+              "NM_001126114.3:c.215=",
+              "NM_001126118.2:c.98=",
+              "NM_001276695.3:c.98=",
+              "NM_001276696.3:c.98=",
+              "NM_001276760.3:c.98=",
+              "NM_001276761.3:c.98="
+            ],
+            "protein": [
+              "NP_000537.3:p.Pro72=",
+              "NP_001119584.1:p.Pro72=",
+              "NP_001119585.1:p.Pro72=",
+              "NP_001119586.1:p.Pro72=",
+              "NP_001119590.1:p.Pro33=",
+              "NP_001263624.1:p.Pro33=",
+              "NP_001263625.1:p.Pro33=",
+              "NP_001263689.1:p.Pro33=",
+              "NP_001263690.1:p.Pro33=",
+              "p.Arg72Pro"
+            ]
+          },
+          "rcv": {
+            "clinical_significance": "Benign",
+            "preferred_name": "NM_000546.6(TP53):c.215= (p.Pro72=)",
+            "review_status": "criteria provided, single submitter"
+          },
+          "rsid": "rs1042522",
+          "variant_id": 165560
+        }
+      }
+    ]
+  }
+}

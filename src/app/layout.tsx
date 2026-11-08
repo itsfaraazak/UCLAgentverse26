@@ -43,9 +43,9 @@ const display = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "SigmaFold — version control for genetic engineering",
+  title: "SigmaFold Workbench — clinical scientists and AI agents review genetic variants together",
   description:
-    "Open a branch, apply an edit to a genotype, and a multi-agent CI pipeline decides whether it passes — structurally, functionally, and on biosafety grounds — before it can be merged.",
+    "Version control for variant interpretation. Every prompt, piece of evidence, ACMG classification, comment and sign-off is an attributed delta on a branch, and nothing merges into the case record until every check passes and a named human signs off.",
   applicationName: "SigmaFold",
 };
 
