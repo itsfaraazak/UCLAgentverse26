@@ -204,6 +204,11 @@ contract. Reviewers should check against this list rather than filing them as fi
 | 5 | `commit(opts)` fields | Required `tree`, `author`, `message`. Optional `timestamp`, `parents` (defaults to `[HEAD]`, or `[]` at root), `edit`, `checkRunId`. |
 | 6 | Insertion coordinates in `applyVariant` | `altCodon` is inserted **at** `codonIndex`; the codon already there shifts right. Appending is `codonIndex === length + 1`. |
 | 7 | HBB modelled region length | **31 codons / 93 nt**, translating to `MVHLTPEEKSAVTALWGKVNVDEVGGEALGR`. An earlier `codonCount: 30` in `loci.json` was wrong and is fixed. Codon 31 straddles the exon 1 / exon 2 boundary, so the modelled region extends one codon past exon 1. |
+| 8 | Which gene symbols may `IntentAgent` resolve? | `loci.json` **∪ `FLAGGED_LOCI`**, plus fixture aliases (`HbS`, `sickle`) that map back to a listed gene. Nothing outside those lists is ever emitted. Resolving against `loci.json` alone would route `knock out TP53` to `OUT_OF_SCOPE` instead of `TUMOUR_SUPPRESSOR_DISRUPTION`, which would defeat the red-team demo. |
+| 9 | Does `escalate` stop the pipeline? | **No — only `block` terminates.** `escalate` still runs agents 3–7, but sets `mergeAllowed: false` and `requiresSignoff: true`. The `signoff` delta kind exists for the UI to write; no agent emits one. |
+| 10 | What pO2 does the assay use? | The requested or default pO2 (95). That is high enough that a naive assay reports `flow_preserved` even for the sickle allele. `VerifierAgent` **independently re-runs the simulation at `pO2.min` against wildtype** and can therefore disagree. This is the structural reason a verifier-always-agrees demo cannot happen. |
+| 11 | What does `occlusion` measure? | *Pathological* blockage caused by sickled cells in the constriction — **not** geometric narrowing. So the reference genotype sits at ~0 by construction, not at some baseline set by the capillary's shape. |
+| 12 | `Delta.id` and `createdAt` | `id` is a content-addressed sha256 prefix with parents validated on insert. `createdAt` is a **logical counter**, not wall-clock time, so a pipeline run is reproducible. |
 
 Note on #2: this is a real limitation, not a shortcut. Reporting a single index keeps `DiffRow`
 honest about the fact that one row cannot name a position in two diverged coordinate systems at
