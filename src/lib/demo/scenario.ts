@@ -26,7 +26,7 @@ import {
   resolveSignoff as resolvePolicySignoff,
   type CheckRun,
 } from '@/lib/merge-gate';
-import { PIPELINE_STEPS, runView as projectRun, type RunView as RunProjection } from '@/lib/run-view';
+import { agentRole, runView as projectRun, type RunView as RunProjection } from '@/lib/run-view';
 import { digestRequest, type ScreenResult } from '@/lib/safety/policy';
 import {
   LOCI_DISCLAIMER,
@@ -451,7 +451,13 @@ function runProposalPipeline(args: {
   readonly commit: Oid;
   readonly plannedVariantId: string | null;
 }): PipelineRun {
-  const result = runRealPipeline({ text: args.requestText, assaySteps: CHALLENGE_STEPS });
+  // `classify: true` adds the ACMG stage after the gate. It can add a
+  // sign-off requirement and never remove one.
+  const result = runRealPipeline({
+    text: args.requestText,
+    assaySteps: CHALLENGE_STEPS,
+    classify: true,
+  });
   const project = projectRun(result);
   const check = checkRunFromPipeline({ commit: args.commit, result, id: args.id });
   // The fixture's own statement about these parameters, not a paraphrase, and
@@ -524,7 +530,7 @@ function runView(run: PipelineRun, signoff: Signoff | undefined): RunView {
       id: `${run.id}:${step.step}`,
       step: step.step,
       agent: step.agent,
-      role: PIPELINE_STEPS[step.step - 1]?.role ?? '',
+      role: agentRole(step.agent),
       status: checkStatusView(step.status),
       title: step.agent,
       summary: step.summary,

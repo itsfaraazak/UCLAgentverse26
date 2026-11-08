@@ -55,7 +55,7 @@ export async function screenRequestAction(
     return { ...prev, error: 'Enter a request to screen.' };
   }
 
-  const result = runPipeline({ text });
+  const result = runPipeline({ text, classify: true });
   const screenDelta = latestOfKind(result.dag.all(), 'screen');
   if (screenDelta === undefined || !isScreenPayload(screenDelta.payload)) {
     return { ...prev, error: 'The pipeline returned no screening result.' };

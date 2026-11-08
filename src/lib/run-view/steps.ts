@@ -23,7 +23,10 @@ export type AgentName =
   | 'StructuralImpactAgent'
   | 'FunctionalAssayAgent'
   | 'OffTargetRiskAgent'
-  | 'VerifierAgent';
+  | 'VerifierAgent'
+  | 'AcmgClassificationAgent'
+  | 'ClassificationConflictAgent'
+  | 'TherapyLookupAgent';
 
 export interface PipelineStepSpec {
   /** 1-based position in the fixed order of SPEC §4.3. */
@@ -100,10 +103,54 @@ const ROLE_BY_AGENT: Readonly<Record<string, string>> = Object.freeze(
 
 /** What an agent is for. Shared so the surfaces label them alike. */
 export function agentRole(agent: string): string {
-  return ROLE_BY_AGENT[agent] ?? '';
+  return ROLE_BY_AGENT[agent] ?? CLASSIFIED_ROLE_BY_AGENT[agent] ?? '';
 }
 
 /** The delta kind an agent emits, or undefined for an unknown name. */
 export function agentDeltaKind(agent: string): DeltaKind | undefined {
-  return KIND_BY_AGENT[agent];
+  return KIND_BY_AGENT[agent] ?? CLASSIFIED_KIND_BY_AGENT[agent];
+}
+
+/**
+ * The order a classified run executes (`classify: true`).
+ *
+ * The ACMG stage sits *after* the biosafety gate, which stays at position 2 —
+ * a `block` still terminates the run before any of this computes. The
+ * classification can add a sign-off requirement and never remove one, so
+ * layering it here cannot loosen the gate.
+ */
+export const CLASSIFIED_PIPELINE_STEPS: readonly PipelineStepSpec[] = Object.freeze([
+  ...PIPELINE_STEPS.slice(0, 6),
+  {
+    step: 7,
+    agent: 'AcmgClassificationAgent',
+    kind: 'classification',
+    role: 'Score the variant against the ACMG/AMP point system',
+  },
+  {
+    step: 8,
+    agent: 'ClassificationConflictAgent',
+    kind: 'conflict',
+    role: 'Compare the score with the prior classification on record',
+  },
+  { ...PIPELINE_STEPS[6], step: 9 } as PipelineStepSpec,
+  {
+    step: 10,
+    agent: 'TherapyLookupAgent',
+    kind: 'therapy_match',
+    role: 'Look the classified variant up in the approved-therapy table',
+  },
+] as readonly PipelineStepSpec[]);
+
+const CLASSIFIED_ROLE_BY_AGENT: Readonly<Record<string, string>> = Object.freeze(
+  Object.fromEntries(CLASSIFIED_PIPELINE_STEPS.map((spec) => [spec.agent, spec.role])),
+);
+
+const CLASSIFIED_KIND_BY_AGENT: Readonly<Record<string, DeltaKind>> = Object.freeze(
+  Object.fromEntries(CLASSIFIED_PIPELINE_STEPS.map((spec) => [spec.agent, spec.kind])),
+);
+
+/** Agents in the order for `classify`, or the seven-agent order otherwise. */
+export function pipelineStepsFor(classified: boolean): readonly PipelineStepSpec[] {
+  return classified ? CLASSIFIED_PIPELINE_STEPS : PIPELINE_STEPS;
 }

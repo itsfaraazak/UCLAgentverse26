@@ -8,7 +8,7 @@ import {
 } from './scenario';
 import { requireLocus, requireVariant } from '@/lib/fixtures/loci';
 import { applyVariant } from '@/lib/genome';
-import { PIPELINE_STEPS } from '@/lib/run-view';
+import { CLASSIFIED_PIPELINE_STEPS } from '@/lib/run-view';
 import type { ScenarioView } from './view';
 
 const scenario = buildScenario();
@@ -100,13 +100,34 @@ describe('scenario structure', () => {
 });
 
 describe('the biosafety gate is structural', () => {
-  it('runs the gate at step 2 of 7 on every run', () => {
-    expect(PIPELINE_STEPS[1]?.agent).toBe('BiosafetyGateAgent');
+  /**
+   * These runs are classified, so the ACMG stage adds three agents after the
+   * gate — ten in all. The number is incidental; the gate's *position* is the
+   * invariant, and it is still second, so a block still terminates the run
+   * before any classification, assay or therapy lookup computes.
+   */
+  it('runs the gate at step 2 on every run, whatever follows it', () => {
+    expect(CLASSIFIED_PIPELINE_STEPS[1]?.agent).toBe('BiosafetyGateAgent');
+    expect(CLASSIFIED_PIPELINE_STEPS[1]?.step).toBe(2);
     for (const commit of view.commits) {
       if (commit.run === null) continue;
-      expect(commit.run.checks).toHaveLength(7);
+      expect(commit.run.checks).toHaveLength(CLASSIFIED_PIPELINE_STEPS.length);
       expect(commit.run.checks[1].agent).toBe('BiosafetyGateAgent');
       expect(commit.run.checks[1].step).toBe(2);
+    }
+  });
+
+  it('places every ACMG agent after the gate, never before it', () => {
+    const gateAt = CLASSIFIED_PIPELINE_STEPS.findIndex(
+      (spec) => spec.agent === 'BiosafetyGateAgent',
+    );
+    for (const acmg of [
+      'AcmgClassificationAgent',
+      'ClassificationConflictAgent',
+      'TherapyLookupAgent',
+    ]) {
+      const at = CLASSIFIED_PIPELINE_STEPS.findIndex((spec) => spec.agent === acmg);
+      expect(at).toBeGreaterThan(gateAt);
     }
   });
 
@@ -220,12 +241,21 @@ describe('the verifier reads the measurement, not the prose', () => {
    * edge per claim it checked. The audit trail is still complete: `history()`
    * walks back through every upstream claim.
    */
-  it('threads the verifier delta onto the run it verified', () => {
+  /**
+   * The DAG is a chain: each delta's parent is the one before it, so the
+   * verifier has a single parent rather than one edge per claim it checked.
+   * On a classified run that parent is the conflict delta, not the off-target
+   * one — asserted positionally so adding a stage does not silently break the
+   * threading it is meant to check.
+   */
+  it('threads the verifier delta onto the delta immediately before it', () => {
     const silent = commitAt('experiment/silent-marker');
-    const verifier = silent.run?.deltas.find((d) => d.kind === 'verdict');
+    const deltas = silent.run?.deltas ?? [];
+    const at = deltas.findIndex((d) => d.kind === 'verdict');
+    expect(at).toBeGreaterThan(0);
+    const verifier = deltas[at];
     expect(verifier?.parents).toHaveLength(1);
-    const offtarget = silent.run?.deltas.find((d) => d.kind === 'offtarget');
-    expect(verifier?.parents[0]).toBe(offtarget?.id);
+    expect(verifier?.parents[0]).toBe(deltas[at - 1]?.id);
   });
 });
 
@@ -388,13 +418,13 @@ describe('genotypes and diffs come from the real modules', () => {
 });
 
 describe('running the pipeline from free text', () => {
-  it('runs all seven agents for an in-scope proposal', () => {
+  it('runs every agent for an in-scope proposal', () => {
     const result = runProposal(
       'Restore the reference codon at HBB codon 7 to correct the sickle substitution.',
       ['HBB'],
     );
     expect(result.run.policy.category).toBe('THERAPEUTIC_SOMATIC');
-    expect(result.run.checks).toHaveLength(7);
+    expect(result.run.checks).toHaveLength(CLASSIFIED_PIPELINE_STEPS.length);
     expect(result.run.checks.every((c) => c.status !== 'skipped')).toBe(true);
     expect(result.plannedVariantLabel).not.toBeNull();
   });
@@ -422,8 +452,22 @@ describe('running the pipeline from free text', () => {
     ]);
     expect(result.run.policy.category).toBe('GERMLINE_HERITABLE');
     expect(result.run.verdict).toBe('escalated');
-    // Escalation holds the merge, it does not terminate the pipeline.
-    expect(result.run.checks.every((c) => c.status !== 'skipped')).toBe(true);
+
+    // Escalation holds the merge; it does not terminate the pipeline. Every
+    // check up to and including the verifier ran — unlike a block, which stops
+    // everything after the gate.
+    const upToVerifier = result.run.checks.slice(
+      0,
+      result.run.checks.findIndex((c) => c.agent === 'VerifierAgent') + 1,
+    );
+    expect(upToVerifier.length).toBeGreaterThan(8);
+    expect(upToVerifier.every((c) => c.status !== 'skipped')).toBe(true);
+
+    // The therapy lookup is the one stage deliberately withheld: it requires
+    // proof the run passed, and an escalated run has not.
+    const therapy = result.run.checks.find((c) => c.agent === 'TherapyLookupAgent');
+    expect(therapy?.status).toBe('skipped');
+
     expect(result.run.mergeBlockedReason).toContain('institutional_biosafety_committee');
   });
 
