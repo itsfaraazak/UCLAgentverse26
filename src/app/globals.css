@@ -1,26 +1,292 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: the titlebar toggle writes `.dark` onto <html>, and
+   the inline script in layout.tsx sets it before first paint. */
+@custom-variant dark (&:is(.dark *));
+
+/* ───────────────────────────────────────────────────────────────────────────
+   SigmaFold — variant/ide-triptych
+   A code editor reviewing a pull request, where the diff is a genome.
+   Graphite-and-ink surfaces, dense spacing, monospace-forward.
+   Both themes are authored; neither is an inversion of the other.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.5rem;
+
+  /* Light — paper-white editor on a warm graphite chrome. */
+  --background: oklch(0.994 0.001 286);
+  --foreground: oklch(0.21 0.008 286);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.008 286);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.008 286);
+
+  --primary: oklch(0.47 0.13 258);
+  --primary-foreground: oklch(0.99 0.002 258);
+
+  --secondary: oklch(0.962 0.003 286);
+  --secondary-foreground: oklch(0.28 0.009 286);
+
+  --muted: oklch(0.966 0.003 286);
+  --muted-foreground: oklch(0.455 0.011 286);
+
+  --accent: oklch(0.953 0.012 258);
+  --accent-foreground: oklch(0.28 0.03 258);
+
+  --destructive: oklch(0.509 0.19 25);
+  --destructive-foreground: oklch(0.99 0.002 25);
+
+  --border: oklch(0.906 0.004 286);
+  --input: oklch(0.906 0.004 286);
+  --ring: oklch(0.52 0.13 258);
+
+  /* Window chrome. A translucent sidebar over a vibrancy-tinted base. */
+  --chrome: oklch(0.955 0.003 286);
+  --chrome-border: oklch(0.878 0.004 286);
+  --vibrancy: oklch(0.97 0.004 286 / 72%);
+  --gutter: oklch(0.976 0.003 286);
+
+  /* Diff registers. Chosen for AA contrast against --card in this theme. */
+  --diff-same-fg: oklch(0.46 0.009 286);
+  --diff-changed: oklch(0.44 0.15 28);
+  --diff-changed-bg: oklch(0.955 0.035 28);
+  --diff-silent: oklch(0.44 0.09 86);
+  --diff-silent-bg: oklch(0.962 0.045 92);
+  --diff-added: oklch(0.42 0.11 150);
+  --diff-added-bg: oklch(0.952 0.04 150);
+  --diff-removed: oklch(0.45 0.13 15);
+  --diff-removed-bg: oklch(0.955 0.03 15);
+
+  /* Check-run statuses. */
+  --status-pass: oklch(0.44 0.12 150);
+  --status-warn: oklch(0.47 0.11 80);
+  --status-fail: oklch(0.49 0.18 25);
+  --status-blocked: oklch(0.42 0.2 12);
+  --status-escalated: oklch(0.46 0.15 300);
+  --status-skipped: oklch(0.47 0.008 286);
+
+  /* Cell canvas. */
+  --cell-discoid: oklch(0.56 0.14 20);
+  --cell-sickled: oklch(0.38 0.16 300);
+  --cell-wall: oklch(0.86 0.006 286);
+  --cell-plasma: oklch(0.985 0.003 240);
+
+  /* Gene track. */
+  --exon-modelled: oklch(0.55 0.11 258);
+  --exon-context: oklch(0.86 0.012 286);
+  --intron: oklch(0.9 0.004 286);
+  --marker: oklch(0.49 0.18 25);
+}
+
+.dark {
+  --background: oklch(0.172 0.006 286);
+  --foreground: oklch(0.925 0.004 286);
+
+  --card: oklch(0.205 0.006 286);
+  --card-foreground: oklch(0.925 0.004 286);
+
+  --popover: oklch(0.228 0.007 286);
+  --popover-foreground: oklch(0.925 0.004 286);
+
+  --primary: oklch(0.72 0.13 255);
+  --primary-foreground: oklch(0.17 0.02 255);
+
+  --secondary: oklch(0.255 0.007 286);
+  --secondary-foreground: oklch(0.915 0.004 286);
+
+  --muted: oklch(0.248 0.007 286);
+  --muted-foreground: oklch(0.755 0.009 286);
+
+  --accent: oklch(0.285 0.028 255);
+  --accent-foreground: oklch(0.9 0.03 255);
+
+  --destructive: oklch(0.68 0.18 24);
+  --destructive-foreground: oklch(0.17 0.02 24);
+
+  --border: oklch(0.3 0.007 286);
+  --input: oklch(0.32 0.007 286);
+  --ring: oklch(0.66 0.12 255);
+
+  --chrome: oklch(0.195 0.006 286);
+  --chrome-border: oklch(0.283 0.007 286);
+  --vibrancy: oklch(0.215 0.007 286 / 68%);
+  --gutter: oklch(0.188 0.006 286);
+
+  --diff-same-fg: oklch(0.67 0.008 286);
+  --diff-changed: oklch(0.79 0.14 32);
+  --diff-changed-bg: oklch(0.265 0.05 30);
+  --diff-silent: oklch(0.83 0.13 92);
+  --diff-silent-bg: oklch(0.265 0.045 92);
+  --diff-added: oklch(0.79 0.14 155);
+  --diff-added-bg: oklch(0.265 0.045 155);
+  --diff-removed: oklch(0.78 0.14 18);
+  --diff-removed-bg: oklch(0.265 0.045 18);
+
+  --status-pass: oklch(0.78 0.14 155);
+  --status-warn: oklch(0.83 0.13 88);
+  --status-fail: oklch(0.75 0.17 25);
+  --status-blocked: oklch(0.72 0.19 14);
+  --status-escalated: oklch(0.78 0.14 300);
+  --status-skipped: oklch(0.72 0.008 286);
+
+  --cell-discoid: oklch(0.68 0.16 22);
+  --cell-sickled: oklch(0.72 0.16 300);
+  --cell-wall: oklch(0.36 0.008 286);
+  --cell-plasma: oklch(0.21 0.008 240);
+
+  --exon-modelled: oklch(0.68 0.12 255);
+  --exon-context: oklch(0.36 0.012 286);
+  --intron: oklch(0.3 0.006 286);
+  --marker: oklch(0.76 0.17 26);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chrome: var(--chrome);
+  --color-chrome-border: var(--chrome-border);
+  --color-vibrancy: var(--vibrancy);
+  --color-gutter: var(--gutter);
+
+  --color-diff-same-fg: var(--diff-same-fg);
+  --color-diff-changed: var(--diff-changed);
+  --color-diff-changed-bg: var(--diff-changed-bg);
+  --color-diff-silent: var(--diff-silent);
+  --color-diff-silent-bg: var(--diff-silent-bg);
+  --color-diff-added: var(--diff-added);
+  --color-diff-added-bg: var(--diff-added-bg);
+  --color-diff-removed: var(--diff-removed);
+  --color-diff-removed-bg: var(--diff-removed-bg);
+
+  --color-status-pass: var(--status-pass);
+  --color-status-warn: var(--status-warn);
+  --color-status-fail: var(--status-fail);
+  --color-status-blocked: var(--status-blocked);
+  --color-status-escalated: var(--status-escalated);
+  --color-status-skipped: var(--status-skipped);
+
+  --color-cell-discoid: var(--cell-discoid);
+  --color-cell-sickled: var(--cell-sickled);
+  --color-cell-wall: var(--cell-wall);
+  --color-cell-plasma: var(--cell-plasma);
+
+  --color-exon-modelled: var(--exon-modelled);
+  --color-exon-context: var(--exon-context);
+  --color-intron: var(--intron);
+  --color-marker: var(--marker);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* macOS feel: the platform UI stack first, so on a Mac this is SF. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text",
+    "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "SFMono-Regular", var(--font-geist-mono),
+    "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /* Dense editor chrome: never let a pane scroll the whole window. */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Translucent sidebar / panel, the macOS vibrancy trick without Electron. */
+  .vibrancy {
+    background-color: var(--vibrancy);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  /* Tabular, fixed-advance digits for codon indices and metric readouts. */
+  .nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* Thin scrollbars, so the panes read as editor panes. */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 99px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }
