@@ -15,7 +15,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 try:
-    from . import versioning, http_security, gene_data, git_history, agent, agent_explain, agent_plan, goal_agent, known_variant, structure_prediction
+    from . import versioning, http_security, gene_data, git_history, agent, agent_explain, agent_plan, goal_agent, known_variant, structure_prediction, ci_pipeline
 except ImportError:
     import versioning
     import http_security
@@ -27,6 +27,7 @@ except ImportError:
     import goal_agent
     import known_variant
     import structure_prediction
+    import ci_pipeline
 
 ROOT = Path(__file__).resolve().parent.parent
 MAX_BODY = 8192
@@ -697,6 +698,88 @@ def structure_predict(body):
             "provider": structure_prediction.provider_name(), "model": "ESMFold"}
 
 
+def ci_run_request(body):
+    branch = body.get("branch", "main")
+    snapshot = NOTES.sequence_read(branch)
+    subs = body.get("substitutions")
+    if subs is not None:
+        state = git_history.hbb_sequence.make_state(subs)
+        substitutions = state["substitutions"]
+    else:
+        substitutions = snapshot["substitutions"]
+    text = body.get("text", "")
+    if not isinstance(text, str):
+        raise APIError("Intent text must be a string.")
+    pO2 = body.get("pO2", 95.0)
+    if type(pO2) not in (int, float):
+        raise APIError("pO2 must be a number between 10 and 100.")
+    classify = body.get("classify", True)
+    if not isinstance(classify, bool):
+        raise APIError("classify must be a boolean.")
+    return ci_pipeline.CI_STORE.run_pipeline(
+        branch=branch,
+        head_commit=snapshot["head"],
+        substitutions=substitutions,
+        raw_text=text,
+        pO2=float(pO2),
+        classify=classify,
+    )
+
+
+def ci_signoff_request(body):
+    return ci_pipeline.CI_STORE.signoff_run(
+        run_id=body["run_id"],
+        signer=body["signer"],
+        rationale=body["rationale"],
+    )
+
+
+def ci_comment_request(body):
+    return ci_pipeline.CI_STORE.comment_delta(
+        run_id=body["run_id"],
+        delta_id=body["delta_id"],
+        author=body["author"],
+        text=body["text"],
+    )
+
+
+def ci_cellsim_request(body):
+    poly = body["polymerization_tendency"]
+    pO2 = body["pO2"]
+    if type(poly) not in (int, float) or type(pO2) not in (int, float):
+        raise APIError("polymerization_tendency and pO2 must be numbers.")
+    seed = body.get("seed", 101)
+    if type(seed) is not int:
+        raise APIError("seed must be an integer.")
+    return ci_pipeline.run_assay(
+        polymerization_tendency=float(poly),
+        pO2=float(pO2),
+        seed=seed,
+    )
+
+
+def sequence_merge_request(body):
+    if body.get("enforce_ci_gate") is True:
+        preview = NOTES.sequence_merge_preview(body["target_branch"], body["source_branch"])
+        gate = ci_pipeline.CI_STORE.evaluate_merge_gate(
+            target_branch=body["target_branch"],
+            source_branch=body["source_branch"],
+            source_head=preview["source"],
+            merged_substitutions=preview["merged_substitutions"],
+        )
+        if not gate["merge_allowed"]:
+            reasons = " ".join(gate["reasons"])
+            raise APIError(f"Multi-Agent CI Merge Gate blocked combine ({gate['gate_status']}): {reasons}", 409)
+    return NOTES.sequence_merge(
+        body["target_branch"],
+        body["source_branch"],
+        body["expected_target_head"],
+        body["expected_source_head"],
+        body["confirmed"],
+        body.get("message", "Merge HBB sequence"),
+    )
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT / "web"), **kwargs)
@@ -761,6 +844,36 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json(400, {"error": str(exc)})
             except gene_data.GeneDataError:
                 self.send_json(502, {"error": "NCBI data is unavailable. Try again later."})
+        elif path in ("/api/ci/status", "/api/ci/merge-gate"):
+            try:
+                params = parse_qs(urlsplit(self.path).query, keep_blank_values=True)
+                if path == "/api/ci/status":
+                    if not set(params) <= {"branch"} or any(len(v) != 1 for v in params.values()):
+                        raise git_history.InvalidInput("Invalid query parameters.")
+                    branch = params.get("branch", ["main"])[0]
+                    snapshot = NOTES.sequence_read(branch)
+                    result = ci_pipeline.CI_STORE.get_branch_status(
+                        branch=branch,
+                        head_commit=snapshot["head"],
+                        substitutions=snapshot["substitutions"],
+                    )
+                else:
+                    if set(params) != {"target_branch", "source_branch"} or any(len(v) != 1 for v in params.values()):
+                        raise git_history.InvalidInput("Invalid query parameters.")
+                    target_b = params["target_branch"][0]
+                    source_b = params["source_branch"][0]
+                    preview = NOTES.sequence_merge_preview(target_b, source_b)
+                    result = ci_pipeline.CI_STORE.evaluate_merge_gate(
+                        target_branch=target_b,
+                        source_branch=source_b,
+                        source_head=preview["source"],
+                        merged_substitutions=preview["merged_substitutions"],
+                    )
+                self.send_json(200, result)
+            except git_history.InvalidInput as exc:
+                self.send_json(400, {"error": str(exc)})
+            except git_history.StorageError:
+                self.send_json(503, {"error": "Git history is unavailable."})
         elif path in ("/api/notes", "/api/notes/diff", "/api/sequence", "/api/sequence/diff", "/api/compare", "/api/branches", "/api/sequence/merge/preview"):
             try:
                 params = parse_qs(urlsplit(self.path).query, keep_blank_values=True)
@@ -817,12 +930,16 @@ class Handler(SimpleHTTPRequestHandler):
                       ("POST", "/api/structure/predict"): ({"branch", "expected_head", "consent"}, structure_predict),
                       ("POST", "/api/branches"): ({"name", "from_branch", "expected_head"}, lambda b: NOTES.create_branch(b["name"], b["from_branch"], b["expected_head"])),
                       ("POST", "/api/sequence/rollback"): ({"target", "expected_head"}, lambda b: NOTES.sequence_rollback(b["target"], b["expected_head"], b.get("branch", "main"), b.get("message", "Restore HBB sequence"))),
-                      ("POST", "/api/sequence/merge"): ({"target_branch", "source_branch", "expected_target_head", "expected_source_head", "confirmed"}, lambda b: NOTES.sequence_merge(b["target_branch"], b["source_branch"], b["expected_target_head"], b["expected_source_head"], b["confirmed"], b.get("message", "Merge HBB sequence"))),
+                      ("POST", "/api/sequence/merge"): ({"target_branch", "source_branch", "expected_target_head", "expected_source_head", "confirmed"}, sequence_merge_request),
                       ("POST", "/api/agent/propose"): ({"positions", "alternatives", "consent"}, agent_propose),
                       ("POST", "/api/agent/plan"): ({"consent", "branch", "messages"}, agent_plan_request),
                       ("POST", "/api/agent/hbs-example"): ({"branch", "confirmed"}, agent_known_hbs),
                       ("POST", "/api/agent/commit"): ({"token", "approved"}, agent_commit),
                       ("POST", "/api/agent/explain"): ({"from", "to", "question", "consent"}, explain_comparison),
+                      ("POST", "/api/ci/run"): ({"branch"}, ci_run_request),
+                      ("POST", "/api/ci/signoff"): ({"run_id", "signer", "rationale"}, ci_signoff_request),
+                      ("POST", "/api/ci/comment"): ({"run_id", "delta_id", "author", "text"}, ci_comment_request),
+                      ("POST", "/api/ci/cellsim"): ({"polymerization_tendency", "pO2"}, ci_cellsim_request),
                       ("POST", "/api/presence"): ({"client_id"}, lambda b: STORE.heartbeat(b["client_id"])),
                       ("POST", "/api/repository"): ({"action", "payload", "version"}, lambda b: STORE.repository_action(b["action"], b["payload"], b["version"])),
                       ("POST", "/api/run"): ({"text", "draft_revision"}, lambda b: STORE.run(b["text"], b["draft_revision"])),
@@ -833,9 +950,11 @@ class Handler(SimpleHTTPRequestHandler):
             fields, action = route
             optional = {"/api/notes": {"branch"}, "/api/sequence": {"branch", "message"},
                         "/api/structure/predict": {"commit"},
-                        "/api/sequence/rollback": {"branch", "message"}, "/api/sequence/merge": {"message"},
+                        "/api/sequence/rollback": {"branch", "message"}, "/api/sequence/merge": {"message", "enforce_ci_gate"},
                         "/api/agent/commit": {"message"},
-                        "/api/agent/explain": {"branch"}}.get(path, set())
+                        "/api/agent/explain": {"branch"},
+                        "/api/ci/run": {"text", "pO2", "classify", "substitutions"},
+                        "/api/ci/cellsim": {"seed"}}.get(path, set())
             if not isinstance(body, dict) or not fields <= set(body) or not set(body) <= fields | optional:
                 raise APIError("Unexpected request fields.")
             self.send_json(200, action(body))

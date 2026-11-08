@@ -11,7 +11,7 @@
   let moleculeInit, moleculeQueue = Promise.resolve(), moleculeVersion = 0;
   let referenceFocus = null;
   let agentWorkspace, previewVersion = 0;
-  let foldPrediction, predictionComparison;
+  let foldPrediction, predictionComparison, multiAgentCI;
   let availableBranches = [], mergePreview = null, mergeVersion = 0;
 
   function element(tag, className, text) {
@@ -103,6 +103,7 @@
     sequence = data;
     foldPrediction?.stateChanged();
     predictionComparison?.stateChanged();
+    multiAgentCI?.sequenceChanged?.();
     $("sequence").textContent = data.sequence;
     $("sequence-source").replaceChildren(document.createTextNode(`Reference: ${data.reference.accession} · `));
     const source = element("a", "", "UniProt source ↗");
@@ -201,7 +202,10 @@
     resetMerge();
     renderMergeSources();
     ++loadVersion;
-    if (changed) agentWorkspace?.branchChanged?.();
+    if (changed) {
+      agentWorkspace?.branchChanged?.();
+      multiAgentCI?.branchChanged?.();
+    }
     sequence = null;
     foldPrediction?.stateChanged();
     predictionComparison?.stateChanged();
@@ -498,6 +502,11 @@
     onCommitted: agentCommitted,
     onPreview: previewAgentChanges
   });
+  if (window.MultiAgentCI && $("multi-agent-ci")) {
+    multiAgentCI = window.MultiAgentCI.mount($("multi-agent-ci"), {
+      getBranch: () => branch
+    });
+  }
   if (window.FoldPrediction || window.PredictionCompare) {
     request("/api/structure/provider").then(({provider, automatic}) => {
       if (window.FoldPrediction) foldPrediction = window.FoldPrediction.mount($("fold-prediction"), {
