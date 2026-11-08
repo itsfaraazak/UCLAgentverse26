@@ -1,0 +1,7 @@
+.fold-prediction { max-width: 100%; min-width: 0; }
+.fold-privacy { font-weight: 600; }
+.fold-sequence { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 12rem; overflow-y: auto; padding: .75rem; border: 1px solid currentColor; }
+.fold-view { position: relative; width: 100%; height: clamp(18rem, 50vw, 32rem); background: #0c131f; }
+.fold-controls { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0; }
+.fold-prediction button { min-height: 2.75rem; }
+.fold-prediction button:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }

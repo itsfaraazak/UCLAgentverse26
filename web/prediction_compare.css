@@ -1,0 +1,15 @@
+.prediction-compare { display: grid; gap: 12px; color: #e6edf3; }
+.prediction-compare p { line-height: 1.5; }
+.prediction-compare__privacy { border-left: 3px solid #e5b96c; padding: 10px; background: #30291e; }
+.prediction-compare__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.prediction-compare__sequence { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 12em; overflow: auto; }
+.prediction-compare__panel { min-width: 0; }
+.prediction-compare__panel h3 { overflow-wrap: anywhere; }
+.prediction-compare__view { position: relative; height: 320px; background: #0c131f; }
+.prediction-compare__controls { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.prediction-compare button { cursor: pointer; }
+.prediction-compare button:disabled { cursor: not-allowed; opacity: .5; }
+.prediction-compare button:focus-visible { outline: 3px solid #e5b96c; outline-offset: 2px; }
+@media (max-width: 700px) {
+  .prediction-compare__grid { grid-template-columns: 1fr; }
+}

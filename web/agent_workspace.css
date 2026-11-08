@@ -1,0 +1,30 @@
+.agent-workspace {
+  display: grid;
+  gap: .75rem;
+  max-width: 48rem;
+  padding: 1.25rem;
+  border: 1px solid #89949c;
+  border-radius: .75rem;
+  font: inherit;
+}
+.agent-workspace h2, .agent-workspace h3, .agent-workspace h4, .agent-workspace p { margin: 0; }
+.agent-workspace form, .agent-workspace label, .agent-workspace section, .agent-workspace section > div { display: grid; gap: .5rem; }
+.agent-workspace input, .agent-workspace textarea, .agent-workspace button { font: inherit; }
+.agent-workspace input[type="text"], .agent-workspace textarea { padding: .75rem; color: #e6edf3; background: #0c131f; border: 1px solid #344153; border-radius: .4rem; }
+.agent-workspace textarea { min-height: 6rem; resize: vertical; }
+.agent-workspace button { padding: .6rem .9rem; cursor: pointer; justify-self: start; color: #d7f8e9; background: #223b36; border: 1px solid #45675d; border-radius: .4rem; }
+.agent-workspace button:disabled { cursor: not-allowed; opacity: .6; }
+.agent-workspace .agent-workspace-consent { display: block; }
+.agent-workspace .agent-workspace-privacy { font-size: .9em; }
+.agent-workspace .agent-conversation:empty { display: none; }
+.agent-workspace .agent-message { display: grid; gap: .3rem; padding: .75rem; border: 1px solid #344153; border-radius: .5rem; overflow-wrap: anywhere; }
+.agent-workspace .agent-message p { white-space: pre-wrap; }
+.agent-workspace a { color: #9cd6ff; overflow-wrap: anywhere; }
+.agent-workspace pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 24rem; overflow: auto; }
+.agent-workspace [hidden] { display: none !important; }
+.agent-workspace .agent-change { display: flex; gap: .6rem; align-items: center; animation: agent-preview .35s ease-out both; }
+.agent-change-before, .agent-change-after { padding: .3rem .6rem; border-radius: .3rem; font-weight: 700; }
+.agent-change-before { background: #542a34; color: #ffd5d8; }
+.agent-change-after { background: #1d4936; color: #c5f5d8; }
+@keyframes agent-preview { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .agent-workspace .agent-change { animation: none; } }

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HBB workspace · EditVerse</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/agent_workspace.css">
+  <link rel="stylesheet" href="/sequence_diff.css">
+  <link rel="stylesheet" href="/fold_prediction.css">
+  <link rel="stylesheet" href="/prediction_compare.css">
+  <script defer src="/vendor/3Dmol-min.js"></script>
+  <script defer src="/molecule.js"></script>
+  <script defer src="/diff_molecule.js"></script>
+  <script defer src="/agent_workspace.js"></script>
+  <script defer src="/sequence_diff.js"></script>
+  <script defer src="/fold_prediction.js"></script>
+  <script defer src="/prediction_compare.js"></script>
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="/">edit<span>verse</span></a>
+    <span class="breadcrumb">RESEARCH WORKSPACE <span>/</span> HBB</span>
+    <span class="mode">Research use only</span>
+  </header>
+  <main class="shell">
+    <div class="intro">
+      <div><p class="eyebrow">HUMAN HEMOGLOBIN SUBUNIT BETA</p><h1>HBB <span>workspace.</span></h1><p class="subhead">Propose sequence changes with an agent, then review them in history.</p></div>
+    </div>
+    <nav class="view-nav" aria-label="Workspace views">
+      <button type="button" id="show-workspace" class="view-button active" aria-current="page" aria-controls="workspace">01 <span>Workspace</span></button>
+      <button type="button" id="show-history" class="view-button" aria-controls="history-view">02 <span>History</span></button>
+    </nav>
+    <div id="error" class="error" role="alert" hidden></div>
+    <section class="panel branch-panel" aria-label="Branch controls">
+      <div><label for="branch-select">Active branch</label><select id="branch-select" disabled></select></div>
+      <form id="branch-form"><label for="branch-name">Create branch from current version</label><div class="branch-create"><input id="branch-name" required placeholder="new-branch"><button class="button secondary" type="submit" disabled>Create branch</button></div></form>
+      <p id="branch-status" class="field-note" role="status">Loading branches…</p>
+    </section>
+
+    <section id="workspace" aria-labelledby="workspace-title">
+      <div class="section-heading"><div><p class="eyebrow">WORKSPACE / 01</p><h2 id="workspace-title">Propose &amp; <span>review</span></h2><p>Work on <strong class="current-branch">the selected branch</strong>. Changes are proposals, not measured effects.</p></div></div>
+      <section class="panel agent-panel" aria-labelledby="agent-title">
+        <p class="eyebrow">AI RESEARCH ASSISTANT</p><h2 id="agent-title">Work with an agent</h2>
+        <div id="agent-workspace"><p class="field-note">Agent workspace is not available.</p></div>
+      </section>
+      <div class="workspace-grid">
+        <section class="panel" aria-labelledby="fold-prediction-title">
+          <p class="eyebrow">COMPUTATIONAL MODEL</p><h2 id="fold-prediction-title">Predict the saved sequence</h2>
+          <div id="fold-prediction"><p class="field-note">Structure prediction is unavailable.</p></div>
+        </section>
+        <div class="editor-column">
+          <section class="panel" aria-labelledby="edit-title">
+            <p class="eyebrow">SEQUENCE EDIT</p><h2 id="edit-title">Substitution</h2>
+            <p class="panel-desc">Edit the proposed sequence relative to UniProt P68871. Positions include the initiator methionine (position 7 corresponds to mature-chain residue 6).</p>
+            <form id="substitution-form">
+              <div class="form-row"><div><label for="residue-position">Reference position (1–147)</label><input id="residue-position" type="number" min="1" max="147" required placeholder="e.g. 7" disabled></div><div><label for="replacement">Replacement amino acid</label><select id="replacement" required disabled><option value="">Select amino acid</option></select></div></div>
+              <label for="commit-message">Commit message</label>
+              <input id="commit-message" type="text" required placeholder="Describe this change" disabled>
+              <button class="button primary" type="submit" disabled>Commit substitution</button>
+              <p class="field-note" id="substitution-status" role="status">Loading reference sequence…</p>
+            </form>
+            <p class="field-note">Each commit replaces the proposed substitution at that position; choose the reference amino acid to remove it. Substitutions are proposals, not measured or predicted effects.</p>
+            <div id="substitutions" aria-live="polite"></div>
+            <details><summary>View proposed sequence</summary><p id="sequence" class="sequence"></p><p class="field-note" id="sequence-source"></p></details>
+          </section>
+        </div>
+      </div>
+      <details class="panel structure-panel" id="reference-structure">
+        <summary id="structure-title">Experimental reference structures (not predictions of your edits)</summary>
+        <span id="structure-badge" class="badge">PDB 2HHB</span>
+        <label for="structure-select">Deposited structure</label>
+        <select id="structure-select" disabled>
+          <option value="2HHB">2HHB · reference hemoglobin A</option>
+          <option value="2HBS">2HBS · hemoglobin S</option>
+        </select>
+        <div id="molecule-view" class="molecule-view" role="img" aria-label="Interactive reference structure of human deoxyhemoglobin. Use the buttons below to change the view."></div>
+        <p id="molecule-status" class="molecule-status" role="status">Loading local structure…</p>
+        <div class="molecule-controls" aria-label="Structure controls">
+          <button class="button secondary" id="molecule-all" type="button" disabled>Reset view</button>
+          <button class="button secondary" id="molecule-beta" type="button" disabled>Focus beta chains</button>
+          <button class="button secondary" id="molecule-rotate" type="button" disabled>Rotate</button>
+          <button class="button secondary" id="molecule-zoom-in" type="button" disabled>Zoom in</button>
+          <button class="button secondary" id="molecule-zoom-out" type="button" disabled>Zoom out</button>
+        </div>
+        <p class="disclaimer"><strong>Deposited structures.</strong> These are independent experimental models, not before-and-after measurements or structures generated from your edits. Differences may reflect experimental conditions as well as sequence. <a id="structure-source" href="https://www.rcsb.org/structure/2HHB">View 2HHB at RCSB PDB ↗</a></p>
+      </details>
+    </section>
+
+    <section id="history-view" aria-labelledby="history-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">WORKSPACE / 02</p><h2 id="history-title">History &amp; <span>comparisons</span></h2><p>Compare recorded commits or the fixed P68871 reference sequence in either direction. The reference is a sequence baseline, not a commit.</p></div><span class="history-label">LOCAL HISTORY</span></div>
+      <section class="panel rollback-panel" aria-label="Restore a sequence">
+        <form id="rollback-form">
+          <div class="form-row"><div><label for="rollback-target">Restore sequence from commit</label><select id="rollback-target" required disabled><option value="">Select a commit</option></select></div><div><label for="rollback-message">Commit message</label><input id="rollback-message" required placeholder="Describe the restore"></div></div>
+          <button class="button secondary" type="submit" disabled>Commit restored sequence</button>
+          <p class="field-note">Creates a new commit on the active branch; it does not rewrite history or restore notes.</p>
+        </form>
+      </section>
+      <section class="panel merge-panel" aria-labelledby="merge-title">
+        <p class="eyebrow">BRANCHES</p><h2 id="merge-title">Combine changes</h2>
+        <p class="field-note">Preview changes from another branch into the active branch. Conflicting residue changes must be resolved before combining.</p>
+        <div class="form-row"><div><label for="merge-source">From branch</label><select id="merge-source"><option value="">Select another branch</option></select></div><div><label for="merge-message">Commit message</label><input id="merge-message" placeholder="Describe the combined change"></div></div>
+        <button id="merge-preview" class="button secondary" type="button">Preview changes</button>
+        <button id="merge-commit" class="button primary" type="button" disabled>Confirm and combine</button>
+        <p id="merge-status" class="field-note" role="status">Select a branch to preview.</p>
+        <div id="merge-details" aria-live="polite"></div>
+      </section>
+      <div class="history-layout">
+        <section class="history" aria-label="Commits"><div class="panel-label">COMMITS <span>Most recent first</span></div><div id="history"><div class="empty">Loading history…</div></div></section>
+        <section class="diff-panel" aria-labelledby="diff-title">
+          <div class="diff-heading"><span id="diff-title">COMPARE COMMITS</span></div>
+          <div class="comparison-content">
+            <div class="form-row">
+              <div><label for="compare-from">From commit or reference</label><select id="compare-from" disabled><option value="">Select a commit or reference</option></select></div>
+              <div><label for="compare-to">To commit or reference</label><select id="compare-to" disabled><option value="">Select a commit or reference</option></select></div>
+            </div>
+            <p id="comparison-status" class="field-note" role="status">Select commits or reference to compare.</p>
+            <h3>Sequence changes</h3>
+            <div id="sequence-diff-view"></div>
+            <p class="field-note">Positions are 1-based on the full reference sequence, including the initiator methionine; they are not structure residue numbers.</p>
+            <div id="comparison-changes"></div>
+            <h3>Raw amino-acid sequence diff</h3>
+            <p class="field-note">Lines prefixed − are from the first selection; + lines are from the second.</p>
+            <pre id="sequence-raw-diff" class="git-diff" aria-live="polite"></pre>
+            <details><summary>Sequence change details</summary><pre id="sequence-diff" class="git-diff"></pre></details>
+            <details><summary>Notes change details</summary><pre id="diff" class="git-diff"></pre></details>
+            <h3>Predicted structures</h3>
+            <div id="prediction-compare"><p class="field-note">Prediction comparison is unavailable.</p></div>
+            <details id="reference-comparison">
+              <summary>Experimental reference context — not a structural diff</summary>
+              <div id="diff-molecule-view" class="molecule-view"></div>
+              <p id="diff-molecule-status" class="molecule-status" role="status">Structural context module unavailable or awaiting a comparison.</p>
+              <p class="field-note">Any displayed structure is independent context, not a structure generated from either commit. Reference positions require explicit mapping to structure residues.</p>
+            </details>
+          </div>
+        </section>
+      </div>
+      <p class="disclaimer">Comparisons show recorded changes, not evidence of a biological effect. Note-only differences do not imply a sequence change.</p>
+    </section>
+    <footer><span>EDITVERSE · RESEARCH PROTOTYPE · NOT FOR CLINICAL USE</span><span>Do not enter sensitive or patient information.</span></footer>
+  </main>
+</body>
+</html>
