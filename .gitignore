@@ -46,3 +46,5 @@ next-env.d.ts
 # workbench runtime state and live evidence cache
 /.data/
 /.cache/
+/.vitest/
+!.env.example

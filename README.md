@@ -1,102 +1,99 @@
-# SigmaFold
+# SigmaFold Workbench
 
-**Version control for genetic engineering.** Open a branch, apply an edit to a genotype, and a
-multi-agent CI pipeline decides whether it passes — structurally, functionally, and on
-biosafety grounds — before it can be merged.
+**Version control where clinical scientists and AI agents interpret genetic variants together.**
 
-Built for UCL AgentVerse 2026, Biotech track.
+Type any variant, such as `rs334`, `BRCA1 c.5266dupC` or `CFTR p.Phe508del`. A Gemini agent fetches real public evidence, a deterministic ACMG rule engine classifies the variant as a required check, a ClinVar reference check flags disagreement, and a named human signs off before anything reaches the case record. Every step (prompt, tool result, classification, comment, sign-off, merge) is an attributed, content-addressed delta on an append-only branch history, so a scientist can see exactly who concluded what, from which evidence.
 
-> Companion to the `feature/deltagene-prototype` branch, which holds the earlier Python
-> variant-classification pipeline. SigmaFold deliberately reuses its "append-only DAG of
-> attributed deltas" vocabulary.
+Built for UCL AgentVerse 2026, Biotech track. One-page write-up: [`docs/WRITEUP.md`](./docs/WRITEUP.md). Evaluation: [`docs/EVALUATION.md`](./docs/EVALUATION.md). Pitch and demo script: [`docs/PITCH.md`](./docs/PITCH.md).
 
----
+## The problem
 
-## Read this first
+Clinical genomics labs sequence far more than they can interpret. For each variant, a clinical scientist gathers population frequency, computational predictions, prior classifications and literature, then applies the ACMG/AMP criteria by hand. The reasoning lives in spreadsheets and email threads, and when an AI tool is involved it's rarely clear what the model said versus what the human decided.
 
-**[`SPEC.md`](./SPEC.md) is the contract.** It defines the module boundaries, the agent
-pipeline, the three UI variants, the engineering standards, and — in §7 — a non-negotiable
-safety boundary. Anyone (human or agent) working on this repo reads it before writing code.
+SigmaFold gives that work the structure software teams already rely on: branches, required checks, review and a protected main branch.
 
-## What it does
+## How it works
 
-| Surface | What it shows |
-|---|---|
-| **Gene track diagram** | SVG map of the locus under edit, zoomable to codon level |
-| **Three-register diff** | DNA / codon / amino-acid, side by side and synchronised |
-| **Live cell canvas** | Deterministic particle simulation driven by the genotype and an O₂ slider |
-| **Agent CI panel** | Seven checks resolving in order, with the full delta audit trail |
-| **Red-team console** | Free-text requests screened by a structural biosafety gate |
-| **Branch + merge gate** | Real branches, real three-way merge, blocked by failing checks |
-
-## Architecture
-
-```
-lib/genome   sequence model, genetic code, variants, diff engine
-lib/vcs      content-addressed objects, branches, three-way merge   ← git for genomes
-lib/agents   append-only delta DAG + the seven-agent pipeline
-lib/safety   screening policy (the gate)
-lib/cellsim  deterministic, headless particle simulation
+```mermaid
+flowchart LR
+  P["Human prompt on a branch"] --> G{"Safety gate<br/>(deterministic)"}
+  G -->|block| X["Branch blocked<br/>no model call"]
+  G -->|allow / escalate| A["Gemini agent<br/>(gemini-4-argon)"]
+  A -->|lookup_variant| E["Evidence<br/>gnomAD, AlphaMissense, consequence"]
+  E --> C["ACMG classifier<br/>required check"]
+  C --> R["ClinVar reference check<br/>held-out answer key"]
+  A -->|search_literature| L["Europe PMC"]
+  R --> H["Humans comment, add evidence,<br/>dismiss criteria with a reason"]
+  H --> S["Named human sign-off"]
+  S --> M{"Merge gate"}
+  M -->|all checks pass| Main["main: the signed case record"]
 ```
 
-`lib/` is pure and framework-free: no React, no DOM. The simulation runs headless so the
-functional-assay agent can call it directly, and every number in the UI comes from a real
-module call.
+- **The agent can't skip the checks.** Whenever the model fetches evidence, the classifier and ClinVar comparison run automatically and are recorded as deterministic deltas.
+- **ClinVar is the answer key, not an input.** The classifier never sees it. It is revealed afterwards, and a major disagreement (one call is P/LP and the other is not) blocks the merge until a human signs off with a rationale.
+- **Only humans make key decisions.** Agents can recommend; only a named human can dismiss a criterion, add family evidence, sign off or merge. A newer classification makes an older sign-off stale.
+- **The safety gate runs before any model call.** Interpreting an observed variant is in scope for any gene. Edit proposals go through the repository's biosafety policy (`src/lib/safety/policy.ts`, unchanged and guarded by CI): disrupting a tumour suppressor is refused, refused text is never stored, and construct-design requests (guides, primers, protocols) are blocked.
+- **Demos survive a bad network.** If the model fails or times out, a deterministic pipeline finishes the run and says so. Evidence for the demo variants ships as a cached snapshot, labelled as cached in the UI.
 
-The agent pipeline runs the **biosafety gate second — before any downstream analysis** — and a
-`block` verdict terminates the run. The gate is structural, not a disclaimer printed next to
-results that were computed anyway.
+## Evaluation
 
-## Variants
+On 200 real ClinVar variants with 2+ star expert consensus (100 P/LP, 100 B/LB, 157 genes), with ClinVar hidden from every method:
 
-Three branches, same core, three genuinely different surfaces:
+| Method | Coverage | Accuracy when it called | False reassurance (pathogenic called benign) |
+|---|---|---|---|
+| SigmaFold classifier | 15.5% | 100% (31/31) | **0** |
+| AlphaMissense alone | 58.5% | 93.2% (109/117) | **5** |
+| Population frequency alone | 11.5% | 100% (23/23) | 0 |
 
-- `variant/ide-triptych` — a code editor. Branch tree ∥ diff ∥ CI. Keyboard-first.
-- `variant/lab-bench` — a lab instrument. Cell canvas as the hero; checks as gauges.
-- `variant/graph-first` — a git client. The commit DAG is the canvas.
+SigmaFold is conservative by design: it implements 8 of the ~28 ACMG criteria and leaves most variants as Uncertain Significance, routing them to a human, rather than making confident wrong calls. Full method, circularity caveats and the false-reassurance cases are in [`docs/EVALUATION.md`](./docs/EVALUATION.md) and at `/evaluation` in the app.
 
-## Stack
+## Data and licences
 
-Next.js 16 (App Router) · TypeScript strict · Tailwind 4 · shadcn/ui (Base UI) ·
-lucide-react · Vitest. No Electron — the macOS feel is CSS.
+Real public reference data only. No patient data is used anywhere.
+
+| Source | Used for | Licence |
+|---|---|---|
+| [MyVariant.info](https://myvariant.info/terms/) | Aggregated variant annotation API | Free public API; each source keeps its terms |
+| [gnomAD](https://gnomad.broadinstitute.org/terms) v2.1.1 | Population allele frequency | CC0 1.0 |
+| [AlphaMissense](https://github.com/google-deepmind/alphamissense#alphamissense-predictions-license) via dbNSFP 4.8a | Missense pathogenicity score | CC BY 4.0 (DeepMind); dbNSFP compilation academic use |
+| [ClinVar](https://www.ncbi.nlm.nih.gov/home/about/policies/) / dbSNP | Held-out reference classification, rsIDs | NCBI: no restrictions (US Government work) |
+| [Europe PMC](https://europepmc.org/Copyright) | Literature titles and links | Free API; article content under publisher copyright |
+| snpEff via MyVariant.info | Consequence annotation | LGPLv3 (v4.3k) |
+
+Each value in the UI carries its source, licence and retrieval time. See [`src/lib/evidence/LICENCES.md`](./src/lib/evidence/LICENCES.md).
 
 ## Run it
 
 ```bash
 pnpm install
-pnpm dev        # http://localhost:3000
-pnpm test       # vitest
-pnpm build      # production build + typecheck
-pnpm lint
+cp .env.example .env.local   # add GEMINI_API_KEY; without it the deterministic pipeline runs
+pnpm build && pnpm start     # http://localhost:3000
 ```
 
-## Honest limits
+```bash
+pnpm test        # unit and component tests
+pnpm eval        # re-score the benchmark offline; writes docs/EVALUATION.md
+pnpm lint && pnpm typecheck
+```
 
-- The particle simulation is **illustrative**, tuned to read clearly on screen. It is not
-  calibrated against experimental haemorheology and must not be read as predictive.
-- Structural annotations are curated textbook summaries, not structure-prediction output.
-- The biosafety screen is a deterministic keyword-and-registry gate, chosen so a reviewer can
-  re-derive every verdict by hand. It over-blocks on innocent phrasing and can be evaded by
-  paraphrase. In any real setting it belongs *in front of* a human biosafety officer, never in
-  place of one.
-- The ACMG classifier (`src/lib/acmg`) implements **8 of the ~28** ACMG/AMP 2015 criteria,
-  using the Tavtigian et al. 2018 point values (*Genet Med* 20:1054-1060). PS1, BS1 and PP1 are
-  approximated from a single input field each, not the orthogonal evidence lines the official
-  codes require. Omitting the case-control and functional-study criteria makes it deliberately
-  **conservative**: the *HBB* rs334 example scores *Likely Pathogenic* where ClinVar reports
-  *Pathogenic*. It is a demonstration of a checkable rule engine, not a certified clinical tool,
-  and the full caveat ships as `ACMG_SCOPE_LIMITATION` on every classification it emits.
-- Only four of the five bands are reachable from the scoped subset: the lowest total any input
-  can produce is −5, so *Likely Benign* is unreachable by points and *Benign* is reached only by
-  the BA1 stand-alone rule.
-- A variant's `priorClassification` **simulates** the call already on record. It is not a
-  ClinVar query, and a disagreement with it is not a real inter-lab discordance.
-- The therapy table (`src/data/therapy-table.json`) is a hand-curated illustrative lookup of
-  publicly documented, regulator-approved therapies — not a live clinical database and not a
-  substitute for a clinician or genetic counselor. It states what is approved; it does not
-  endorse any edit this repository models.
-- Fixtures in `src/data/loci.json`, `src/data/acmg-variants.json` and
-  `src/data/therapy-table.json` are labelled `public-reference` or
-  `synthetic-illustrative`. No real patient data. No construct designs, guides, primers,
-  vectors or protocols appear anywhere in this repository, by policy.
-- This is a hackathon prototype. It is not a clinical tool and not a biosafety control.
+Pages: `/` workbench · `/evaluation` benchmark results · `/classic` the earlier genome version-control prototype (`/ide`, `/bench`, `/graph` are its variants).
+
+## Code map
+
+```
+src/lib/evidence    MyVariant.info / Europe PMC clients, normalisation, cache, ACMG mapping, ClinVar comparison
+src/lib/workbench   append-only delta store, safety gate, Gemini function-calling agent, fallback, merge gate
+src/lib/acmg        deterministic ACMG/AMP points engine (Tavtigian et al. 2018)
+src/lib/safety      biosafety screening policy (never edited by agents; CI-guarded)
+src/lib/eval        benchmark metrics and baselines
+src/app/api/workbench  route handlers (NDJSON streaming for agent runs)
+src/components/workbench  the UI
+```
+
+## Limits
+
+- **Not a clinical tool.** The classifier implements 8 of ~28 ACMG/AMP criteria. PVS1 uses a consequence plus a curated gene list, with no NMD or last-exon analysis. PS1 is not assessed, because it would need ClinVar.
+- **Computational evidence is limited.** AlphaMissense is used only as supporting evidence and only scores missense variants. It is known to under-call some mechanisms, such as the sickle-cell allele (rs334), which is exactly why the reference check and human sign-off exist.
+- **The ClinVar safety net needs a ClinVar record.** For a novel variant there is nothing to disagree with, and the Uncertain Significance call itself is the signal for a human.
+- **Identity is self-declared.** Name and role are typed in, with no authentication in this prototype. State lives in one server process (`.data/workbench.json`).
+- **Edits stay at sequence level.** Edit proposals are sequence-diff descriptions only. No guides, primers, vectors or protocols are produced, by policy.
