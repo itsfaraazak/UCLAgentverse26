@@ -499,7 +499,7 @@ export function benchData(): BenchData {
 }
 
 function pipelineFor(spec: FrameSpec, pO2: number): PipelineResult {
-  return runPipeline({ text: spec.request, pO2 });
+  return runPipeline({ text: spec.request, pO2, classify: true });
 }
 
 /** Run the seven-agent pipeline for one filmstrip frame. */

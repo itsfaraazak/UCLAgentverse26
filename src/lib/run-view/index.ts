@@ -22,9 +22,12 @@
  */
 
 import { latestOfKind, type Delta, type DeltaKind, type PipelineResult } from '@/lib/agents';
-import { AGENT_ORDER, agentDeltaKind } from './steps';
+import { agentDeltaKind, pipelineStepsFor } from './steps';
 import {
   isAssayPayload,
+  isClassificationPayload,
+  isConflictPayload,
+  isTherapyMatchPayload,
   isEditPlanPayload,
   isIntentPayload,
   isOffTargetPayload,
@@ -180,9 +183,12 @@ function stepFor(
   delta: Delta | undefined,
   result: PipelineResult,
   screen: ScreenView,
+  classified: boolean,
 ): StepView {
   const kind = agentDeltaKind(agent) ?? 'intent';
-  const step = AGENT_ORDER.indexOf(agent as never) + 1;
+  // Numbered by the order this run actually executed, so the verifier is
+  // step 7 on a seven-agent run and step 9 on a classified one.
+  const step = pipelineStepsFor(classified).find((spec) => spec.agent === agent)?.step ?? 0;
 
   if (delta === undefined) {
     return {
@@ -369,6 +375,78 @@ function stepFor(
         deltaId: delta.id,
       };
     }
+    case 'classification': {
+      if (!isClassificationPayload(delta.payload)) break;
+      const p = delta.payload;
+      const details: StepDetail[] = [
+        { label: 'classification', value: p.classification ?? '—' },
+        { label: 'points', value: p.points === null ? '—' : String(p.points) },
+        {
+          label: 'criteria',
+          value: p.criteria.length === 0 ? '—' : p.criteria.map((c) => c.code).join(', '),
+        },
+      ];
+      if (p.hgvs !== null) details.push({ label: 'hgvs', value: p.hgvs });
+      if (p.priorClassification !== null) {
+        details.push({ label: 'prior call', value: p.priorClassification });
+      }
+      details.push({ label: 'citation', value: p.citation });
+      return {
+        ...base,
+        status: p.classified ? 'passed' : 'warning',
+        summary: p.note,
+        details,
+        // The scope caveat travels with the classification, so a surface
+        // cannot show the call without it.
+        limitation: p.limitation,
+        deltaId: delta.id,
+      };
+    }
+
+    case 'conflict': {
+      if (!isConflictPayload(delta.payload)) break;
+      const p = delta.payload;
+      return {
+        ...base,
+        status: !p.assessed ? 'warning' : p.crossesActionableThreshold ? 'escalated' : 'passed',
+        summary: p.note,
+        details: [
+          { label: 'prior call', value: p.priorClassification ?? '—' },
+          { label: 'new call', value: p.newClassification ?? '—' },
+          { label: 'disagrees', value: p.conflict ? 'yes' : 'no' },
+          {
+            label: 'crosses actionable threshold',
+            value: p.crossesActionableThreshold ? 'yes — sign-off required' : 'no',
+          },
+        ],
+        limitation: p.limitation,
+        deltaId: delta.id,
+      };
+    }
+
+    case 'therapy_match': {
+      if (!isTherapyMatchPayload(delta.payload)) break;
+      const p = delta.payload;
+      return {
+        ...base,
+        status: 'passed',
+        summary: p.note,
+        details: [
+          { label: 'classification', value: p.classification },
+          { label: 'result', value: p.result },
+          {
+            label: 'therapies',
+            value:
+              p.therapies.length === 0
+                ? 'none in the curated table'
+                : p.therapies.map((t) => t.name).join(', '),
+          },
+          { label: 'disclaimer', value: p.disclaimer },
+        ],
+        limitation: p.limitation,
+        deltaId: delta.id,
+      };
+    }
   }
 
   // A delta exists but its payload did not match the expected shape. Report
@@ -430,10 +508,14 @@ export function runView(result: PipelineResult): RunView {
   const deltas = result.dag.all();
   const screen = screenView(result);
 
-  const steps = AGENT_ORDER.map((agent) => {
-    const delta = latestOfKind(deltas, agentDeltaKind(agent) ?? 'intent');
-    return stepFor(agent, delta, result, screen);
-  });
+  // Read from the run, not inferred from its deltas: a blocked classified run
+  // emits no classification, and it must still show the three stages the gate
+  // stopped as "not executed" rather than pretending they were never part of
+  // the pipeline.
+  const classified = result.classified;
+  const steps = pipelineStepsFor(classified).map((spec) =>
+    stepFor(spec.agent, latestOfKind(deltas, spec.kind), result, screen, classified),
+  );
 
   const verdict = latestOfKind(deltas, 'verdict');
   const measured =
@@ -458,9 +540,11 @@ export function runView(result: PipelineResult): RunView {
 
 export {
   AGENT_ORDER,
+  CLASSIFIED_PIPELINE_STEPS,
   PIPELINE_STEPS,
   agentDeltaKind,
   agentRole,
+  pipelineStepsFor,
   type AgentName,
   type PipelineStepSpec,
 } from './steps';

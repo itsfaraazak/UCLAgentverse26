@@ -661,6 +661,7 @@ export function runPipeline(input: PipelineInput, deps: PipelineDeps = {}): Pipe
       requiresSignoff: opts.requiresSignoff,
       signoffRole: opts.signoffRole,
       headId: head,
+      classified: input.classify === true,
     };
   };
 

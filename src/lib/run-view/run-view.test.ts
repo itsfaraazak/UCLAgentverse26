@@ -228,3 +228,70 @@ describe('the audit trail withholds the request-shaped payloads on a refusal', (
     expect(intent?.payload).not.toMatch(/withheld/);
   });
 });
+
+describe('the classified run surfaces the ACMG stage and its caveat', () => {
+  const classified = runView(runPipeline({ text: REPAIR, classify: true, assaySteps: 80 }));
+
+  it('runs ten agents with the gate still at position 2', () => {
+    expect(classified.steps).toHaveLength(10);
+    expect(classified.steps[1]?.agent).toBe('BiosafetyGateAgent');
+    expect(classified.steps[1]?.step).toBe(2);
+  });
+
+  it('places every ACMG stage after the gate', () => {
+    for (const agent of [
+      'AcmgClassificationAgent',
+      'ClassificationConflictAgent',
+      'TherapyLookupAgent',
+    ]) {
+      const step = classified.steps.find((s) => s.agent === agent);
+      expect(step, `expected a ${agent} step`).toBeDefined();
+      expect(step?.step).toBeGreaterThan(2);
+    }
+  });
+
+  it('carries the scope caveat wherever the classification is shown', () => {
+    const step = classified.steps.find((s) => s.kind === 'classification');
+    // The approximation is the caveat most likely to be dropped to make the
+    // feature look stronger, so it is asserted by its substance.
+    expect(step?.limitation ?? '').toContain('PS1, BS1 and PP1 are approximated');
+    expect(step?.limitation ?? '').toMatch(/not a certified clinical tool/i);
+    expect(step?.details.some((d) => d.label === 'citation')).toBe(true);
+  });
+
+  it('states the prior call is simulated on the conflict stage', () => {
+    const step = classified.steps.find((s) => s.kind === 'conflict');
+    expect(step?.limitation ?? '').toMatch(/single-field approximations|not ClinVar|simulated/i);
+  });
+
+  it('keeps the therapy lookup disclaimed', () => {
+    const step = classified.steps.find((s) => s.kind === 'therapy_match');
+    expect(step?.details.some((d) => d.label === 'disclaimer')).toBe(true);
+    expect(step?.limitation ?? '').not.toBe('');
+  });
+
+  it('shows the ACMG stages as not executed when the gate blocks', () => {
+    const blocked = runView(runPipeline({ text: BLOCKED, classify: true }));
+    expect(blocked.steps).toHaveLength(10);
+    expect(blocked.agentsRun).toBe(2);
+    for (const agent of [
+      'AcmgClassificationAgent',
+      'ClassificationConflictAgent',
+      'TherapyLookupAgent',
+    ]) {
+      const step = blocked.steps.find((s) => s.agent === agent);
+      expect(step?.status).toBe('not-run');
+      expect(step?.summary).toMatch(/gate ended the run/i);
+    }
+  });
+
+  it('reports ten steps for a blocked classified run rather than hiding three', () => {
+    // `classified` is read off the result, not inferred from the deltas: a
+    // blocked run emits no classification, and inferring would have shown it
+    // as a seven-agent pipeline, hiding what the gate prevented.
+    const blocked = runView(runPipeline({ text: BLOCKED, classify: true }));
+    const unclassified = runView(runPipeline({ text: BLOCKED }));
+    expect(blocked.steps).toHaveLength(10);
+    expect(unclassified.steps).toHaveLength(7);
+  });
+});

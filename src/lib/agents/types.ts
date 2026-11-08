@@ -181,6 +181,15 @@ export interface PipelineResult {
   readonly requiresSignoff: boolean;
   readonly signoffRole?: string;
   readonly headId: string;
+  /**
+   * Whether this run included the ACMG stage.
+   *
+   * Reported rather than inferred from the deltas: a blocked run terminates at
+   * the gate and emits no classification, so a surface that guessed from the
+   * output would show a refused classified run as a seven-agent pipeline and
+   * hide the three stages the gate prevented from running.
+   */
+  readonly classified: boolean;
 }
 
 export interface DeltaDAGView {

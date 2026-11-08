@@ -212,7 +212,10 @@ export async function runPipelineAction(branchName: string): Promise<RunPipeline
   // framework, and nothing client-supplied belongs in a log (SPEC §7.3).
   if (branch === undefined) throw new Error('no such branch on this workspace');
 
-  const result = runPipeline({ text: clamp(branch.defaultRequest) });
+  // `classify: true` runs the ACMG stage after the gate. It adds three deltas
+  // and can add a sign-off requirement; it can never remove one, and the gate
+  // still terminates a blocked run at position 2 before any of it computes.
+  const result = runPipeline({ text: clamp(branch.defaultRequest), classify: true });
   const head = heads.get(branch.name);
   if (head === undefined) throw new Error('branch head missing from the rebuilt repository');
 
@@ -232,7 +235,7 @@ export async function runPipelineAction(branchName: string): Promise<RunPipeline
  * template filled with it.
  */
 export async function screenRequestAction(text: string): Promise<RunView> {
-  return runView(runPipeline({ text: clamp(text) }));
+  return runView(runPipeline({ text: clamp(text), classify: true }));
 }
 
 export type SignOffOutcome =

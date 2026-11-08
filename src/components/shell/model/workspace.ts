@@ -287,7 +287,7 @@ const runCache = new Map<string, PipelineResult>();
 function runFor(text: string): PipelineResult {
   const cached = runCache.get(text);
   if (cached !== undefined) return cached;
-  const result = runPipeline({ text });
+  const result = runPipeline({ text, classify: true });
   runCache.set(text, result);
   return result;
 }
@@ -902,7 +902,7 @@ export function screenConsoleRequest(args: {
   //
   // `runPipeline` terminates at the gate on a `block` verdict, so no
   // downstream agent runs for a refused request (SPEC §4.5 #9).
-  const result = runPipeline({ text: args.text });
+  const result = runPipeline({ text: args.text, classify: true });
   const screenDelta = result.dag.all().find((d) => d.kind === 'screen');
   if (screenDelta === undefined || !isScreenPayload(screenDelta.payload)) {
     throw new Error('shell/model: pipeline did not emit a biosafety screen');
