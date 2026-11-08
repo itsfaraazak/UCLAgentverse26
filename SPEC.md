@@ -245,6 +245,35 @@ have several equally-good common ancestors. Git resolves that with recursive mer
 prototype does not. Picking the lowest oid makes the choice deterministic and symmetric, not
 correct in the full sense. Document it; do not pretend it is resolved.
 
+### 4.7 The trailing-partial-codon asymmetry is intentional
+
+The implementing agent flagged that after §4.6, `translate`/`codons` still *drop* a trailing
+1–2 nt remainder while `diffSequences` *throws* on one — so the same input can yield a protein
+but refuse to diff. It followed the spec rather than unifying them, and was right to raise it.
+
+**The asymmetry stays, because both halves are individually correct:**
+
+- **`translate` dropping the tail is correct biology.** A trailing one or two bases are not a
+  codon and are not translated. Real tooling behaves this way, and existing tests pin it.
+- **`diffSequences` throwing is correct for a codon-row diff.** Every row *is* a codon, so a
+  partial codon has no row to live in. The alternatives are a special-cased ragged row or
+  silently discarding data the user supplied; a clear error beats both.
+
+So this is not an inconsistency to fix but a boundary to **document**. Both functions' doc
+comments must state their remainder behaviour explicitly, and any UI that translates a sequence
+it could not diff must not imply the two views cover the same bases.
+
+If this ever does need unifying, the right direction is to reject non-multiple-of-3 input at the
+`Sequence` boundary for *every* consumer — not to make the diff lenient.
+
+### 4.8 Known gaps, recorded rather than hidden
+
+| Gap | Status |
+|---|---|
+| No insertion/deletion fixture exists in `loci.json` | `kind: 'insertion'` and `'deletion'` are supported by `applyVariant` and by the diff, and are covered by property tests on synthetic sequences — but no *fixture* exercises them, so the diff view has no indel case to render from real data. Deliberately not added mid-integration: it would change data three in-flight UI branches do not have and force updating an exact-variant-id assertion. **Follow-up.** |
+| `requireRefCodon`'s insertion branch is untested | The loader previously made an insertion fixture impossible to express at all (`requireString` rejects `''`, which §4.6 #15 requires). Fixed, and the substitution path is covered by the whole existing suite. The insertion branch has no test because the parser is internal and no fixture reaches it. **Follow-up, tied to the row above.** |
+| `merge` does not consult `checkRunId` | By design — `Repo` stays a content primitive. The policy layer is `src/lib/merge-gate/`. See §1 and §9.6. |
+
 ## 5. UI requirements (all three variants)
 
 - **macOS app feel in the browser.** No Electron. Traffic-light chrome, translucent sidebar,

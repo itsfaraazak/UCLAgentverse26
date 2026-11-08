@@ -67,6 +67,33 @@ function requireString(value: unknown, field: string): string {
   return value;
 }
 
+/**
+ * `refCodon` is validated against the variant's `kind`, mirroring
+ * `applyVariant` (SPEC.md §4.6 #15).
+ *
+ * An insertion has no reference codon to check, so its `refCodon` must be the
+ * empty string — and `applyVariant` throws if a non-empty one is supplied, so
+ * that nobody believes a check happened that did not. A fixture is therefore
+ * rejected at load time rather than at apply time, which is where a malformed
+ * fixture is cheapest to notice.
+ *
+ * Without this, `requireString`'s non-empty rule made an insertion fixture
+ * impossible to express at all, even though `kind: 'insertion'` is supported.
+ */
+function requireRefCodon(value: unknown, kind: VariantKind, field: string): string {
+  if (kind === 'insertion') {
+    if (value === undefined || value === '') return '';
+    if (typeof value !== 'string') {
+      throw new Error(`loci.json: ${field} must be a string when present`);
+    }
+    throw new Error(
+      `loci.json: ${field} must be empty for an insertion — an insertion has no ` +
+        `reference codon to verify (got ${JSON.stringify(value)})`,
+    );
+  }
+  return requireString(value, field).toUpperCase();
+}
+
 function requireNumber(value: unknown, field: string): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new Error(`loci.json: ${field} must be a finite number`);
@@ -120,14 +147,16 @@ function parseVariant(raw: unknown, gene: string, field: string): LocusVariant {
   if (!isRecord(raw)) {
     throw new Error(`loci.json: ${field} must be an object`);
   }
+  // `kind` is resolved first because it decides how `refCodon` is validated.
+  const kind = requireKind(raw.kind, `${field}.kind`);
   const variant: LocusVariant = {
     id: requireString(raw.id, `${field}.id`),
     provenance: requireProvenance(raw.provenance, `${field}.provenance`),
     gene,
     codonIndex: requireNumber(raw.codonIndex, `${field}.codonIndex`),
-    refCodon: requireString(raw.refCodon, `${field}.refCodon`).toUpperCase(),
+    refCodon: requireRefCodon(raw.refCodon, kind, `${field}.refCodon`),
     altCodon: requireString(raw.altCodon, `${field}.altCodon`).toUpperCase(),
-    kind: requireKind(raw.kind, `${field}.kind`),
+    kind,
     label: requireString(raw.label, `${field}.label`),
     structural: parseStructural(raw.structural, `${field}.structural`),
   };
