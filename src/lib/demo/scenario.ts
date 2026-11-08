@@ -516,7 +516,22 @@ function isMergeable(
               `${run.screen.signoffRole ?? 'a human reviewer'}. Nothing auto-approves an escalation.`,
           };
     case 'pass':
-      return { ok: true };
+      // `conclusionOf` derives the verdict from blocked/escalated/passed and
+      // does not consult `requiresSignoff`, while the pipeline's rule is
+      // `passed && !escalated && !requiresSignoff`. Today the policy table
+      // sets `requiresSignoff` only on escalations, so a passing run that
+      // still needs a signature cannot occur — but that is an accident of the
+      // table, not a property of this code. Check it here so adding an
+      // `allow`-plus-sign-off rule cannot let `/graph` merge something
+      // `lib/merge-gate` refuses on the other surfaces.
+      return run.screen.requiresSignoff && !signed
+        ? {
+            ok: false,
+            reason:
+              `Held for named sign-off from ` +
+              `${run.screen.signoffRole ?? 'a human reviewer'}.`,
+          }
+        : { ok: true };
   }
 }
 

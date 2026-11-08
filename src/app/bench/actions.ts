@@ -11,11 +11,25 @@
 
 import { latestOfKind, runPipeline } from '@/lib/agents';
 import { isScreenPayload } from '@/lib/agents/types';
+import { PO2_RANGE, SIMULATION_DEFAULTS } from '@/lib/cellsim';
 import { attemptMergeFor, runChecksFor } from './bench-data';
 import type { CheckRunView, MergeAttemptView, ScreenView } from './bench-types';
 
+/**
+ * The slider's value arrives from the client, so it can be anything.
+ *
+ * It is not a gate input — `verifyEdit` compares at its own fixed high and low
+ * pO₂, so this value never moves a pass/fail. It does reach the assay the
+ * panel displays, and `NaN` or an out-of-range value would be read back as a
+ * measurement, so pin it to the range the UI claims to offer.
+ */
+function safePO2(pO2: number): number {
+  if (!Number.isFinite(pO2)) return SIMULATION_DEFAULTS.pO2;
+  return Math.min(Math.max(pO2, PO2_RANGE.min), PO2_RANGE.max);
+}
+
 export async function runChecksAction(frameId: string, pO2: number): Promise<CheckRunView> {
-  return runChecksFor(frameId, pO2);
+  return runChecksFor(frameId, safePO2(pO2));
 }
 
 /**
@@ -30,7 +44,7 @@ export async function attemptMergeAction(
   pO2: number,
   approver: string | null,
 ): Promise<MergeAttemptView> {
-  return attemptMergeFor(frameId, pO2, approver);
+  return attemptMergeFor(frameId, safePO2(pO2), approver);
 }
 
 export interface RedTeamState {

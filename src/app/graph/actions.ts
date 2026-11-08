@@ -68,6 +68,13 @@ function bounded(state: SessionState): {
     .slice(0, MAX_REPLAY);
   const seenBranch = new Set<string>();
   const signoffs = (state.signoffs ?? [])
+    // Normalise and shape-check here, not only in `signOff`. Every action
+    // replays this list, so a client that posts `loadScenario` or
+    // `attemptMerge` directly would otherwise land unvalidated free text in
+    // the history and the rendered sign-off. Someone refused by the gate
+    // could paste their refused request into `by` and have it read back.
+    .map((s) => ({ branch: s.branch, by: s.by.trim().slice(0, 120) }))
+    .filter((s) => APPROVER_PATTERN.test(s.by))
     .filter((s) => {
       if (seenBranch.has(s.branch)) return false;
       seenBranch.add(s.branch);

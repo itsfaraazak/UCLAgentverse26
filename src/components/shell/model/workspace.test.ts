@@ -14,6 +14,7 @@ import lociFile from '@/data/loci.json';
 import { diffSequences, loadLoci, referenceSequence, translate } from '@/lib/genome';
 import { PO2_RANGE, SIMULATION_DEFAULTS } from '@/lib/cellsim';
 import { pipelineAgentOrder } from '@/lib/agents';
+import { pipelineStepsFor } from '@/lib/run-view';
 import { POLICY } from '@/lib/safety/policy';
 
 import {
@@ -113,17 +114,34 @@ describe('buildWorkspace — branches come from lib/vcs over the fixture', () =>
     expect(workspace.fixtureDisclaimer).toBe(lociFile._disclaimer);
   });
 
-  it('builds a seven-row run log in the pipeline order lib/agents declares', () => {
+  it('builds the run log in the order the run actually executed', () => {
     const workspace = buildWorkspace();
-    const order = pipelineAgentOrder();
-    expect(order.length).toBe(7);
+    // This surface runs with `classify: true`, so the rows follow the
+    // classified order. Asserting the seven-agent order here would have
+    // pinned the bug where the three ACMG rows were computed and dropped.
+    const order = pipelineStepsFor(true).map((s) => s.agent);
+    expect(pipelineAgentOrder().length).toBe(7);
+    expect(order.length).toBe(10);
 
     for (const branch of workspace.branches) {
       if (branch.run === null) continue;
-      expect(branch.run.steps.map((s) => s.agent)).toEqual([...order]);
-      expect(branch.run.steps.map((s) => s.position)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+      expect(branch.run.steps.map((s) => s.agent)).toEqual(order);
+      expect(branch.run.steps.map((s) => s.position)).toEqual([
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      ]);
       // The gate is position 2 and is structural, not a trailing disclaimer.
+      // It stays there whatever the ACMG stage adds after it.
       expect(branch.run.steps[1]?.agent).toBe('BiosafetyGateAgent');
+      const gateAt = branch.run.steps.findIndex((s) => s.agent === 'BiosafetyGateAgent');
+      for (const acmg of [
+        'AcmgClassificationAgent',
+        'ClassificationConflictAgent',
+        'TherapyLookupAgent',
+      ]) {
+        expect(branch.run.steps.findIndex((s) => s.agent === acmg)).toBeGreaterThan(gateAt);
+      }
+      // Every row carries its role and kind, including the added ones.
+      expect(branch.run.steps.every((s) => s.role !== '')).toBe(true);
     }
   });
 
@@ -315,7 +333,9 @@ describe('screenConsoleRequest — SPEC §7.3 redaction boundary', () => {
     expect(result.verdict).toBe('allow');
     expect(result.redacted).toBe(false);
     expect(result.echo).toBe('Repair HBB at codon 7 using variant HBB_repair');
-    expect(result.run?.steps.length).toBe(7);
+    // Classified run: ten rows, the gate still second.
+    expect(result.run?.steps.length).toBe(10);
+    expect(result.run?.steps[1]?.agent).toBe('BiosafetyGateAgent');
   });
 
   it('stops a blocked run at the gate, leaving agents 3-7 unrun', () => {

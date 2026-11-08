@@ -23,7 +23,6 @@ import {
 import { Repo, type MergeConflict, type Oid } from '@/lib/vcs';
 import {
   latestOfKind,
-  pipelineAgentOrder,
   runPipeline,
   type Delta,
   type PipelineResult,
@@ -48,6 +47,7 @@ import {
   SIMULATION_DEFAULTS,
   runAssay,
 } from '@/lib/cellsim';
+import { pipelineStepsFor } from '@/lib/run-view';
 import type {
   BenchData,
   CheckRunView,
@@ -242,16 +242,6 @@ function toDeltaView(d: Delta): DeltaView {
   };
 }
 
-const KIND_FOR_AGENT: Readonly<Record<string, string>> = {
-  IntentAgent: 'intent',
-  BiosafetyGateAgent: 'screen',
-  EditPlannerAgent: 'edit_plan',
-  StructuralImpactAgent: 'structural',
-  FunctionalAssayAgent: 'assay',
-  OffTargetRiskAgent: 'offtarget',
-  VerifierAgent: 'verdict',
-};
-
 function summarise(delta: Delta, screen: ScreenView): string {
   switch (delta.kind) {
     case 'intent':
@@ -322,8 +312,13 @@ function toCheckRunView(
       ? 'Not run: the biosafety gate blocked this request.'
       : 'Not run.';
 
-  const steps: CheckStepView[] = pipelineAgentOrder().map((agent, i) => {
-    const kind = KIND_FOR_AGENT[agent] ?? 'intent';
+  // Derive the step list from what this run actually executed. `/bench` runs
+  // with `classify: true`, so pinning the seven-agent order here computed the
+  // three ACMG deltas and then dropped them: a reclassification could hold a
+  // merge through `result.requiresSignoff` with no visible reason on screen.
+  const steps: CheckStepView[] = pipelineStepsFor(result.classified).map((spec, i) => {
+    const agent = spec.agent;
+    const kind = spec.kind;
     const delta = deltas.find((d) => d.author === agent && d.kind === kind);
     if (delta === undefined) {
       return {
@@ -614,7 +609,14 @@ export function attemptMergeFor(
         ...base,
         kind: decision.kind,
         reason: 'Merge refused: a check run on an introduced commit did not pass.',
-        blockingReasons: [...decision.reasons],
+        // Attribute each reason to the commit whose check produced it.
+        // Flattening `decision.reasons` read as though every reason described
+        // the branch tip: merging a repair that forks from the mutant shows
+        // the *mutant's* failure, and unattributed that says the repair
+        // retains a high polymerization tendency, which is false of it.
+        blockingReasons: decision.blocking.flatMap((check) =>
+          check.reasons.map((r) => `${short(check.commit)}: ${r}`),
+        ),
         requiresSignoff,
         signoffRole,
       };

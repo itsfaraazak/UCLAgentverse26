@@ -50,6 +50,7 @@ import {
   runPipeline,
 } from '@/lib/agents';
 import type { Delta, PipelineResult } from '@/lib/agents';
+import { agentDeltaKind, agentRole, pipelineStepsFor } from '@/lib/run-view';
 import {
   ASSAY_MODEL_LIMITATION,
   PO2_RANGE,
@@ -368,9 +369,12 @@ function metricRows(label: string, metrics: SimMetrics | null): DetailRow[] {
 }
 
 function stepFor(position: number, agent: string, deltas: readonly Delta[]): AgentStepView {
-  const kind = AGENT_KIND[agent];
+  // The local maps cover the seven-agent run; `lib/run-view` is the authority
+  // for the agents the ACMG stage adds, so a classified run's rows carry a
+  // role and a kind rather than rendering blank.
+  const kind = AGENT_KIND[agent] ?? agentDeltaKind(agent);
   const delta = deltas.find((d) => d.author === agent);
-  const role = AGENT_ROLES[agent] ?? '';
+  const role = AGENT_ROLES[agent] ?? agentRole(agent);
   const base = {
     position,
     agent,
@@ -599,7 +603,12 @@ function runView(args: {
   readonly check: CheckRun;
 }): RunView {
   const deltas = args.result.dag.all();
-  const steps = pipelineAgentOrder().map((agent, i) => stepFor(i + 1, agent, deltas));
+  // This surface runs with `classify: true`, so the step list has to follow
+  // what the run executed. Pinning the seven-agent order dropped the three
+  // ACMG rows, hiding a stage that can hold a merge.
+  const steps = pipelineStepsFor(args.result.classified).map((spec, i) =>
+    stepFor(i + 1, spec.agent, deltas),
+  );
 
   const screenDelta = deltas.find((d) => d.kind === 'screen');
   const digest =

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { pipelineStepsFor } from '@/lib/run-view';
 import { screenRequestAction, type RedTeamState } from './actions';
 import { runChecksFor, attemptMergeFor, benchData } from './bench-data';
 
@@ -92,10 +93,21 @@ describe('bench data and checks', () => {
     );
   });
 
-  it('runs all seven agents in order for an allowed request', () => {
+  it('runs every agent in order for an allowed request, the gate second', () => {
     const run = runChecksFor('frame-repaired', 20);
-    expect(run.steps).toHaveLength(7);
+    // `/bench` runs with `classify: true`, so the view shows the ten steps it
+    // executed. It used to show seven and silently drop the ACMG stage, which
+    // can hold a merge via `requiresSignoff` — a hold with no visible reason.
+    expect(run.steps.map((s) => s.agent)).toEqual(pipelineStepsFor(true).map((s) => s.agent));
     expect(run.steps[1].agent).toBe('BiosafetyGateAgent');
+    const gateAt = run.steps.findIndex((s) => s.agent === 'BiosafetyGateAgent');
+    for (const acmg of [
+      'AcmgClassificationAgent',
+      'ClassificationConflictAgent',
+      'TherapyLookupAgent',
+    ]) {
+      expect(run.steps.findIndex((s) => s.agent === acmg)).toBeGreaterThan(gateAt);
+    }
     expect(run.steps.every((s) => s.status !== 'skipped')).toBe(true);
     expect(run.screen.verdict).toBe('allow');
     expect(run.elapsedMs).toBeGreaterThanOrEqual(0);
