@@ -543,12 +543,10 @@ describe('property: merge algebra', () => {
     expect(repo.head()).toBe(result.oid);
   });
 
-  it.skip('merge(a, a) is a no-op — SPEC does not exempt the equal-oid case from writing a merge commit', () => {
-    // Git would say "Already up to date." SPEC §4.5 #4 specifies merge-commit
-    // metadata for a successful three-way merge (parents [ours, theirs], author
-    // sigmafold-merge, timestamp max+1) and does not say ours === theirs is a
-    // fast-forward / no-op. Current code writes a merge commit with parents
-    // [a, a]. Do not invent a fast-forward policy.
+  it('merge(a, a) is a no-op (SPEC §4.6 #16)', () => {
+    // Decided: return the existing oid; do not write a merge commit with
+    // parents [a, a]. §4.5 #4's metadata rules apply only to merges that
+    // combine two distinct commits.
     const repo = new Repo();
     const oid = repo.commit({
       tree: blobTree(repo, { HBB: seq('AAA', 'h') }),
@@ -703,14 +701,9 @@ describe('property: mergeBase on DAGs', () => {
     expect(ancestors(repo, mergedCb.oid).has(base)).toBe(true);
   });
 
-  it.skip('returns a best common ancestor and is symmetric — SPEC does not define which common ancestor', () => {
-    // Git merge-base returns a *best* common ancestor (not dominated by another
-    // common ancestor) and `git merge-base A B` is symmetric. SPEC §4.2 only
-    // types mergeBase as Oid | null. The implementation BFS-walks from `b` and
-    // returns the first ancestor of `a` it sees, which can be a dominated
-    // ancestor when `b` lists that older commit as a parent, and can disagree
-    // with mergeBase(b, a) on criss-cross histories. Picking BCAs or min-oid
-    // would be invented policy.
+  it('returns a best common ancestor and is symmetric (SPEC §4.6 #17)', () => {
+    // BFS-from-b used to return W (dominated) for mergeBase(A, B) because B
+    // lists W as its first parent, and disagreed with mergeBase(B, A).
     const repo = new Repo();
     const w = repo.commit({
       tree: blobTree(repo, { HBB: seq('AAA', 'w') }),
@@ -743,6 +736,91 @@ describe('property: mergeBase on DAGs', () => {
     expect(repo.mergeBase(a, b)).toBe(m);
     expect(repo.mergeBase(a, b)).toBe(repo.mergeBase(b, a));
     expect(isBestCommonAncestor(repo, m, a, b)).toBe(true);
+    expect(isBestCommonAncestor(repo, w, a, b)).toBe(false);
+  });
+
+  it('is symmetric and never returns a dominated ancestor on random DAGs, including criss-cross', () => {
+    const iterations = 40;
+    for (let i = 0; i < iterations; i += 1) {
+      const seed = 0x610 + i;
+      withSeed(seed, () => {
+        const n = 8 + (seed % 5);
+        const { repo, commits } = randomDag(seed, n);
+        const rng = mulberry32(seed ^ 0x51ed);
+        for (let p = 0; p < 4; p += 1) {
+          const a = pickOne(rng, commits);
+          const b = pickOne(rng, commits);
+          const forward = repo.mergeBase(a, b);
+          const reverse = repo.mergeBase(b, a);
+          if (forward !== reverse) {
+            failSeed(seed, `mergeBase not symmetric: ${forward} vs ${reverse}`);
+          }
+          const common = [...ancestors(repo, a)].filter((oid) => ancestors(repo, b).has(oid));
+          if (common.length === 0) {
+            if (forward !== null) failSeed(seed, `unrelated histories returned ${forward}`);
+            continue;
+          }
+          if (forward === null) failSeed(seed, 'shared history returned null');
+          if (!isBestCommonAncestor(repo, forward, a, b)) {
+            failSeed(seed, `mergeBase ${forward} is dominated`);
+          }
+          const bcas = common.filter((oid) => isBestCommonAncestor(repo, oid, a, b));
+          bcas.sort();
+          const want = bcas[0];
+          if (forward !== want) {
+            failSeed(seed, `mergeBase ${forward} is not lowest-oid BCA ${want ?? 'none'}`);
+          }
+        }
+      });
+    }
+  });
+
+  it('picks the lowest oid among equally-good common ancestors on a criss-cross merge', () => {
+    const repo = new Repo();
+    const root = repo.commit({
+      tree: blobTree(repo, { HBB: seq('AAA', 'h'), SYN: seq('CCC', 's') }),
+      author: 'a',
+      message: 'root',
+      timestamp: 1,
+    });
+    repo.branch('c', root);
+    const b = repo.commit({
+      tree: blobTree(repo, { HBB: seq('TTT', 'h'), SYN: seq('CCC', 's') }),
+      author: 'a',
+      message: 'B',
+      timestamp: 2,
+    });
+    repo.checkout('c');
+    const c = repo.commit({
+      tree: blobTree(repo, { HBB: seq('AAA', 'h'), SYN: seq('GGG', 's') }),
+      author: 'a',
+      message: 'C',
+      timestamp: 3,
+      parents: [root],
+    });
+    repo.checkout('main');
+    const mergedBc = repo.merge(b, c);
+    expect(isCleanMerge(mergedBc)).toBe(true);
+    if (!isCleanMerge(mergedBc)) return;
+    repo.checkout('c');
+    const mergedCb = repo.merge(c, b);
+    expect(isCleanMerge(mergedCb)).toBe(true);
+    if (!isCleanMerge(mergedCb)) return;
+    const forward = repo.mergeBase(mergedBc.oid, mergedCb.oid);
+    const reverse = repo.mergeBase(mergedCb.oid, mergedBc.oid);
+    expect(forward).toBe(reverse);
+    expect(forward).not.toBe(null);
+    if (forward === null) return;
+    expect(isBestCommonAncestor(repo, forward, mergedBc.oid, mergedCb.oid)).toBe(true);
+    const common = [...ancestors(repo, mergedBc.oid)].filter((oid) =>
+      ancestors(repo, mergedCb.oid).has(oid),
+    );
+    const bcas = common.filter((oid) =>
+      isBestCommonAncestor(repo, oid, mergedBc.oid, mergedCb.oid),
+    );
+    bcas.sort();
+    expect(forward).toBe(bcas[0]);
+    expect(bcas.length).toBeGreaterThanOrEqual(2);
   });
 });
 

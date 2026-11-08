@@ -121,21 +121,47 @@ export class Repo {
     return result;
   }
 
+  /**
+   * Best common ancestor of `a` and `b`, or null if the histories are disjoint.
+   *
+   * Walk both ancestor sets (O(V+E)), intersect, then discard any common
+   * ancestor that is a parent of another common ancestor. The common set is
+   * ancestor-closed along paths between its members, so marking immediate
+   * parents is enough to drop every dominated node. Among what remains, pick
+   * the lowest oid.
+   *
+   * Criss-cross histories can have several equally-good common ancestors.
+   * Git resolves that with recursive merge; this prototype does not. Lowest-oid
+   * makes the choice deterministic and symmetric, not correct in the full
+   * sense.
+   */
   mergeBase(a: Oid, b: Oid): Oid | null {
     this.requireCommit(a);
     this.requireCommit(b);
+    if (a === b) return a;
+
     const ancestorsOfA = this.ancestorSet(a);
-    const visited = new Set<Oid>();
-    const queue: Oid[] = [b];
-    while (queue.length > 0) {
-      const oid = queue.shift();
-      if (oid === undefined || visited.has(oid)) continue;
-      visited.add(oid);
-      if (ancestorsOfA.has(oid)) return oid;
-      const commit = this.requireCommit(oid);
-      for (const parent of commit.parents) queue.push(parent);
+    const ancestorsOfB = this.ancestorSet(b);
+    const common = new Set<Oid>();
+    for (const oid of ancestorsOfA) {
+      if (ancestorsOfB.has(oid)) common.add(oid);
     }
-    return null;
+    if (common.size === 0) return null;
+
+    const dominated = new Set<Oid>();
+    for (const oid of common) {
+      const commit = this.requireCommit(oid);
+      for (const parent of commit.parents) {
+        if (common.has(parent)) dominated.add(parent);
+      }
+    }
+
+    let best: Oid | null = null;
+    for (const oid of common) {
+      if (dominated.has(oid)) continue;
+      if (best === null || oid < best) best = oid;
+    }
+    return best;
   }
 
   /**
@@ -143,10 +169,17 @@ export class Repo {
    *  - changed on one side only    → take that side
    *  - changed identically on both → take it
    *  - changed differently on both → CONFLICT, do not auto-resolve
+   *
+   * `merge(a, a)` is a no-op: return the existing oid and do not write a
+   * merge commit with `parents: [a, a]`. SPEC §4.5 #4's metadata rules apply
+   * only to merges that combine two distinct commits.
    */
   merge(ours: Oid, theirs: Oid): MergeResult {
     const oursCommit = this.requireCommit(ours);
     const theirsCommit = this.requireCommit(theirs);
+    if (ours === theirs) {
+      return { oid: ours };
+    }
     const baseOid = this.mergeBase(ours, theirs);
     const baseTree =
       baseOid === null
@@ -213,14 +246,17 @@ export class Repo {
   }
 
   private ancestorSet(oid: Oid): Set<Oid> {
-    const found = new Set<Oid>();
+    const found = new Set<Oid>([oid]);
     const queue: Oid[] = [oid];
-    while (queue.length > 0) {
-      const current = queue.shift();
-      if (current === undefined || found.has(current)) continue;
-      found.add(current);
+    for (let i = 0; i < queue.length; i += 1) {
+      const current = queue[i];
+      if (current === undefined) continue;
       const commit = this.requireCommit(current);
-      for (const parent of commit.parents) queue.push(parent);
+      for (const parent of commit.parents) {
+        if (found.has(parent)) continue;
+        found.add(parent);
+        queue.push(parent);
+      }
     }
     return found;
   }

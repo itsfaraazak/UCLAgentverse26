@@ -275,4 +275,78 @@ describe('mergeBase and three-way merge', () => {
     expect(repo.mergeBase(result.oid, theirs)).toBe(theirs);
     expect(root).toHaveLength(64);
   });
+
+  it('merge(a, a) returns the existing oid and does not write a merge commit', () => {
+    const repo = new Repo();
+    const oid = repo.commit({
+      tree: blobTree(repo, { HBB: seq('AAA', 'h') }),
+      author: 'a',
+      message: 'root',
+      timestamp: 1,
+    });
+    repo.branch('other', oid);
+    const result = repo.merge(oid, oid);
+    expect(isCleanMerge(result)).toBe(true);
+    if (!isCleanMerge(result)) return;
+    expect(result.oid).toBe(oid);
+    expect(repo.head()).toBe(oid);
+    expect(repo.log()).toHaveLength(1);
+    repo.checkout('other');
+    expect(repo.head()).toBe(oid);
+  });
+
+  it('a dominated merge-base no longer produces a spurious both-sides conflict (SPEC §4.6 #17)', () => {
+    // W -- M -- A (HBB: AAA → CCC → GGG)
+    //  \     \- B  parents [W, M], tree still CCC
+    // The old BFS-from-b returned W when walking B first (W is B's first
+    // parent). Three-way vs W saw CCC vs GGG as both changed from AAA →
+    // conflict. The BCA is M, so B matches the base and A's edit is one-sided.
+    const repo = new Repo();
+    const w = repo.commit({
+      tree: blobTree(repo, { HBB: seq('AAA', 'w') }),
+      author: 'a',
+      message: 'W',
+      timestamp: 1,
+      parents: [],
+    });
+    const m = repo.commit({
+      tree: blobTree(repo, { HBB: seq('CCC', 'm') }),
+      author: 'a',
+      message: 'M',
+      timestamp: 2,
+      parents: [w],
+    });
+    const a = repo.commit({
+      tree: blobTree(repo, { HBB: seq('GGG', 'a') }),
+      author: 'a',
+      message: 'A',
+      timestamp: 3,
+      parents: [m],
+    });
+    const b = repo.commit({
+      tree: blobTree(repo, { HBB: seq('CCC', 'm') }),
+      author: 'a',
+      message: 'B',
+      timestamp: 4,
+      parents: [w, m],
+    });
+    expect(repo.mergeBase(a, b)).toBe(m);
+    expect(repo.mergeBase(b, a)).toBe(m);
+    repo.checkout('main');
+    const result = repo.merge(a, b);
+    expect(isCleanMerge(result)).toBe(true);
+    if (!isCleanMerge(result)) {
+      throw new Error(
+        `spurious conflict from a dominated base: ${JSON.stringify(result)}`,
+      );
+    }
+    const mergeCommit = repo.read(result.oid);
+    expect(mergeCommit.kind).toBe('commit');
+    if (mergeCommit.kind !== 'commit') return;
+    const tree = repo.read(mergeCommit.tree);
+    expect(tree.kind).toBe('tree');
+    if (tree.kind !== 'tree') return;
+    const hbb = repo.read(tree.entries.HBB ?? '');
+    expect(hbb.kind === 'blob' && hbb.sequence.bases).toBe('GGG');
+  });
 });
