@@ -13,25 +13,53 @@
  * sidebar, which is what keeps a dense list calm.
  */
 
-import { Dna, GitBranch, Microscope } from 'lucide-react';
+import Link from 'next/link';
+import { Activity, ArrowUpRight, Columns3, Dna, GitBranch, Microscope } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-import type { BranchView, LocusView } from './model/types';
+import type {
+  BranchSpec,
+  BranchView,
+  EditView,
+  LocusView,
+  WorkspaceView,
+} from './model/types';
+import { NewBranch } from './new-branch';
+import { SURFACES } from './model/surfaces';
+import type { SurfaceIconName } from './model/surfaces';
 import { StatusMark, statusLabel, toneForRun } from './status';
+
+/** Total over `SurfaceIconName`, so the lookup cannot be undefined. */
+const SURFACE_ICONS: Readonly<Record<SurfaceIconName, LucideIcon>> = {
+  Columns3,
+  Activity,
+  GitBranch,
+};
 
 export interface BranchRailProps {
   readonly locus: LocusView;
   readonly branches: readonly BranchView[];
+  readonly variants: readonly EditView[];
   readonly current: string;
   readonly collapsed: boolean;
+  readonly overlay: readonly BranchSpec[];
   readonly onSelect: (branch: string) => void;
+  readonly onCreated: (
+    workspace: WorkspaceView,
+    overlay: readonly BranchSpec[],
+    created: string,
+  ) => void;
 }
 
 export function BranchRail({
   locus,
   branches,
+  variants,
   current,
   collapsed,
+  overlay,
   onSelect,
+  onCreated,
 }: BranchRailProps) {
   return (
     <>
@@ -106,6 +134,51 @@ export function BranchRail({
                     label={`${branch.name}: ${statusLabel(tone)}`}
                   />
                 </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        <NewBranch
+          branches={branches}
+          variants={variants}
+          from={current}
+          overlay={overlay}
+          onCreated={onCreated}
+        />
+      </section>
+
+      <hr className="rail__rule" />
+
+      <section className="rail__section" aria-labelledby="rail-surface-heading">
+        <h2 className="rail__heading" id="rail-surface-heading">
+          <span>Surfaces</span>
+        </h2>
+        <ul className="contents" role="list">
+          {SURFACES.map((surface) => {
+            const Icon = SURFACE_ICONS[surface.icon];
+            return (
+              <li key={surface.href} className="contents">
+                <Link
+                  href={surface.href}
+                  className="row branch-row"
+                  title={`${surface.label} — ${surface.concept}`}
+                >
+                  <Icon
+                    className="row__icon mt-[0.1875rem]"
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                  />
+                  <span className="branch-row__text">
+                    <span className="row__label">{surface.label}</span>
+                    <span className="branch-row__sub">{surface.concept}</span>
+                  </span>
+                  <ArrowUpRight
+                    className="row__icon mt-[0.1875rem] h-3.5 w-3.5"
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                  />
+                </Link>
               </li>
             );
           })}

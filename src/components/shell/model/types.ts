@@ -163,6 +163,27 @@ export interface BranchView {
   readonly run: RunView | null;
 }
 
+/**
+ * A branch the user created, as an instruction to replay rather than a record
+ * of one.
+ *
+ * The server holds no session state: it rebuilds the repository from
+ * `data/loci.json` on every call, which is only sound because `lib/vcs` oids
+ * are deterministic. A created branch therefore cannot live on the server
+ * between requests. Instead the client keeps the list of specs and re-sends
+ * it, and the server replays each one with `Repo.branch()` and a real
+ * `applyVariant` commit. The branch is genuinely in the repository for the
+ * duration of the request that needs it, and replaying the same specs
+ * reproduces the same oids, so short hashes stay stable across requests.
+ */
+export interface BranchSpec {
+  readonly name: string;
+  /** The branch whose head the new line starts from. */
+  readonly from: string;
+  /** A curated variant id from `data/loci.json`, applied as its first edit. */
+  readonly variantId: string;
+}
+
 export type MergeDecisionView =
   | { readonly kind: 'allowed'; readonly oid: string; readonly short: string }
   | {
@@ -246,6 +267,13 @@ export interface WorkspaceView {
   readonly locus: LocusView;
   readonly branches: readonly BranchView[];
   readonly defaultBranch: string;
+  /**
+   * Every curated variant in the locus, offered as the edit a newly created
+   * branch applies. Derived from the fixture, so the picker gains an entry
+   * when `data/loci.json` does and cannot offer an edit the planner has no
+   * annotation for.
+   */
+  readonly variants: readonly EditView[];
   readonly agentOrder: readonly string[];
   readonly simulation: SimulationDefaultsView;
   readonly fixtureDisclaimer: string;

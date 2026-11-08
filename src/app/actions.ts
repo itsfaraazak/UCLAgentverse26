@@ -23,12 +23,15 @@
 import {
   buildDiff,
   buildMergeProposal,
+  buildWorkspace,
   screenConsoleRequest,
 } from '@/components/shell/model/workspace';
 import type {
+  BranchSpec,
   DiffView,
   MergeProposalView,
   ScreenView,
+  WorkspaceView,
 } from '@/components/shell/model/types';
 
 /**
@@ -59,8 +62,54 @@ export async function screenRequestAction(input: {
 }
 
 /** The three-register diff of a branch's genotype against the reference. */
-export async function diffAction(branch: string): Promise<DiffView> {
-  return buildDiff(branch);
+export async function diffAction(
+  branch: string,
+  overlay: readonly BranchSpec[] = [],
+): Promise<DiffView> {
+  return buildDiff(branch, overlay);
+}
+
+/**
+ * Create a genotype line and return the workspace that contains it.
+ *
+ * The branch is a real `Repo.branch()` ref with a real `applyVariant` commit
+ * and its own pipeline run — not a UI-only row. Because the server keeps no
+ * session state, the new branch is expressed as a `BranchSpec` the client
+ * holds and re-sends; see `BranchSpec` for why that is sound.
+ *
+ * Validation is here rather than in the component because this is the trust
+ * seam: the branch name is the one piece of free text in the request, and the
+ * variant id has to be one the fixture actually carries.
+ */
+export async function createBranchAction(input: {
+  readonly name: string;
+  readonly from: string;
+  readonly variantId: string;
+  readonly overlay: readonly BranchSpec[];
+}): Promise<{ readonly workspace: WorkspaceView; readonly overlay: readonly BranchSpec[] }> {
+  const name = input.name.trim();
+  if (name.length === 0) {
+    throw new Error('A branch name is required.');
+  }
+  if (name.length > 64) {
+    throw new Error('Branch names are limited to 64 characters.');
+  }
+  // Mirrors what `Repo.branch` will accept, and keeps a name that could be
+  // confused for an oid or a path out of the ref namespace.
+  if (!/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(name)) {
+    throw new Error(
+      'Use letters, digits, and . _ / - only, starting with a letter or digit.',
+    );
+  }
+  if (input.overlay.some((spec) => spec.name === name)) {
+    throw new Error(`Branch '${name}' already exists.`);
+  }
+
+  const spec: BranchSpec = { name, from: input.from, variantId: input.variantId };
+  const overlay = [...input.overlay, spec];
+  // buildWorkspace throws if `from` is unknown or the variant is not in the
+  // fixture, so a bad request fails here rather than rendering a broken line.
+  return { workspace: buildWorkspace(overlay), overlay };
 }
 
 /**
@@ -75,10 +124,12 @@ export async function mergeProposalAction(input: {
   readonly into: string;
   readonly incoming: string;
   readonly signedOffBy?: readonly string[];
+  readonly overlay?: readonly BranchSpec[];
 }): Promise<MergeProposalView> {
   return buildMergeProposal({
     into: input.into,
     incoming: input.incoming,
     ...(input.signedOffBy === undefined ? {} : { signedOffBy: input.signedOffBy }),
+    ...(input.overlay === undefined ? {} : { overlay: input.overlay }),
   });
 }

@@ -25,16 +25,23 @@ import {
 } from 'lucide-react';
 
 import { mergeProposalAction } from '@/app/actions';
-import type { BranchView, CheckRunView, MergeProposalView } from '../model/types';
+import type {
+  BranchSpec,
+  BranchView,
+  CheckRunView,
+  MergeProposalView,
+} from '../model/types';
 import { StatusMark, toneForCheck } from '../status';
 
 export interface MergeViewProps {
   readonly branches: readonly BranchView[];
   readonly into: string;
+  /** Replay list for branches the user created. */
+  readonly overlay: readonly BranchSpec[];
   readonly defaultBranch: string;
 }
 
-export function MergeView({ branches, into, defaultBranch }: MergeViewProps) {
+export function MergeView({ branches, into, overlay, defaultBranch }: MergeViewProps) {
   const [picked, setPicked] = useState<string | null>(null);
   const [signoff, setSignoff] = useState('');
   const [signatures, setSignatures] = useState<readonly string[]>([]);
@@ -57,7 +64,12 @@ export function MergeView({ branches, into, defaultBranch }: MergeViewProps) {
     let live = true;
     startTransition(async () => {
       try {
-        const next = await mergeProposalAction({ into, incoming, signedOffBy: signatures });
+        const next = await mergeProposalAction({
+          into,
+          incoming,
+          signedOffBy: signatures,
+          overlay,
+        });
         if (live) {
           setProposal(next);
           setError(null);
@@ -71,7 +83,7 @@ export function MergeView({ branches, into, defaultBranch }: MergeViewProps) {
     return () => {
       live = false;
     };
-  }, [into, incoming, signatures]);
+  }, [into, incoming, signatures, overlay]);
 
   return (
     <div className="work__pad">

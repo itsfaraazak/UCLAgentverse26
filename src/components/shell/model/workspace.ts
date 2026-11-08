@@ -74,6 +74,7 @@ import {
 } from './derive';
 import type {
   AgentStepView,
+  BranchSpec,
   BranchView,
   CheckRunView,
   CommitView,
@@ -167,7 +168,10 @@ function writeGenotype(repo: Repo, gene: string, sequence: Sequence): Oid {
  * Timestamps are the commit's index within its branch, not wall-clock time, so
  * oids are reproducible across processes.
  */
-function seedRepo(checks: ReadonlyMap<string, CheckRun>): Omit<SeededRepo, 'checks'> {
+function seedRepo(
+  checks: ReadonlyMap<string, CheckRun>,
+  overlay: readonly BranchSpec[] = [],
+): SeededRepo {
   const locus = requireLocus();
   const reference = referenceSequence(locus);
   const repo = new Repo();
@@ -259,8 +263,69 @@ function seedRepo(checks: ReadonlyMap<string, CheckRun>): Omit<SeededRepo, 'chec
     );
   }
 
+  // Replay user-created branches. These are real `Repo.branch()` refs with a
+  // real `applyVariant` commit — the only difference from a fixture line is
+  // that the instruction came from the client rather than from a genotype.
+  const overlayChecks = new Map<string, CheckRun>(checks);
+  for (const spec of overlay) {
+    const source = branches.find((b) => b.name === spec.from);
+    if (source === undefined) {
+      throw new Error(
+        `shell/model: cannot branch from '${spec.from}', which does not exist`,
+      );
+    }
+    if (branches.some((b) => b.name === spec.name)) {
+      throw new Error(`shell/model: branch '${spec.name}' already exists`);
+    }
+    const variant = requireVariant(locus, spec.variantId);
+
+    repo.branch(spec.name, source.head);
+    repo.checkout(spec.name);
+    const sequence = applyVariant(source.sequence, variant);
+    const tree = writeGenotype(repo, locus.gene, sequence);
+
+    // The check has to be bound to *this* commit. A fixture branch applying
+    // the same variant produces a different oid (different parents), and
+    // `lib/merge-gate` verifies `check.commit === commitOid` before accepting
+    // a check — so reusing the fixture's check run would read as missing and
+    // fail the merge closed.
+    const result = runFor(requestFor(locus, variant));
+    const oid = repo.commit({
+      tree,
+      author: FIXTURE_AUTHOR,
+      message: variant.label,
+      timestamp: source.commitOids.length,
+      edit: variant,
+    });
+    const check = checkRunFromPipeline({
+      commit: oid,
+      result,
+      id: `${result.headId}:${oid.slice(0, 12)}`,
+    });
+    // Keyed by commit oid, not by check id. The fixture commits carry a
+    // `checkRunId` and are found by that; this commit cannot, because its oid
+    // is not known until after it is written and the id would then be part of
+    // the content being hashed. `lib/merge-gate` resolves exactly that case by
+    // falling back to `checks.get(commitOid)`, so the key has to be the oid —
+    // keyed by id it reads as *missing*, and the gate fails closed.
+    overlayChecks.set(oid, check);
+
+    editByCommit.set(oid, variant);
+    branches.push({
+      name: spec.name,
+      head: oid,
+      origin: `created from ${spec.from} · variant '${variant.id}'`,
+      genotypeId: null,
+      genotypeLabel: variant.label,
+      polymerizationTendency: variant.structural.polymerizationTendency,
+      sequence,
+      variants: [variant],
+      commitOids: [...source.commitOids, oid],
+    });
+  }
+
   repo.checkout(DEFAULT_BRANCH);
-  return { repo, locus, reference, branches, editByCommit };
+  return { repo, locus, reference, branches, editByCommit, checks: overlayChecks };
 }
 
 /**
@@ -312,7 +377,7 @@ function seedChecks(): ReadonlyMap<string, CheckRun> {
 
 let cached: SeededRepo | null = null;
 
-/** Fully seeded workspace, memoised. Deterministic, so caching is sound. */
+/** The fixture-only workspace, memoised. Deterministic, so caching is sound. */
 function seeded(): SeededRepo {
   if (cached !== null) return cached;
   const preliminary = seedChecks();
@@ -332,13 +397,24 @@ function seeded(): SeededRepo {
 }
 
 /**
- * A throwaway repository for operations that write. `evaluateMerge` writes a
- * merge commit on its success path, and a shared repository would accumulate
- * those across requests; rebuilding is deterministic, so a fresh one costs
- * only the seeding work and keeps oids identical.
+ * The workspace for a request, including any branches the client created.
+ *
+ * Always a fresh repository when an overlay is present, and never cached:
+ * caching would make one client's created branches visible to another, and
+ * `evaluateMerge` writes a merge commit on its success path, which a shared
+ * repository would accumulate across requests. Rebuilding is cheap because
+ * the expensive part — the pipeline runs — is memoised by request text in
+ * `runCache`, and deterministic oids mean a replay reproduces the same
+ * hashes.
  */
-function scratch(): Omit<SeededRepo, 'checks'> {
-  return seedRepo(seeded().checks);
+function build(overlay: readonly BranchSpec[] = []): SeededRepo {
+  if (overlay.length === 0) return seeded();
+  return seedRepo(seeded().checks, overlay);
+}
+
+/** A throwaway repository for operations that write. */
+function scratch(overlay: readonly BranchSpec[] = []): SeededRepo {
+  return seedRepo(seeded().checks, overlay);
 }
 
 /* ─────────────────────────── view model building ───────────────────────── */
@@ -688,9 +764,18 @@ function branchView(seed: SeededRepo, branch: SeededBranch): BranchView {
   if (tipVariant !== null) {
     request = requestFor(seed.locus, tipVariant);
     const result = runFor(request);
-    const check =
-      seed.checks.get(checkIdFor(seed.locus, tipVariant)) ??
-      checkRunFromPipeline({ commit: branch.head, result });
+    // Find the check bound to *this* head rather than by request text: a
+    // created branch applying the same variant has the same request but a
+    // different commit, and a check whose `commit` does not match is not this
+    // branch's check.
+    let bound: CheckRun | undefined;
+    for (const candidate of seed.checks.values()) {
+      if (candidate.commit === branch.head) {
+        bound = candidate;
+        break;
+      }
+    }
+    const check = bound ?? checkRunFromPipeline({ commit: branch.head, result });
     run = runView({
       branch: branch.name,
       commit: branch.head,
@@ -720,12 +805,13 @@ function branchView(seed: SeededRepo, branch: SeededBranch): BranchView {
 
 /* ───────────────────────────── public surface ──────────────────────────── */
 
-export function buildWorkspace(): WorkspaceView {
-  const seed = seeded();
+export function buildWorkspace(overlay: readonly BranchSpec[] = []): WorkspaceView {
+  const seed = build(overlay);
   return {
     locus: locusView(seed.locus),
     branches: seed.branches.map((branch) => branchView(seed, branch)),
     defaultBranch: DEFAULT_BRANCH,
+    variants: seed.locus.variants.map((v) => editViewOf(seed.locus, v)),
     agentOrder: [...pipelineAgentOrder()],
     simulation: {
       seed: SIMULATION_DEFAULTS.seed,
@@ -741,8 +827,11 @@ export function buildWorkspace(): WorkspaceView {
 }
 
 /** The diff of a branch's genotype against the imported reference. */
-export function buildDiff(branchName: string): DiffView {
-  const seed = seeded();
+export function buildDiff(
+  branchName: string,
+  overlay: readonly BranchSpec[] = [],
+): DiffView {
+  const seed = build(overlay);
   const branch = seed.branches.find((b) => b.name === branchName);
   if (branch === undefined) {
     throw new Error(`shell/model: unknown branch '${branchName}'`);
@@ -769,9 +858,11 @@ export function buildMergeProposal(args: {
   readonly into: string;
   readonly incoming: string;
   readonly signedOffBy?: readonly string[];
+  readonly overlay?: readonly BranchSpec[];
 }): MergeProposalView {
-  const seed = seeded();
-  const fresh = scratch();
+  const overlay = args.overlay ?? [];
+  const seed = build(overlay);
+  const fresh = scratch(overlay);
   const into = fresh.branches.find((b) => b.name === args.into);
   const incoming = fresh.branches.find((b) => b.name === args.incoming);
   if (into === undefined || incoming === undefined) {

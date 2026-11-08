@@ -14,12 +14,14 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Columns3, GitBranch, Terminal } from 'lucide-react';
 
 import './shell.css';
 
-import type { ScreenView, WorkspaceView } from './model/types';
+import type { BranchSpec, ScreenView, WorkspaceView } from './model/types';
 import type { ShellCommand } from './model/commands';
+import { SURFACES } from './model/surfaces';
 import { BranchRail } from './branch-rail';
 import { AgentConsole } from './agent-console';
 import { RedTeamConsole } from './redteam-console';
@@ -35,12 +37,17 @@ export interface AppShellProps {
   readonly workspace: WorkspaceView;
 }
 
-export function AppShell({ workspace }: AppShellProps) {
+export function AppShell({ workspace: initial }: AppShellProps) {
+  // The workspace is server-rendered, then replaced wholesale when the user
+  // creates a branch. `overlay` is the replay list the server needs to rebuild
+  // that state on later calls — see `BranchSpec`.
+  const [workspace, setWorkspace] = useState(initial);
+  const [overlay, setOverlay] = useState<readonly BranchSpec[]>([]);
   const [current, setCurrent] = useState(() => {
     // Open on the most interesting line rather than the reference: the first
     // branch that carries an edit. Derived, not named.
-    const edited = workspace.branches.find((b) => b.tipEdit !== null);
-    return (edited ?? workspace.branches[0])?.name ?? workspace.defaultBranch;
+    const edited = initial.branches.find((b) => b.tipEdit !== null);
+    return (edited ?? initial.branches[0])?.name ?? initial.defaultBranch;
   });
   const [tab, setTab] = useState<WorkspaceTab>('overview');
   const [railCollapsed, setRailCollapsed] = useState(false);
@@ -51,6 +58,7 @@ export function AppShell({ workspace }: AppShellProps) {
   const [consoleRun, setConsoleRun] = useState<ScreenView | null>(null);
 
   const { theme, toggle: toggleTheme } = useTheme();
+  const router = useRouter();
 
   const branch =
     workspace.branches.find((b) => b.name === current) ?? workspace.branches[0];
@@ -149,6 +157,18 @@ export function AppShell({ workspace }: AppShellProps) {
       });
     }
 
+    for (const surface of SURFACES) {
+      list.push({
+        id: `surface:${surface.href}`,
+        group: 'Workspace',
+        label: `Go to ${surface.label}`,
+        hint: surface.href,
+        icon: surface.icon,
+        keywords: ['variant', 'surface', surface.href.replace('/', ''), surface.concept],
+        run: () => router.push(surface.href),
+      });
+    }
+
     list.push(
       {
         id: 'view:rail',
@@ -182,6 +202,7 @@ export function AppShell({ workspace }: AppShellProps) {
     current,
     midCollapsed,
     railCollapsed,
+    router,
     selectBranch,
     tab,
     theme,
@@ -230,9 +251,20 @@ export function AppShell({ workspace }: AppShellProps) {
         <BranchRail
           locus={workspace.locus}
           branches={workspace.branches}
+          variants={workspace.variants}
           current={branch.name}
           collapsed={railCollapsed}
+          overlay={overlay}
           onSelect={selectBranch}
+          onCreated={(next, nextOverlay, created) => {
+            setWorkspace(next);
+            setOverlay(nextOverlay);
+            // Switch to what was just created: the point of creating a line is
+            // to look at its diff.
+            selectBranch(created);
+            setTab('diff');
+            setPane('work');
+          }}
         />
       </nav>
 
@@ -290,6 +322,7 @@ export function AppShell({ workspace }: AppShellProps) {
           locus={workspace.locus}
           branches={workspace.branches}
           branch={branch}
+          overlay={overlay}
           defaultBranch={workspace.defaultBranch}
           simulation={workspace.simulation}
           fixtureDisclaimer={workspace.fixtureDisclaimer}
