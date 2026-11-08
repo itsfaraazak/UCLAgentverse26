@@ -260,6 +260,29 @@ describe('created branches are real refs, not UI rows', () => {
     expect(next.alt.bases).not.toBe(base.alt.bases);
   });
 
+  it('gives two lines from the same base and variant distinct oids', () => {
+    // Every other field of the replay commit is a function of (from,
+    // variantId), so without the ref name in the commit these hashed
+    // identically: two names on one short oid, both resolving to the same
+    // check, and a merge between them whose base equalled both heads.
+    const specs = [
+      { name: 'line/a', from: 'main', variantId: sickleVariant.id },
+      { name: 'line/b', from: 'main', variantId: sickleVariant.id },
+    ] as const;
+    const w = buildWorkspace([...specs]);
+    const a = w.branches.find((b) => b.name === 'line/a');
+    const b = w.branches.find((b) => b.name === 'line/b');
+    expect(a?.head).toMatch(/^[0-9a-f]{64}$/);
+    expect(b?.head).toMatch(/^[0-9a-f]{64}$/);
+    expect(a?.head).not.toBe(b?.head);
+    // Each check is bound to its own line's commit, or the gate reads it as
+    // missing and fails the merge closed.
+    expect(a?.run?.check.commit).toBe(a?.head);
+    expect(b?.run?.check.commit).toBe(b?.head);
+    // Same genotype either way: the distinction is identity, not content.
+    expect(a?.sequence.bases).toBe(b?.sequence.bases);
+  });
+
   it('replays to the same oid, so short hashes are stable across requests', () => {
     const a = buildWorkspace([spec]);
     const b = buildWorkspace([spec]);

@@ -298,7 +298,15 @@ function seedRepo(
     const oid = repo.commit({
       tree,
       author: FIXTURE_AUTHOR,
-      message: variant.label,
+      // The ref name is part of the commit so two created lines are distinct
+      // objects. Every other field here is a function of (from, variantId)
+      // alone, so without it `line/a` and `line/b` from the same base with the
+      // same variant hashed identically: the rail showed two names on one
+      // short oid, both resolved to the same check, and a merge between them
+      // had `mergeBase === into.head === incoming.head`. Not unsafe — the gate
+      // still read the real check — but it undercut the claim that these are
+      // real refs. Replay stays deterministic: the name comes from the spec.
+      message: `${variant.label} (${spec.name})`,
       timestamp: source.commitOids.length,
       edit: variant,
     });

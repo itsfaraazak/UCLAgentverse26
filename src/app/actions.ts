@@ -36,7 +36,8 @@ import type {
 
 /**
  * Screen one free-text request and, when the gate permits, run the full
- * seven-agent pipeline over it.
+ * pipeline over it. A classified run is ten steps, not seven — the count
+ * moved with the ACMG port, so it is deliberately not named here.
  *
  * The returned `ScreenView.echo` is `null` for every `redacted` verdict, and
  * that nulling happens in `screenConsoleRequest` on this side of the wire —
