@@ -1,0 +1,28 @@
+{
+  "_disclaimer": "Public reference sequence retrieved from NCBI Nucleotide and committed so the demo runs offline. Regenerate with `node scripts/fetch-genome.mjs`; verify the committed copy against the live record with `--check`. No patient data, no construct design content (see SPEC.md section 7).",
+  "provenance": {
+    "accession": "NM_000518.5",
+    "title": "NM_000518.5 Homo sapiens hemoglobin subunit beta (HBB), mRNA",
+    "database": "NCBI Nucleotide (nuccore)",
+    "sourceUrl": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NM_000518.5&rettype=fasta&retmode=text",
+    "retrievedAt": "2026-11-08",
+    "retrievedBy": "scripts/fetch-genome.mjs",
+    "licence": "NCBI public-domain reference record; see https://www.ncbi.nlm.nih.gov/home/about/policies/",
+    "provenanceLabel": "public-reference"
+  },
+  "molecule": {
+    "type": "mRNA",
+    "lengthNt": 628,
+    "sha256": "9e811fb12c639fc6610265da635ebbf31521b62410132c6e19dfd0192bd194f3",
+    "alphabet": "ACGT"
+  },
+  "cds": {
+    "offset": 50,
+    "lengthNt": 444,
+    "codonCount": 148,
+    "residueCount": 147,
+    "protein": "MVHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH*",
+    "note": "CDS runs from offset 50 to 494 (exclusive). 147 residues plus one stop codon. Codon numbering in loci.json and SPEC.md is 1-based CDS numbering, so codon 7 is the sickle position (NM_000518.5(HBB):c.20A>T, p.Glu7Val)."
+  },
+  "bases": "ACATTTGCTTCTGACACAACTGTGTTCACTAGCAACCTCAAACAGACACCATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGGCTGCTGGTGGTCTACCCTTGGACCCAGAGGTTCTTTGAGTCCTTTGGGGATCTGTCCACTCCTGATGCTGTTATGGGCAACCCTAAGGTGAAGGCTCATGGCAAGAAAGTGCTCGGTGCCTTTAGTGATGGCCTGGCTCACCTGGACAACCTCAAGGGCACCTTTGCCACACTGAGTGAGCTGCACTGTGACAAGCTGCACGTGGATCCTGAGAACTTCAGGCTCCTGGGCAACGTGCTGGTCTGTGTGCTGGCCCATCACTTTGGCAAAGAATTCACCCCACCAGTGCAGGCTGCCTATCAGAAAGTGGTGGCTGGTGTGGCTAATGCCCTGGCCCACAAGTATCACTAAGCTCGCTTTCTTGCTGTCCAATTTCTATTAAAGGTTCCTTTGTTCCCTAAGTCCAACTACTAAACTGGGGGATATTATGAAGGGCCTTGAGCATCTGGATTCTGCCTAATAAAAAACATTTATTTTCATTGCAA"
+}

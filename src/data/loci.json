@@ -1,24 +1,44 @@
 {
   "_disclaimer": "Curated fixtures for the SigmaFold prototype. Every entry is either (a) public reference knowledge about a human gene, used as a teaching example, or (b) explicitly synthetic and labelled as such. No real patient data. No construct designs, guides, primers, vectors or protocols appear anywhere in this file, by policy (see SPEC.md section 7). Structural and simulation annotations are illustrative teaching summaries, not predictions from a validated model.",
-
   "loci": [
     {
       "gene": "HBB",
       "provenance": "public-reference",
       "name": "Haemoglobin subunit beta",
       "chromosome": "11",
-      "note": "The worked example for this prototype. Only the first 31 codons of the coding sequence are included — enough to diff and translate the classic codon-7 substitution. This is standard textbook reference material. The included region translates to MVHLTPEEKSAVTALWGKVNVDEVGGEALGR.",
+      "note": "The worked example for this prototype. The full reference coding sequence is included: 147 codons plus the terminator, taken from the NCBI reference record NM_000518.5 (see src/data/genomes/hbb-nm_000518.5.json for the retrieval provenance). This is standard textbook reference material. The first 31 codons translate to MVHLTPEEKSAVTALWGKVNVDEVGGEALGR; the full CDS translates to the 147-residue beta-globin chain.",
       "cdsReference": {
         "label": "HbA (reference allele)",
+        "accession": "NM_000518.5",
+        "cdsOffset": 50,
         "startCodon": 1,
-        "codonCount": 31,
-        "lengthNt": 93,
-        "bases": "ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGG"
+        "codonCount": 148,
+        "lengthNt": 444,
+        "note": "Codon 148 is the terminator, so 147 codons encode residues. Sliced from the committed NM_000518.5 mRNA at 0-based offset 50; a test asserts this slice still matches that file.",
+        "bases": "ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGGCTGCTGGTGGTCTACCCTTGGACCCAGAGGTTCTTTGAGTCCTTTGGGGATCTGTCCACTCCTGATGCTGTTATGGGCAACCCTAAGGTGAAGGCTCATGGCAAGAAAGTGCTCGGTGCCTTTAGTGATGGCCTGGCTCACCTGGACAACCTCAAGGGCACCTTTGCCACACTGAGTGAGCTGCACTGTGACAAGCTGCACGTGGATCCTGAGAACTTCAGGCTCCTGGGCAACGTGCTGGTCTGTGTGCTGGCCCATCACTTTGGCAAAGAATTCACCCCACCAGTGCAGGCTGCCTATCAGAAAGTGGTGGCTGGTGTGGCTAATGCCCTGGCCCACAAGTATCACTAA"
       },
       "exons": [
-        { "index": 1, "label": "Exon 1", "codonStart": 1, "codonEnd": 30, "note": "Exon 1 encodes codons 1-30 plus the first base of codon 31, so codon 31 straddles the exon 1 / exon 2 boundary. The 93 nt modelled region therefore extends one codon past the end of exon 1." },
-        { "index": 2, "label": "Exon 2", "codonStart": 31, "codonEnd": 104, "note": "Only the first codon is modelled; the remainder is shown greyed on the gene track for context." },
-        { "index": 3, "label": "Exon 3", "codonStart": 105, "codonEnd": 147, "note": "Not modelled; shown greyed on the gene track for context." }
+        {
+          "index": 1,
+          "label": "Exon 1",
+          "codonStart": 1,
+          "codonEnd": 30,
+          "note": "Exon 1 encodes codons 1-30 plus the first base of codon 31, so codon 31 straddles the exon 1 / exon 2 boundary."
+        },
+        {
+          "index": 2,
+          "label": "Exon 2",
+          "codonStart": 31,
+          "codonEnd": 104,
+          "note": "Codons 31-104, picking up from the second base of codon 31 and running into the first base of codon 105."
+        },
+        {
+          "index": 3,
+          "label": "Exon 3",
+          "codonStart": 105,
+          "codonEnd": 147,
+          "note": "Codons 105-147 plus the terminator, picking up from the second base of codon 105. Ends the coding sequence."
+        }
       ],
       "variants": [
         {
@@ -84,23 +104,53 @@
             "altAaName": "Threonine",
             "summary": "Synonymous substitution; no amino-acid change.",
             "consequence": "No predicted change to the protein in this model.",
-            "polymerizationTendency": 0.0,
+            "polymerizationTendency": 0,
             "confidence": "synthetic",
             "limitation": "Entirely synthetic, included to test the diff renderer."
           }
         }
       ],
       "genotypes": [
-        { "id": "wildtype", "label": "HbA / HbA", "appliedVariants": [], "polymerizationTendency": 0.0 },
-        { "id": "sickle", "label": "HbS / HbS", "appliedVariants": ["HBB_HbS"], "polymerizationTendency": 0.85 },
-        { "id": "repaired", "label": "Post-repair", "appliedVariants": ["HBB_HbS", "HBB_repair"], "polymerizationTendency": 0.05 }
+        {
+          "id": "wildtype",
+          "label": "HbA / HbA",
+          "appliedVariants": [],
+          "polymerizationTendency": 0
+        },
+        {
+          "id": "sickle",
+          "label": "HbS / HbS",
+          "appliedVariants": [
+            "HBB_HbS"
+          ],
+          "polymerizationTendency": 0.85
+        },
+        {
+          "id": "repaired",
+          "label": "Post-repair",
+          "appliedVariants": [
+            "HBB_HbS",
+            "HBB_repair"
+          ],
+          "polymerizationTendency": 0.05
+        }
       ]
     }
   ],
-
   "simulation": {
     "_note": "Parameters for the illustrative particle model in src/lib/cellsim. Chosen so the demo reads clearly on screen; they are not calibrated against experimental haemorheology data and must be presented in the UI as illustrative.",
-    "defaults": { "seed": 20260308, "cellCount": 140, "pO2": 95, "capillaryConstriction": 0.42 },
-    "pO2": { "min": 10, "max": 100, "unit": "mmHg", "label": "Oxygen tension", "sicklingOnsetBelow": 60 }
+    "defaults": {
+      "seed": 20260308,
+      "cellCount": 140,
+      "pO2": 95,
+      "capillaryConstriction": 0.42
+    },
+    "pO2": {
+      "min": 10,
+      "max": 100,
+      "unit": "mmHg",
+      "label": "Oxygen tension",
+      "sicklingOnsetBelow": 60
+    }
   }
 }
