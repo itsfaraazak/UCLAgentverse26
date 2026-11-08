@@ -61,17 +61,22 @@ describe('codons / translate', () => {
     expect(translate('ATGTAG')).toBe('M*');
   });
 
-  it('translates the HBB reference N-terminus used in the fixture', () => {
+  it('translates the HBB reference CDS used in the fixture', () => {
     const hbb = getLocus('HBB');
     expect(hbb).toBeDefined();
     if (hbb === undefined) return;
     const protein = translate(hbb.cdsReference.bases);
     expect(protein.startsWith('MVHLTPEEK')).toBe(true);
-    // Fixture `codonCount` is 31, matching `bases` at 93 nt = 31 complete codons.
-    // Codon 31 straddles the exon 1 / exon 2 boundary; see SPEC.md §4.5 #7.
-    // Translation follows the bases, which is the authoritative sequence.
+    // Fixture `codonCount` is 148, matching `bases` at 444 nt = 148 complete
+    // codons: 147 residues plus the terminator. The loader cross-checks the
+    // two, so translation length and codon count cannot drift apart.
     expect(protein).toHaveLength(codons(hbb.cdsReference.bases).length);
-    expect(protein.includes('*')).toBe(false);
+    // The fixture now holds the whole coding sequence, so it *does* contain a
+    // stop — exactly one, as the last codon. Before the real NM_000518.5
+    // sequence replaced the hand-typed 31-codon region this asserted no stop
+    // was present, which only held because the region stopped short of one.
+    expect(protein.endsWith('*')).toBe(true);
+    expect(protein.indexOf('*')).toBe(protein.length - 1);
   });
 });
 

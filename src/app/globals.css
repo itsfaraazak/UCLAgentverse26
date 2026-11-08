@@ -352,8 +352,7 @@
     BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --font-mono: var(--font-mono-src), ui-monospace, "SF Mono", Menlo, Consolas,
     monospace;
-  --font-display: var(--font-display-src), ui-serif, "New York", Georgia,
-    "Times New Roman", serif;
+  --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -390,12 +389,19 @@
 }
 
 @layer utilities {
-  /* Wordmark, section headings, large figures. Single weight — use size and
-     colour for hierarchy, never font-bold. */
+  /* Wordmark, section headings, large figures. Poppins 500 by default; 600 is
+     loaded for headings that need more presence. */
   .font-display {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.01em;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  /* Hairline rules. The reference design uses sub-pixel borders to keep a dense
+     app shell from reading as a grid of boxes. */
+  .hairline {
+    border-color: color-mix(in oklab, var(--border) 85%, transparent);
+    border-width: 0.5px;
   }
 
   /*

@@ -29,6 +29,13 @@ export interface CdsReference {
   readonly startCodon: number;
   readonly codonCount: number;
   readonly bases: string;
+  /**
+   * Public database accession the sequence was taken from, when it came from
+   * one. Absent for synthetic fixtures.
+   */
+  readonly accession?: string;
+  /** 0-based offset of this CDS within that record's full molecule. */
+  readonly cdsOffset?: number;
 }
 
 export interface LocusVariant extends Variant {
@@ -206,6 +213,42 @@ function parseExon(raw: unknown, field: string): LocusExon {
   };
 }
 
+function optionalNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+/**
+ * `codonCount` is redundant with `bases` by construction, which is exactly why
+ * it is cross-checked: a fixture whose declared length disagrees with its
+ * sequence is the kind of drift that silently invalidates every codon
+ * coordinate downstream. Fail at load, not at render.
+ */
+function parseCdsReference(raw: Record<string, unknown>, field: string): CdsReference {
+  const bases = requireString(raw.bases, `${field}.bases`).toUpperCase();
+  const codonCount = requireNumber(raw.codonCount, `${field}.codonCount`);
+  if (bases.length % 3 !== 0) {
+    throw new Error(
+      `loci.json: ${field}.bases has length ${bases.length}, which is not a whole number of codons`,
+    );
+  }
+  if (bases.length / 3 !== codonCount) {
+    throw new Error(
+      `loci.json: ${field}.codonCount is ${codonCount} but ${field}.bases holds ` +
+        `${bases.length / 3} codons (${bases.length} nt)`,
+    );
+  }
+  const accession = optionalString(raw.accession);
+  const cdsOffset = optionalNumber(raw.cdsOffset);
+  return {
+    label: requireString(raw.label, `${field}.label`),
+    startCodon: requireNumber(raw.startCodon, `${field}.startCodon`),
+    codonCount,
+    bases,
+    ...(accession === undefined ? {} : { accession }),
+    ...(cdsOffset === undefined ? {} : { cdsOffset }),
+  };
+}
+
 function parseLocus(raw: unknown, field: string): Locus {
   if (!isRecord(raw)) {
     throw new Error(`loci.json: ${field} must be an object`);
@@ -223,12 +266,7 @@ function parseLocus(raw: unknown, field: string): Locus {
     name: requireString(raw.name, `${field}.name`),
     chromosome: requireString(raw.chromosome, `${field}.chromosome`),
     note: requireString(raw.note, `${field}.note`),
-    cdsReference: {
-      label: requireString(raw.cdsReference.label, `${field}.cdsReference.label`),
-      startCodon: requireNumber(raw.cdsReference.startCodon, `${field}.cdsReference.startCodon`),
-      codonCount: requireNumber(raw.cdsReference.codonCount, `${field}.cdsReference.codonCount`),
-      bases: requireString(raw.cdsReference.bases, `${field}.cdsReference.bases`).toUpperCase(),
-    },
+    cdsReference: parseCdsReference(raw.cdsReference, `${field}.cdsReference`),
     exons: raw.exons.map((exon, i) => parseExon(exon, `${field}.exons[${i}]`)),
     variants: raw.variants.map((variant, i) =>
       parseVariant(variant, gene, `${field}.variants[${i}]`),

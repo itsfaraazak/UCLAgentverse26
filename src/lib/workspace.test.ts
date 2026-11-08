@@ -64,9 +64,11 @@ describe('buildWorkspace', () => {
   it('reports the modelled region and the wider locus honestly', () => {
     // `modelledCodonCount` is derived from the sequence and `declaredCodonCount`
     // is read from the fixture, so this asserts the two agree rather than
-    // trusting either alone. 31 codons / 93 nt (SPEC §4.5 #7).
-    expect(ws.modelledCodonCount).toBe(31);
-    expect(ws.declaredCodonCount).toBe(31);
+    // trusting either alone. The fixture is the full NM_000518.5 CDS: 148
+    // codons / 444 nt, of which codon 148 is the terminator, so 147 encode
+    // residues and the last exon ends at 147.
+    expect(ws.modelledCodonCount).toBe(148);
+    expect(ws.declaredCodonCount).toBe(148);
     expect(ws.totalCodonCount).toBe(147);
     expect(ws.exons).toHaveLength(3);
   });
