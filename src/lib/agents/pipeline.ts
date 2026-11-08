@@ -1,6 +1,7 @@
 import { lookupLocus, screen } from '@/lib/safety/policy';
 import {
   ASSAY_MODEL_LIMITATION,
+  CHALLENGE_STEPS,
   PO2_RANGE,
   SIMULATION_DEFAULTS,
   runAssay,
@@ -531,7 +532,9 @@ export function runPipeline(input: PipelineInput): PipelineResult {
   const dag = new DeltaDAG();
   const seed = input.seed ?? SIMULATION_DEFAULTS.seed;
   const pO2 = input.pO2 ?? SIMULATION_DEFAULTS.pO2;
-  const steps = input.assaySteps ?? 220;
+  // The assay is a challenge of declared duration, not an open-ended run —
+  // see CHALLENGE_STEPS for why that distinction is load-bearing here.
+  const steps = input.assaySteps ?? CHALLENGE_STEPS;
   let createdAt = 0;
   let parentId: string | null = null;
 

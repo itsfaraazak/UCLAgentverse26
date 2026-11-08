@@ -449,3 +449,28 @@ export function runView(result: PipelineResult): RunView {
 export function agentRole(agent: string): string {
   return ROLE_FOR_AGENT[agent] ?? '';
 }
+
+export interface PipelineStepSpec {
+  /** 1-based position in the fixed order of SPEC §4.3. */
+  readonly step: number;
+  readonly agent: string;
+  readonly kind: DeltaKind;
+  readonly role: string;
+}
+
+/**
+ * The pipeline, described for a UI: the seven agents in their fixed order,
+ * with the delta kind each emits and what each is for.
+ *
+ * Derived from `pipelineAgentOrder()` rather than restated, so a surface
+ * cannot render a different pipeline than the one that runs. The gate is
+ * position 2 here because it is position 2 there.
+ */
+export const PIPELINE_STEPS: readonly PipelineStepSpec[] = pipelineAgentOrder().map(
+  (agent, index) => ({
+    step: index + 1,
+    agent,
+    kind: KIND_FOR_AGENT[agent] ?? 'intent',
+    role: agentRole(agent),
+  }),
+);

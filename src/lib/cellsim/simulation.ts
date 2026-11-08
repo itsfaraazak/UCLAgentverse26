@@ -31,6 +31,25 @@ const NEIGHBOR_CUTOFF = 14;
 
 export const DEFAULT_ASSAY_STEPS = 260;
 
+/**
+ * Length of the acute-hypoxia challenge the agent pipeline assays over.
+ *
+ * This number needs stating, because the model has no steady state at severe
+ * hypoxia. A sickled cell that jams the constriction only clears if it
+ * unsickles, and at a sustained low pO2 it re-sickles, so jams accumulate for
+ * as long as the run continues. Wildtype (tendency 0) never sickles and sits
+ * at exactly 0 however long it runs; a near-reference genotype such as the
+ * repaired allele (tendency 0.05) therefore drifts upward without bound —
+ * measured occlusion 0.02 / 0.10 / 0.18 / 0.21 at 80 / 200 / 260 / 400 steps.
+ *
+ * Past a few hundred steps the comparison stops being about genotype and
+ * becomes about how long the run was. So the assay is defined as a challenge
+ * of fixed, declared duration, and this is that duration. It is a modelling
+ * choice, not a measurement, and it is the kind of choice this tool exists to
+ * make auditable rather than implicit.
+ */
+export const CHALLENGE_STEPS = 200;
+
 export const SIMULATION_DEFAULTS = {
   seed: lociFile.simulation.defaults.seed,
   cellCount: lociFile.simulation.defaults.cellCount,
@@ -427,8 +446,36 @@ function wrapX(x: number): number {
   return v;
 }
 
+/**
+ * Run the simulation headless and report steady-state metrics.
+ *
+ * The estimator matters, so it is stated here. `CellSim.metrics()` averages a
+ * 48-step trailing window, which is the right thing for a live readout but the
+ * wrong thing for an assay: for a genotype near the sickling threshold, a
+ * single terminal window lands inside an intermittent jam or outside it, and
+ * the reported occlusion swings with the step count rather than with the
+ * genotype. Measured on the repaired allele (tendency 0.05) at pO2 10, the
+ * terminal window gave 0.031 / 0.378 / 0.418 / 0.194 / 0.364 at 160 / 200 /
+ * 220 / 260 / 400 steps — noise, not signal.
+ *
+ * So this averages across the run after a warm-up, which is what makes the
+ * number a property of the genotype. It stays fully deterministic: same seed
+ * and same params give the same result.
+ */
 export function runAssay(input: AssayInput): SimMetrics {
+  const steps = Math.max(0, Math.floor(input.steps ?? DEFAULT_ASSAY_STEPS));
   const sim = new CellSim(input);
-  sim.run(input.steps ?? DEFAULT_ASSAY_STEPS);
-  return sim.metrics();
+
+  // Let the flow establish before measuring; the first ticks are the initial
+  // layout relaxing, not the genotype behaving.
+  const warmup = Math.min(steps, Math.ceil(steps * 0.25));
+  sim.run(warmup);
+
+  const samples: SimMetrics[] = [];
+  for (let i = warmup; i < steps; i += 1) {
+    sim.step();
+    samples.push(sim.metrics());
+  }
+  if (samples.length === 0) return sim.metrics();
+  return averageMetrics(samples);
 }

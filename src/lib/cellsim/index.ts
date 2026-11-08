@@ -1,6 +1,7 @@
 export { Mulberry32 } from './prng';
 export {
   ASSAY_MODEL_LIMITATION,
+  CHALLENGE_STEPS,
   CHANNEL,
   CellSim,
   DEFAULT_ASSAY_STEPS,
