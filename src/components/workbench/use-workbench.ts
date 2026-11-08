@@ -121,8 +121,21 @@ export function useWorkbench(identity: HumanIdentity | null) {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('branch');
+    if (fromUrl) setSelected(fromUrl);
+  }, []);
+
   const selected =
     snapshot && snapshot.branches.some((b) => b.name === selectedRaw) ? selectedRaw : MAIN;
+
+  useEffect(() => {
+    if (!snapshot) return;
+    const url = new URL(window.location.href);
+    if (selected === MAIN) url.searchParams.delete('branch');
+    else url.searchParams.set('branch', selected);
+    window.history.replaceState(null, '', url);
+  }, [selected, snapshot]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 

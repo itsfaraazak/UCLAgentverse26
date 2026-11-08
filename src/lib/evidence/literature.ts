@@ -34,9 +34,29 @@ export function literatureUrl(query: string, limit: number): string {
   return `${EUROPE_PMC_SEARCH}?${params.toString()}`;
 }
 
+const ENTITIES: Readonly<Record<string, string>> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+};
+
+/** Europe PMC titles arrive with entity-escaped markup (`&lt;i&gt;BRCA1&lt;/i&gt;`). */
+function decodeEntities(s: string): string {
+  return s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, name: string) => {
+    if (name[0] === '#') {
+      const code = name[1] === 'x' || name[1] === 'X' ? parseInt(name.slice(2), 16) : parseInt(name.slice(1), 10);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : whole;
+    }
+    return ENTITIES[name.toLowerCase()] ?? whole;
+  });
+}
+
 function text(value: unknown): string | null {
   if (typeof value !== 'string' && typeof value !== 'number') return null;
-  const s = String(value).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const s = decodeEntities(String(value)).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
   return s === '' ? null : s;
 }
 
