@@ -19,7 +19,7 @@
 
 import { assessConflict } from '@/lib/acmg/conflict';
 import type { AcmgVariantRecord } from '@/lib/acmg/registry';
-import { ACMG_VARIANT_RECORDS } from '@/lib/acmg/registry';
+import { ACMG_PRIOR_CALL_LIMITATION, ACMG_VARIANT_RECORDS } from '@/lib/acmg/registry';
 import { ACMG_CITATION, ACMG_SCOPE_LIMITATION, scoreAcmg } from '@/lib/acmg/score';
 import { lookupTherapies } from '@/lib/acmg/therapy';
 import { findGenotype, findLocus } from './fixtures';
@@ -28,6 +28,7 @@ import type {
   ConflictPayload,
   EditPlanPayload,
   TherapyMatchPayload,
+  VerdictPayload,
 } from './types';
 
 export const AcmgClassificationAgent = { name: 'AcmgClassificationAgent' } as const;
@@ -120,17 +121,33 @@ export function conflictFromClassification(c: ClassificationPayload): ConflictPa
       newClassification: null,
       crossesActionableThreshold: false,
       note: 'No classification was produced, so there is nothing to compare.',
+      limitation: ACMG_PRIOR_CALL_LIMITATION,
     };
   }
-  return { assessed: true, ...assessConflict(c.priorClassification, c.classification) };
+  return {
+    assessed: true,
+    ...assessConflict(c.priorClassification, c.classification),
+    limitation: ACMG_PRIOR_CALL_LIMITATION,
+  };
 }
 
 /**
- * Returns null when the lookup is not reachable. Callers must only pass a
- * run that passed the verifier with no outstanding sign-off; this re-checks
- * the classification side so a non-actionable call never reaches the table.
+ * Returns null unless the run actually passed with nothing awaiting a human.
+ *
+ * The verifier's own verdict is a required argument rather than a documented
+ * precondition: a caller cannot obtain therapy data without presenting the
+ * evidence that the run cleared. A review found that when this was only a
+ * doc comment, any holder of an escalated run's `classification` delta could
+ * still get a therapy back — SPEC §7.5 says nothing auto-approves, and an
+ * approved therapy must never render beside a call still under review.
  */
-export function therapyFromClassification(c: ClassificationPayload): TherapyMatchPayload | null {
+export function therapyFromClassification(
+  c: ClassificationPayload,
+  verdict: VerdictPayload,
+): TherapyMatchPayload | null {
+  if (!verdict.passed || verdict.mergeBlocked || verdict.requiresSignoff) {
+    return null;
+  }
   if (!c.classified || c.classification === null || c.gene === null || c.variantId === null) {
     return null;
   }

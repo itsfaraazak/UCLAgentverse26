@@ -7,6 +7,7 @@ import { checkRunFromPipeline } from '@/lib/merge-gate/from-pipeline';
 import {
   ACMG_RECLASSIFICATION_SIGNOFF_ROLE,
   classificationCandidates,
+  therapyFromClassification,
 } from './classification';
 import {
   classifiedPipelineAgentOrder,
@@ -338,5 +339,83 @@ describe('which variant gets classified', () => {
         note: '',
       }),
     ).toEqual([]);
+  });
+});
+
+describe('the therapy seam refuses to answer without proof the run passed', () => {
+  const PASSING = {
+    passed: true,
+    mergeBlocked: false,
+    requiresSignoff: false,
+    reasons: [],
+    disagreedWithAssay: false,
+    disagreedWithStructural: false,
+    measured: { highPO2: null, lowPO2: null, referenceLowPO2: null },
+  } as const;
+
+  function classificationFromEscalatedRun() {
+    const result = runPipeline(
+      { text: REPAIR, assaySteps: STEPS, classify: true },
+      { acmgRecords: withPrior('Uncertain Significance') },
+    );
+    expect(result.escalated).toBe(true);
+    return classificationOf(result);
+  }
+
+  it('returns a therapy for a classification that passed cleanly', () => {
+    const result = runPipeline({ text: REPAIR, assaySteps: STEPS, classify: true });
+    expect(therapyFromClassification(classificationOf(result), PASSING)?.result).toBe('matched');
+  });
+
+  it('refuses the same classification once the verdict says sign-off is pending', () => {
+    const c = classificationFromEscalatedRun();
+    expect(therapyFromClassification(c, { ...PASSING, requiresSignoff: true })).toBeNull();
+    expect(therapyFromClassification(c, { ...PASSING, mergeBlocked: true })).toBeNull();
+    expect(therapyFromClassification(c, { ...PASSING, passed: false })).toBeNull();
+  });
+
+  it('refuses an escalated run even holding its real verdict', () => {
+    const result = runPipeline(
+      { text: REPAIR, assaySteps: STEPS, classify: true },
+      { acmgRecords: withPrior('Uncertain Significance') },
+    );
+    expect(therapyFromClassification(classificationOf(result), verdictOf(result))).toBeNull();
+  });
+});
+
+describe('an ACMG-only escalation does not read as approved', () => {
+  it('leads with the crossing, not the biosafety allow-reason', () => {
+    const result = runPipeline(
+      { text: REPAIR, assaySteps: STEPS, classify: true },
+      { acmgRecords: withPrior('Uncertain Significance') },
+    );
+    const check = checkRunFromPipeline({ commit: 'c'.repeat(16), result });
+    expect(check.status).toBe('escalated');
+    for (const reason of check.reasons) {
+      expect(reason).not.toMatch(/In scope for simulation/);
+    }
+    expect(check.reasons.some((r) => /crosses the actionable/.test(r))).toBe(true);
+  });
+
+  it('still carries the biosafety reason when the screen is what escalated', () => {
+    const result = runPipeline({
+      text: 'repair HBB in the germline to treat sickle cell disease',
+      assaySteps: STEPS,
+      classify: true,
+    });
+    const check = checkRunFromPipeline({ commit: 'd'.repeat(16), result });
+    expect(check.reasons[0]).toMatch(/heritable/i);
+  });
+});
+
+describe('the conflict delta carries the simulated-prior caveat', () => {
+  it('attaches it whether or not a prior call existed', () => {
+    const clean = runPipeline({ text: REPAIR, assaySteps: STEPS, classify: true });
+    expect(conflictOf(clean).limitation).toMatch(/not a live ClinVar query/);
+    const none = runPipeline(
+      { text: REPAIR, assaySteps: STEPS, classify: true },
+      { acmgRecords: [] },
+    );
+    expect(conflictOf(none).limitation).toMatch(/not a live ClinVar query/);
   });
 });

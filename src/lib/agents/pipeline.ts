@@ -728,8 +728,8 @@ export function runPipeline(input: PipelineInput, deps: PipelineDeps = {}): Pipe
   // Therapy is reachable only from a run that passed with nothing awaiting a
   // human. An escalated run gets no lookup at all — not an empty one — so no
   // therapy is ever shown beside a call that is still under review.
-  if (classification !== null && mergeAllowed) {
-    const therapy = therapyFromClassification(classification);
+  if (classification !== null && mergeAllowed && isVerdictPayload(verdictDelta.payload)) {
+    const therapy = therapyFromClassification(classification, verdictDelta.payload);
     if (therapy !== null) {
       emit('therapy_match', TherapyLookupAgent.name, 'therapy-lookup', therapy);
     }
