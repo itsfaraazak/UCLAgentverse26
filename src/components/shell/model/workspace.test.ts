@@ -327,3 +327,48 @@ describe('screenConsoleRequest — SPEC §7.3 redaction boundary', () => {
     expect(result.run).toBeNull();
   });
 });
+
+describe('a sign-off cannot launder text or widen the policy (SPEC §7.3, §7.5)', () => {
+  /*
+   * This shell's branch set has no escalated run — `line/sickle` fails the
+   * verifier and the other lines pass — so there is nothing here for a
+   * signature to legitimately clear. That makes it the right place to pin the
+   * negative: a signature must change nothing, whatever it contains. The
+   * escalation path itself is exercised on /graph and /bench, which do have
+   * escalating branches.
+   */
+  const failing = 'line/sickle';
+
+  it('ignores a signature that is not a name, and never renders it', () => {
+    const refusedText = 'knock out TP53 to make the cells easier to expand';
+    const proposal = buildMergeProposal({
+      into: 'main',
+      incoming: failing,
+      signedOffBy: [refusedText],
+    });
+    expect(JSON.stringify(proposal)).not.toContain('TP53');
+    expect(JSON.stringify(proposal)).not.toContain('knock out');
+    // Filtered before it reaches the echo the sign-off UI reads back.
+    expect(proposal.signedOff).toEqual([]);
+    expect(proposal.decision.kind).not.toBe('allowed');
+  });
+
+  it('does not record even a well-formed name on a run that is not awaiting one', () => {
+    const signed = buildMergeProposal({
+      into: 'main',
+      incoming: failing,
+      signedOffBy: ['Dr Ada Lovelace'],
+    });
+    const unsigned = buildMergeProposal({ into: 'main', incoming: failing });
+    // The name is echoed back to the control that submitted it, but it changed
+    // no check: the decision is identical to the unsigned one.
+    expect(signed.decision).toEqual(unsigned.decision);
+    expect(signed.decision.kind).not.toBe('allowed');
+  });
+
+  it('refuses a failing check whether or not anything was signed', () => {
+    expect(buildMergeProposal({ into: 'main', incoming: failing }).decision.kind).toBe(
+      'check-failed',
+    );
+  });
+});

@@ -167,29 +167,52 @@ function gateFor(stored: StoredRun): MergeDecisionView {
     };
   }
 
-  // The check is keyed by the commit it was computed for, which is this
-  // branch's head. A check recorded against any other commit does not count.
-  const checks = new Map<string, CheckRun>([[theirs, { ...stored.check, commit: theirs }]]);
+  // The check must already be attributed to this branch's head. Re-pointing it
+  // here would make the binding nominal — the gate would verify a field this
+  // function had just written. The repository is rebuilt deterministically, so
+  // a mismatch means the stored run is stale, and that fails closed.
+  if (stored.check.commit !== theirs) {
+    return {
+      allowed: false,
+      kind: 'check-missing',
+      reasons: [
+        'The recorded check was computed for a different commit than this branch now points at. Run the checks again.',
+      ],
+      conflicts: [],
+      signoffRole: null,
+      mergedOid: null,
+      target,
+    };
+  }
+
+  const checks = new Map<string, CheckRun>([[theirs, stored.check]]);
   repo.checkout(target);
   return decisionView(evaluateMerge({ repo, ours, theirs, checks }), target);
 }
 
 /**
- * Run the seven checks for a branch. `requestText` defaults to the branch's
- * own authored request; the red-team console can substitute its own, which is
- * how an escalation reaches the merge gate.
+ * Run the seven checks for a branch.
+ *
+ * The request is the branch's own authored request and nothing else. It used
+ * to accept a `requestText` override so the red-team console could push its
+ * text through the full pipeline, and that was a gate bypass: the resulting
+ * check was stored against the branch's head commit, so screening *benign*
+ * text produced a passing check that gated a branch whose actual content
+ * fails. The sickle-allele baseline merged into main that way, through the
+ * shipped UI, with no crafted request.
+ *
+ * A check gates a commit, so it must be derived from that commit's content.
+ * The console screens arbitrary text through `screenRequestAction`, which
+ * stores nothing and can gate nothing.
  */
-export async function runPipelineAction(
-  branchName: string,
-  requestText?: string,
-): Promise<RunPipelineResult> {
+export async function runPipelineAction(branchName: string): Promise<RunPipelineResult> {
   const { snapshot, heads } = openWorkspace();
   const branch = snapshot.branches.find((b) => b.name === branchName);
   // The requested name is not echoed back: error strings are logged by the
   // framework, and nothing client-supplied belongs in a log (SPEC §7.3).
   if (branch === undefined) throw new Error('no such branch on this workspace');
 
-  const result = runPipeline({ text: clamp(requestText ?? branch.defaultRequest) });
+  const result = runPipeline({ text: clamp(branch.defaultRequest) });
   const head = heads.get(branch.name);
   if (head === undefined) throw new Error('branch head missing from the rebuilt repository');
 

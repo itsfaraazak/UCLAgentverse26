@@ -18,12 +18,19 @@ export async function runChecksAction(frameId: string, pO2: number): Promise<Che
   return runChecksFor(frameId, pO2);
 }
 
+/**
+ * Attempt a merge. `approver` is the name of the person accepting an
+ * escalation, and it is the only thing the client may contribute to a
+ * sign-off: the role comes from the policy and the decision comes from
+ * `lib/merge-gate`. A null or malformed name simply yields no sign-off, so
+ * the gate still refuses the merge (SPEC §7.5).
+ */
 export async function attemptMergeAction(
   frameId: string,
   pO2: number,
-  signedOff: boolean,
+  approver: string | null,
 ): Promise<MergeAttemptView> {
-  return attemptMergeFor(frameId, pO2, signedOff);
+  return attemptMergeFor(frameId, pO2, approver);
 }
 
 export interface RedTeamState {

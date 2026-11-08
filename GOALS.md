@@ -66,13 +66,15 @@ Everything converges on **`sigmafold/paramveer`**, which opens **one PR** agains
 main
  ├── variant/lab-bench        ✅ merged → /bench
  ├── variant/ide-triptych     ✅ merged → /ide
- ├── variant/graph-first      ⏳ merging → /graph
- ├── chore/unslop             ⏳ pending
- ├── feat/ai-harness          ⏳ pending   (genome + BYOK providers)
- ├── feat/app-shell           ⏳ pending
- ├── feat/genome-3d-upload    ⏳ pending
- └── docs/demo-script-v2      ⏳ pending
+ ├── variant/graph-first      ✅ merged → /graph
+ ├── chore/unslop             ✅ merged
+ ├── feat/ai-harness          ✅ reached the branch via main
+ ├── feat/app-shell           ✅ merged → / (the primary frame)
+ ├── feat/genome-3d-upload    ✅ merged
+ └── docs/demo-script-v2      ✅ merged
 ```
+
+All eight are in. `sigmafold/paramveer` opens the single PR.
 
 ## 6. Status
 
@@ -93,12 +95,25 @@ main
 
 ### Remaining
 
-1. **`graph-first` stub drift** — 16 invented exports across `agents` + `cellsim`. *Blocks the build.*
-2. App shell lands, variants mount inside it
-3. 3D genome view + upload merge
-4. `lib/ai` guard tests + three feature wirings
-5. Demo script and pitch
-6. **Review loop on every branch** (see §7), then the single PR
+1. ~~`graph-first` stub drift~~ — done. All eight stub files are deleted, plus a ninth the
+   checker does not scan (`src/lib/loci/index.ts`, a duplicate of the real `lib/genome/loci.ts`).
+   `node scripts/check-stubs.mjs sigmafold/paramveer` exits 0 and no `TEMP STUB` file remains.
+2. ~~App shell lands, variants mount inside it~~ — done. `/` is the shell; a `VariantSwitcher`
+   in all four titlebars reaches `/ide`, `/bench` and `/graph` from the chrome.
+3. ~~3D genome view + upload merge~~ — done.
+4. ~~Demo script and pitch~~ — done.
+5. **Open findings**, carried to the PR body rather than silently fixed:
+   - The pipeline is **branch-blind**. `EditPlannerAgent` resolves an edit against `loci.json`
+     and the assay runs on the genotype the fixture names, so the same edit on the reference and
+     on the sickle allele assays identically. The deleted stubs took a `baselineTendency`; the
+     real agent contract has no equivalent. Fixing it means adding the branch's baseline
+     genotype to `PipelineInput` — an agent-contract change, so it is escalated per
+     CONVENTIONS §5 rather than invented. Recorded in `src/lib/demo/scenario.ts`.
+   - `src/lib/fixtures/loci.ts` (graph-first) is a third fixture reader alongside the real
+     `lib/genome/loci.ts`. It works and is not a stub, but it is duplication worth collapsing.
+   - The app shell's own branch set never escalates, so its sign-off control has nothing to
+     clear. The escalation path is exercisable on `/graph` and `/bench`.
+6. ~~Review loop~~ — run; findings in the PR body.
 
 ## 7. Process — the review loop is mandatory
 
@@ -138,7 +153,25 @@ tones and a graph-layout bug found by fuzzing.
 
 | Risk | State |
 |---|---|
-| Parallel UI builds drifted from the real `lib/` interfaces | `scripts/check-stubs.mjs` detects it; must exit 0 before merge |
+| Parallel UI builds drifted from the real `lib/` interfaces | Resolved on the integration branch. `node scripts/check-stubs.mjs sigmafold/paramveer` exits 0 — see the note below on which invocation is the gate |
 | A content classifier can halt biology-adjacent threads | Hit twice. Rescope the brief to the software problem; do not model-shop to evade |
 | Uncommitted work lost when a thread dies | Mitigated by committing incrementally |
 | Lockfile churn across branches | Regenerate with `pnpm install --no-frozen-lockfile`, never hand-merge |
+
+### A note on `check-stubs.mjs` invocations
+
+The script's positional arguments are the branches **to scan**; `--base=` only sets the
+reference to compare their exports against. So:
+
+- `node scripts/check-stubs.mjs sigmafold/paramveer` → scans the integration branch. **Exits 0**,
+  and reports `no files marked "TEMP STUB"`. This is the gate: it asserts the thing that
+  matters, that the branch which ships has no placeholder modules and no drift.
+- `node scripts/check-stubs.mjs --base=sigmafold/paramveer` → passes no branch names, so it
+  discovers and scans the three `variant/*` branches, using the integration branch as the
+  reference. Those branches are untouched remote refs and still contain their own stub files, so
+  it reports their invented exports and **exits 1** — and will keep doing so however correct the
+  integration is. The only way to make that form exit 0 is to rewrite the three variant branches
+  to delete their stubs, which is a force-push to branches this thread does not own.
+
+Both facts are true at once and neither is a build failure. If the variant branches should be
+cleaned up too, that is a separate decision.

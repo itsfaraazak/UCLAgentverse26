@@ -102,13 +102,41 @@ describe('bench data and checks', () => {
   });
 
   it('refuses a merge whose introduced commit did not pass its checks', () => {
-    const merge = attemptMergeFor('frame-mutant', 20, false);
+    const merge = attemptMergeFor('frame-mutant', 20, null);
     expect(merge.ok).toBe(false);
     expect(merge.kind).toBe('check-failed');
     expect(merge.blockingReasons.length).toBeGreaterThan(0);
   });
 
   it('treats the reference frame as nothing to merge', () => {
-    expect(attemptMergeFor('frame-reference', 20, false).ok).toBe(false);
+    expect(attemptMergeFor('frame-reference', 20, null).ok).toBe(false);
+  });
+
+  /**
+   * Regression: the client used to send `signedOff: boolean` and the server
+   * stamped a constant actor onto the check, so a crafted request cleared an
+   * escalation with no human attached. Only a name travels now, and
+   * `resolveSignoff` decides (SPEC §7.5).
+   */
+  it('records no sign-off without a name, so the gate still refuses', () => {
+    const merge = attemptMergeFor('frame-repaired', 20, null);
+    if (merge.requiresSignoff) {
+      expect(merge.ok).toBe(false);
+    }
+    expect(attemptMergeFor('frame-repaired', 20, '').ok).toBe(
+      attemptMergeFor('frame-repaired', 20, null).ok,
+    );
+  });
+
+  it('refuses a malformed approver exactly as it refuses none', () => {
+    const none = attemptMergeFor('frame-repaired', 20, null);
+    for (const bogus of ['   ', '!!', '1', '<script>', '\u0000']) {
+      expect(attemptMergeFor('frame-repaired', 20, bogus).ok).toBe(none.ok);
+    }
+  });
+
+  it('never carries an approver name into a blocked frame\u2019s output', () => {
+    const merge = attemptMergeFor('frame-mutant', 20, 'Dr Ada Lovelace');
+    expect(JSON.stringify(merge)).not.toContain('Lovelace');
   });
 });

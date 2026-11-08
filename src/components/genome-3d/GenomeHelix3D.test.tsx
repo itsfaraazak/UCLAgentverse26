@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import lociFile from '@/data/loci.json';
 import {
   ContextLostError,
   LibraryLoadError,
@@ -12,6 +13,10 @@ import { loadGenomeEngine } from './load-engine';
 import type { GenomeEngineHandle, GenomeEngineOptions } from './engine';
 import { buildGenomeModel } from './model';
 
+const hbb = lociFile.loci.find((locus) => locus.gene === 'HBB');
+if (hbb === undefined) throw new Error('HBB fixture missing from loci.json');
+const HBB_CODON_COUNT = hbb.cdsReference.codonCount;
+
 vi.mock('./load-engine', () => ({ loadGenomeEngine: vi.fn() }));
 const loadEngine = vi.mocked(loadGenomeEngine);
 
@@ -19,10 +24,10 @@ function fakeHandle(): GenomeEngineHandle {
   return {
     renderer: { kind: 'webgl2', label: 'WebGL 2', fallbackReason: 'WebGPU not exposed by this browser' },
     scene: {
-      codonInstances: 147,
-      rungInstances: 93,
-      modelledCodons: 31,
-      unsequencedCodons: 116,
+      codonInstances: HBB_CODON_COUNT,
+      rungInstances: HBB_CODON_COUNT * 3,
+      modelledCodons: HBB_CODON_COUNT,
+      unsequencedCodons: 0,
       editedCodonIndices: [7],
       focusedCodon: null,
       axisLength: 149.6,
@@ -74,9 +79,19 @@ describe('GenomeHelix3D — success path', () => {
 
     await waitFor(() => expect(container.querySelector('[data-renderer="webgl2"]')).not.toBeNull());
     expect(screen.getByRole('heading', { name: 'HBB coding region' })).toBeTruthy();
-    expect(screen.getByText('31')).toBeTruthy();
-    expect(screen.getByText('147')).toBeTruthy();
-    expect(mount.mock.calls[0]?.[0].model).toMatchObject({ gene: 'HBB', totalCodonCount: 147 });
+    expect(
+      screen.getByText((_content, element) => {
+        if (element === null || element.tagName !== 'P') return false;
+        return (element.textContent ?? '').includes(
+          `${HBB_CODON_COUNT} of ${HBB_CODON_COUNT} codons sequenced`,
+        );
+      }),
+    ).toBeTruthy();
+    expect(mount.mock.calls[0]?.[0].model).toMatchObject({
+      gene: 'HBB',
+      totalCodonCount: HBB_CODON_COUNT,
+      modelledCodonCount: HBB_CODON_COUNT,
+    });
   });
 
   it('disposes the engine handle on unmount', async () => {

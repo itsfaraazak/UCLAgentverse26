@@ -40,14 +40,10 @@ import type { MergeDecisionView } from '@/app/ide/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CHECK_STATUS_STYLE, VERDICT_HEADLINE } from '@/components/shell/status-ide';
-import { pipelineAgentOrder } from '@/lib/agents';
-import {
-  agentRole,
-  type DeltaView,
-  type RunView,
-  type StepDetail,
-  type StepView,
-} from '@/lib/run-view';
+import type { DeltaView, RunView, StepDetail, StepView } from '@/lib/run-view';
+// The pipeline's shape only. Importing a value from `@/lib/agents` here would
+// bundle lib/safety, and with it node:crypto, into the browser.
+import { PIPELINE_STEPS, agentRole } from '@/lib/run-view/steps';
 
 const AGENT_ICON: Readonly<Record<string, LucideIcon>> = {
   IntentAgent: ListTree,
@@ -278,7 +274,7 @@ export function CiPanel({
             cross-checks every claim against the measured numbers.
           </p>
           <ol className="mt-1 space-y-1">
-            {pipelineAgentOrder().map((agent: string, i: number) => {
+            {PIPELINE_STEPS.map(({ agent }, i) => {
               const Icon = AGENT_ICON[agent] ?? ListTree;
               return (
                 <li key={agent} className="flex items-center gap-2 text-[11.5px] text-muted-foreground">
