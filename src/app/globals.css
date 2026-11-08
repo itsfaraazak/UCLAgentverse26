@@ -549,6 +549,65 @@
   --color-lumen: var(--lumen);
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Variant layer: /graph (graph-first).
+
+   The graph variant styles verdicts with short aliases (`text-block`,
+   `bg-pass-soft`, …) and draws its DAG lanes from --graph-lane-N. Both were
+   defined on variant/graph-first and dropped when its globals.css was
+   resolved into the shared one, which left /graph's verdict tints, conflict
+   notices, changed-base highlights and lane strokes with no colour at all.
+
+   The aliases point at the shared verdict tokens, so they inherit the AA
+   guarantee contrast.test.ts enforces rather than restating it. Lane colours
+   are categorical data — which line of history a commit is on — not accents.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --graph-lane-1: oklch(0.52 0.16 258);
+  --graph-lane-2: oklch(0.56 0.14 152);
+  --graph-lane-3: oklch(0.6 0.15 48);
+  --graph-lane-4: oklch(0.54 0.18 310);
+  --graph-lane-5: oklch(0.55 0.14 196);
+  --graph-lane-6: oklch(0.54 0.17 10);
+  --graph-grid: oklch(0.52 0.02 262 / 0.06);
+}
+
+.dark {
+  --graph-lane-1: oklch(0.74 0.14 258);
+  --graph-lane-2: oklch(0.78 0.14 155);
+  --graph-lane-3: oklch(0.8 0.14 62);
+  --graph-lane-4: oklch(0.76 0.16 312);
+  --graph-lane-5: oklch(0.76 0.12 200);
+  --graph-lane-6: oklch(0.74 0.16 14);
+  --graph-grid: oklch(0.99 0.004 250 / 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --graph-lane-1: oklch(0.74 0.14 258);
+    --graph-lane-2: oklch(0.78 0.14 155);
+    --graph-lane-3: oklch(0.8 0.14 62);
+    --graph-lane-4: oklch(0.76 0.16 312);
+    --graph-lane-5: oklch(0.76 0.12 200);
+    --graph-lane-6: oklch(0.74 0.16 14);
+    --graph-grid: oklch(0.99 0.004 250 / 0.05);
+  }
+}
+
+@theme inline {
+  --color-pass: var(--verdict-pass);
+  --color-pass-soft: var(--verdict-pass-soft);
+  --color-escalate: var(--verdict-escalate);
+  --color-escalate-soft: var(--verdict-escalate-soft);
+  --color-block: var(--verdict-block);
+  --color-block-soft: var(--verdict-block-soft);
+  --color-conflict: var(--verdict-conflict);
+  --color-conflict-soft: var(--verdict-conflict-soft);
+  --color-neutral-verdict: var(--verdict-neutral);
+  --color-neutral-verdict-soft: var(--verdict-neutral-soft);
+}
+
 @layer base {
   html {
     color-scheme: light;
