@@ -34,7 +34,7 @@ import { useId, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { VERDICT_HEADLINE, VERDICT_STYLE } from '@/components/shell/status';
+import { VERDICT_HEADLINE, VERDICT_STYLE } from '@/components/shell/status-ide';
 import { screenRequestAction } from '@/app/ide/actions';
 import type { RunView, ScreenView } from '@/lib/run-view';
 

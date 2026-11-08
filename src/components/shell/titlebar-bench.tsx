@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { VariantSwitcher } from '@/components/shell/variant-switcher';
 
 export interface TitleBarProps {
   branches: readonly string[];
@@ -68,6 +69,8 @@ export function TitleBar({
           </h1>
           <p className="truncate text-[0.6875rem] text-muted-foreground">{subtitle}</p>
         </div>
+
+        <VariantSwitcher current="/bench" />
 
         <div className="ml-auto flex items-center gap-2">
           <label htmlFor="branch-select" className="sr-only">

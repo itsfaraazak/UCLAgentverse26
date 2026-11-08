@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { THEME_STORAGE_KEY } from './theme-script';
+import { VariantSwitcher } from '@/components/shell/variant-switcher';
 
 /** The three macOS window buttons. Decorative, and hidden from the AX tree. */
 function TrafficLights() {
@@ -80,7 +81,9 @@ export function Titlebar({ repoName, headBranch, commitCount, branchCount }: Tit
         </span>
         <span className="truncate font-mono text-[12px] text-muted-foreground">{repoName}</span>
       </div>
-      <div className="ml-auto flex items-center gap-3">
+      <VariantSwitcher current="/graph" />
+
+        <div className="ml-auto flex items-center gap-3">
         <span className="hidden items-center gap-1.5 text-[12px] text-muted-foreground tnum sm:flex">
           <GitBranch className="size-3.5" aria-hidden="true" />
           <span>

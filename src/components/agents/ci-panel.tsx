@@ -39,7 +39,7 @@ import { useId, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { MergeDecisionView } from '@/app/ide/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CHECK_STATUS_STYLE, VERDICT_HEADLINE } from '@/components/shell/status';
+import { CHECK_STATUS_STYLE, VERDICT_HEADLINE } from '@/components/shell/status-ide';
 import { pipelineAgentOrder } from '@/lib/agents';
 import {
   agentRole,

@@ -1,27 +1,22 @@
-'use client';
+"use client";
 
-/**
- * ⌘K command palette — the keyboard-first spine of this variant.
- *
- * Everything the triptych can do is reachable here: switch branch, run the
- * pipeline, jump to the edited codon, change the gene-track zoom, open the
- * red-team console or the cell canvas, attempt the merge, flip the theme.
- */
-
+import * as React from "react";
 import {
-  Command as CommandIcon,
-  CornerDownLeft,
-  FlaskConical,
+  Activity,
+  Atom,
+  Columns3,
+  Crosshair,
+  Dna,
   GitBranch,
   GitMerge,
-  Microscope,
-  MoonStar,
-  PlayCircle,
-  ScanSearch,
-  Swords,
-  Target,
+  PanelLeft,
+  PanelRight,
+  Play,
+  ShieldCheck,
+  SunMoon,
+  Upload,
   type LucideIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 import {
   Command,
@@ -33,154 +28,171 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from '@/components/ui/command';
-import type { BranchView } from '@/lib/workspace';
-
-export interface PaletteAction {
-  readonly id: string;
-  readonly label: string;
-  readonly icon: LucideIcon;
-  readonly shortcut?: string;
-  readonly run: () => void;
-  readonly hint?: string;
-}
+} from "@/components/ui/command";
+import type {
+  CommandGroup as CommandGroupName,
+  CommandIconName,
+  ShellCommand,
+} from "@/components/shell/model/commands";
 
 export interface CommandPaletteProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  readonly branches: readonly BranchView[];
-  readonly activeBranch: string;
-  readonly markerCodon: number | null;
-  readonly onSelectBranch: (branch: string) => void;
-  readonly onRunPipeline: () => void;
-  readonly onJumpToEdit: () => void;
-  readonly onAttemptMerge: () => void;
-  readonly onOpenRedTeam: () => void;
-  readonly onOpenCanvas: () => void;
-  readonly onZoom: (zoom: 'locus' | 'exon' | 'codon') => void;
-  readonly onToggleTheme: () => void;
+  readonly commands: readonly ShellCommand[];
+}
+
+const ICONS: Record<CommandIconName, LucideIcon> = {
+  GitBranch,
+  GitMerge,
+  Play,
+  ShieldCheck,
+  Columns3,
+  Dna,
+  Atom,
+  Activity,
+  PanelLeft,
+  PanelRight,
+  Crosshair,
+  SunMoon,
+  Upload,
+};
+
+const GROUP_ORDER: readonly CommandGroupName[] = [
+  "Branch",
+  "Pipeline",
+  "Workspace",
+  "View",
+];
+
+function isApplePlatform(): boolean {
+  return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function isInsideContentEditable(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement && target.isContentEditable;
 }
 
 export function CommandPalette({
   open,
   onOpenChange,
-  branches,
-  activeBranch,
-  markerCodon,
-  onSelectBranch,
-  onRunPipeline,
-  onJumpToEdit,
-  onAttemptMerge,
-  onOpenRedTeam,
-  onOpenCanvas,
-  onZoom,
-  onToggleTheme,
-}: CommandPaletteProps) {
-  const close = (fn: () => void) => () => {
+  commands,
+}: CommandPaletteProps): React.ReactElement {
+  React.useEffect(() => {
+    const apple = isApplePlatform();
+
+    function onKeyDown(event: KeyboardEvent): void {
+      if (event.key.toLowerCase() !== "k" || event.altKey) return;
+      const chord = apple
+        ? event.metaKey && !event.ctrlKey
+        : event.ctrlKey && !event.metaKey;
+      if (!chord || isInsideContentEditable(event.target)) return;
+
+      event.preventDefault();
+      if (event.repeat) return;
+      onOpenChange(!open);
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, onOpenChange]);
+
+  const groups = React.useMemo(
+    () =>
+      GROUP_ORDER.map((group) => ({
+        group,
+        items: commands.filter((command) => command.group === group),
+      })).filter(({ items }) => items.length > 0),
+    [commands],
+  );
+
+  function select(command: ShellCommand): void {
+    command.run();
     onOpenChange(false);
-    fn();
-  };
+  }
 
   return (
     <CommandDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="SigmaFold command palette"
-      description="Switch branch, run the agent pipeline, jump to the edited codon, or open the red-team console."
-      className="sm:max-w-xl"
+      title="Command palette"
+      description="Search for a branch, pipeline, workspace or view command."
+      className="ring-foreground/[0.08] shadow-none sm:max-w-xl"
     >
-      <Command loop>
-        <CommandInput placeholder="Type a command or a branch name…" />
-        <CommandList className="max-h-[22rem]">
-          <CommandEmpty>No matching command.</CommandEmpty>
-
-          <CommandGroup heading="Pipeline">
-            <CommandItem value="run checks pipeline agents" onSelect={close(onRunPipeline)}>
-              <PlayCircle aria-hidden />
-              Run the seven agent checks
-              <CommandShortcut>⌘⏎</CommandShortcut>
-            </CommandItem>
-            <CommandItem value="attempt merge gate" onSelect={close(onAttemptMerge)}>
-              <GitMerge aria-hidden />
-              Attempt merge into the base branch
-              <CommandShortcut>⌘⇧M</CommandShortcut>
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <CommandGroup heading="Navigate">
-            <CommandItem value="jump edited codon diff" onSelect={close(onJumpToEdit)}>
-              <Target aria-hidden />
-              {markerCodon === null
-                ? 'Jump to the edit (this branch has none)'
-                : `Jump to the edited codon (${markerCodon})`}
-              <CommandShortcut>⌘G</CommandShortcut>
-            </CommandItem>
-            <CommandItem value="zoom locus gene track" onSelect={close(() => onZoom('locus'))}>
-              <ScanSearch aria-hidden />
-              Gene track — zoom to whole locus
-            </CommandItem>
-            <CommandItem value="zoom exon gene track" onSelect={close(() => onZoom('exon'))}>
-              <ScanSearch aria-hidden />
-              Gene track — zoom to the modelled exon
-            </CommandItem>
-            <CommandItem value="zoom codon gene track" onSelect={close(() => onZoom('codon'))}>
-              <Microscope aria-hidden />
-              Gene track — zoom to codon level
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <CommandGroup heading="Branches">
-            {branches.map((branch) => (
-              <CommandItem
-                key={branch.name}
-                value={`branch ${branch.name} ${branch.genotypeLabel}`}
-                onSelect={close(() => onSelectBranch(branch.name))}
-              >
-                <GitBranch aria-hidden />
-                <span className="font-mono">{branch.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {branch.genotypeLabel}
+      <Command className="rounded-none! p-1">
+        <CommandInput placeholder="Type a command or search…" />
+        <CommandSeparator className="mt-1" />
+        <CommandList className="max-h-[min(24rem,60vh)] py-1">
+          <CommandEmpty className="py-8 text-sm text-muted-foreground">
+            No matching command.
+          </CommandEmpty>
+          {groups.map(({ group, items }) => (
+            <CommandGroup
+              key={group}
+              heading={
+                <span className="font-display text-[0.6875rem] tracking-[0.06em]! text-muted-foreground uppercase">
+                  {group}
                 </span>
-                {branch.name === activeBranch && (
-                  <CornerDownLeft className="ml-auto size-3 opacity-60" aria-label="current branch" />
-                )}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <CommandGroup heading="Panel">
-            <CommandItem value="red team console safety screen" onSelect={close(onOpenRedTeam)}>
-              <Swords aria-hidden />
-              Open the red-team console
-              <CommandShortcut>⌘⇧R</CommandShortcut>
-            </CommandItem>
-            <CommandItem value="cell canvas simulation po2" onSelect={close(onOpenCanvas)}>
-              <FlaskConical aria-hidden />
-              Open the live cell canvas
-              <CommandShortcut>⌘⇧C</CommandShortcut>
-            </CommandItem>
-            <CommandItem value="theme dark light appearance" onSelect={close(onToggleTheme)}>
-              <MoonStar aria-hidden />
-              Toggle light / dark appearance
-            </CommandItem>
-          </CommandGroup>
+              }
+              className="px-1 py-0.5 **:[[cmdk-group-heading]]:pt-2.5 **:[[cmdk-group-heading]]:pb-1"
+            >
+              {items.map((command) => (
+                <CommandPaletteRow
+                  key={command.id}
+                  command={command}
+                  onSelect={select}
+                />
+              ))}
+            </CommandGroup>
+          ))}
         </CommandList>
-
-        <div className="flex items-center gap-2 border-t border-border px-2.5 py-1.5 text-[10px] text-muted-foreground">
-          <CommandIcon className="size-3" aria-hidden />
-          <span>
-            Every command here is also a keyboard shortcut. The palette never bypasses the
-            biosafety gate — running the pipeline from here screens the request first, exactly as
-            the CI panel does.
-          </span>
-        </div>
       </Command>
     </CommandDialog>
+  );
+}
+
+function CommandPaletteRow({
+  command,
+  onSelect,
+}: {
+  readonly command: ShellCommand;
+  readonly onSelect: (command: ShellCommand) => void;
+}): React.ReactElement {
+  const Icon = ICONS[command.icon];
+  const hasTrailing =
+    command.hint !== undefined ||
+    (command.shortcut !== undefined && command.shortcut.length > 0);
+
+  return (
+    <CommandItem
+      value={command.label}
+      keywords={command.keywords ? [...command.keywords] : undefined}
+      disabled={command.disabled}
+      onSelect={() => onSelect(command)}
+      className="h-9 gap-2.5 py-0 text-sm text-foreground data-selected:bg-accent data-selected:text-accent-foreground [&_svg]:text-muted-foreground"
+    >
+      <Icon aria-hidden className="h-4 w-4" strokeWidth={1.75} />
+      <span className="min-w-0 flex-1 truncate">{command.label}</span>
+      {hasTrailing ? (
+        <CommandShortcut className="flex shrink-0 items-center gap-2 tracking-normal">
+          {command.hint !== undefined ? (
+            <span className="max-w-48 truncate text-xs text-muted-foreground">
+              {command.hint}
+            </span>
+          ) : null}
+          {command.shortcut !== undefined && command.shortcut.length > 0 ? (
+            <span className="flex items-center gap-0.5">
+              {command.shortcut.map((key, index) => (
+                <kbd
+                  key={`${key}-${index}`}
+                  className="hairline inline-flex h-5 min-w-5 items-center justify-center rounded-sm px-1 font-sans text-[0.6875rem] leading-none text-muted-foreground"
+                >
+                  {key}
+                </kbd>
+              ))}
+            </span>
+          ) : null}
+        </CommandShortcut>
+      ) : null}
+    </CommandItem>
   );
 }

@@ -598,3 +598,57 @@
     overscroll-behavior: none;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Surface switcher.
+
+   One product, four surfaces (the shell, /ide, /bench, /graph). It sits in
+   each surface's own titlebar, so it lives here rather than in the shell's
+   stylesheet — the three variants do not load shell.css.
+   ────────────────────────────────────────────────────────────────────────── */
+.vswitch {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 3px);
+  background: color-mix(in oklab, var(--muted) 60%, transparent);
+}
+
+.vswitch__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.4375rem;
+  border-radius: calc(var(--radius) - 5px);
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.vswitch__item:hover {
+  background: color-mix(in oklab, var(--accent) 70%, transparent);
+  color: var(--foreground);
+}
+
+.vswitch__item[aria-current='page'] {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px color-mix(in oklab, black 10%, transparent);
+}
+
+.vswitch__item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* On a narrow window the icons carry it; the titlebar is already dense. */
+@media (max-width: 1100px) {
+  .vswitch__label {
+    display: none;
+  }
+}

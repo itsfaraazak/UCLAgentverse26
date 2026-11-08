@@ -1,48 +1,83 @@
 'use client';
 
 /**
- * The theme lives on `<html class="dark">`, written before first paint by the
- * inline script in `layout.tsx`. That element is the source of truth, so this
- * subscribes to it rather than mirroring it into React state — which also
- * means the titlebar icon stays correct when the command palette flips the
- * theme instead of the button.
+ * Theme state.
+ *
+ * `globals.css` follows the OS when neither `.dark` nor `.light` is set on
+ * `<html>`, and lets an explicit class win. So first paint is never wrong and
+ * no anti-flash script is needed.
+ *
+ * The theme lives in the DOM and in `localStorage`, not in React state, so
+ * this reads it with `useSyncExternalStore` rather than copying it into state
+ * from an effect. That is the difference between subscribing to an external
+ * system and mirroring it — the mirror is what causes a cascading render, and
+ * it would also drift the moment anything else touched the class.
  */
 
 import { useCallback, useSyncExternalStore } from 'react';
 
-const THEME_KEY = 'sigmafold-theme';
+export type ThemeMode = 'light' | 'dark';
 
-function subscribe(onChange: () => void): () => void {
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-  return () => observer.disconnect();
-}
+const STORAGE_KEY = 'sigmafold.theme';
+/** Dispatched on toggle so every subscriber re-reads at once. */
+const CHANGE_EVENT = 'sigmafold:themechange';
 
-function getSnapshot(): boolean {
-  return document.documentElement.classList.contains('dark');
-}
-
-/** Light is the server-rendered default; the inline script corrects it. */
-function getServerSnapshot(): boolean {
-  return false;
-}
-
-export function setTheme(dark: boolean): void {
-  document.documentElement.classList.toggle('dark', dark);
+function readStored(): ThemeMode | null {
   try {
-    localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+    const value = window.localStorage.getItem(STORAGE_KEY);
+    return value === 'light' || value === 'dark' ? value : null;
   } catch {
-    // Private browsing or blocked storage: the choice applies but is not kept.
+    // Private browsing or blocked storage.
+    return null;
   }
 }
 
-export function useTheme(): { readonly dark: boolean; readonly toggle: () => void } {
-  const dark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+function systemTheme(): ThemeMode {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function subscribe(onChange: () => void): () => void {
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  media.addEventListener('change', onChange);
+  window.addEventListener(CHANGE_EVENT, onChange);
+  return () => {
+    media.removeEventListener('change', onChange);
+    window.removeEventListener(CHANGE_EVENT, onChange);
+  };
+}
+
+/** The live theme: an explicit class wins, then storage, then the OS. */
+function getSnapshot(): ThemeMode {
+  const root = document.documentElement;
+  if (root.classList.contains('dark')) return 'dark';
+  if (root.classList.contains('light')) return 'light';
+  return readStored() ?? systemTheme();
+}
+
+/** Dark is the primary design target, so that is the server's assumption. */
+function getServerSnapshot(): ThemeMode {
+  return 'dark';
+}
+
+export function useTheme(): {
+  readonly theme: ThemeMode;
+  readonly toggle: () => void;
+} {
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
   const toggle = useCallback(() => {
-    setTheme(!document.documentElement.classList.contains('dark'));
+    const next: ThemeMode = getSnapshot() === 'dark' ? 'light' : 'dark';
+    const root = document.documentElement;
+    root.classList.toggle('dark', next === 'dark');
+    root.classList.toggle('light', next === 'light');
+    root.style.colorScheme = next;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // A remembered theme is a convenience, not a requirement.
+    }
+    window.dispatchEvent(new Event(CHANGE_EVENT));
   }, []);
-  return { dark, toggle };
+
+  return { theme, toggle };
 }

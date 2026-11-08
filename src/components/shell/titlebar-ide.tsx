@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/shell/use-theme';
+import { VariantSwitcher } from '@/components/shell/variant-switcher';
 
 export interface TitlebarProps {
   readonly gene: string;
@@ -31,17 +32,17 @@ export interface TitlebarProps {
 }
 
 function ThemeToggle() {
-  const { dark, toggle } = useTheme();
+  const { theme, toggle } = useTheme();
 
   return (
     <Button
       size="icon-xs"
       variant="ghost"
       onClick={toggle}
-      aria-pressed={dark}
-      aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+      aria-pressed={theme === 'dark'}
+      aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
     >
-      {dark ? <Sun aria-hidden /> : <Moon aria-hidden />}
+      {theme === 'dark' ? <Sun aria-hidden /> : <Moon aria-hidden />}
     </Button>
   );
 }
@@ -91,7 +92,9 @@ export function Titlebar({
         <span className="nums font-mono text-[10px] text-muted-foreground">{headShort}</span>
       </div>
 
-      <div className="ml-auto flex shrink-0 items-center gap-1">
+      <VariantSwitcher current="/ide" />
+
+        <div className="ml-auto flex shrink-0 items-center gap-1">
         <Button
           size="xs"
           variant="outline"

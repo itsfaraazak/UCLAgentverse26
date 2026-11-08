@@ -42,10 +42,10 @@ import { DiffStack } from '@/components/diff/diff-stack';
 import { GeneTrack, type CodonTick, type TrackZoom } from '@/components/genome-map/gene-track-ide';
 import { RedTeamConsole } from '@/components/redteam/redteam-console-ide';
 import { BranchTree } from '@/components/shell/branch-tree';
-import { CommandPalette } from '@/components/shell/command-palette';
-import { CHECK_STATUS_STYLE } from '@/components/shell/status';
+import { CommandPalette } from '@/components/shell/command-palette-ide';
+import { CHECK_STATUS_STYLE } from '@/components/shell/status-ide';
 import { Titlebar } from '@/components/shell/titlebar-ide';
-import { setTheme } from '@/components/shell/use-theme';
+import { useTheme } from '@/components/shell/use-theme';
 import { Button } from '@/components/ui/button';
 import {
   ResizableHandle,
@@ -81,6 +81,7 @@ export function Workbench({ workspace }: WorkbenchProps) {
   const [signOffs, setSignOffs] = useState<Readonly<Record<string, RecordedSignOff>>>({});
   const [signOffError, setSignOffError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { toggle: toggleTheme } = useTheme();
 
   const branch = useMemo(
     () =>
@@ -209,10 +210,6 @@ export function Workbench({ workspace }: WorkbenchProps) {
     setFocusCodon(target);
     setZoom('codon');
   }, [branch.editCodonIndex, branch.diff]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme(!document.documentElement.classList.contains('dark'));
-  }, []);
 
   // Keyboard-first: the palette and the commands it lists are all bound.
   useEffect(() => {
