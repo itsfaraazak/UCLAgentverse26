@@ -77,11 +77,11 @@ describe('screenUpload — refusals carry no uploaded text', () => {
     });
   }
 
-  it('refuses a flagged tumour suppressor target and names only the gene', () => {
+  it('refuses a flagged tumour suppressor target and withholds flaggedGenes on a redacted verdict', () => {
     const result = screenUpload({ text: SEQUENCE, targetGene: 'TP53' });
     expect(result.accepted).toBe(false);
     expect(result.screening.category).toBe('TUMOUR_SUPPRESSOR_DISRUPTION');
-    expect(result.screening.flaggedGenes).toEqual(['TP53']);
+    expect(result.screening.flaggedGenes).toEqual([]);
     expect('text' in result).toBe(false);
   });
 

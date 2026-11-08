@@ -18,13 +18,16 @@
  */
 
 import { applyVariant, diffSequences, translate, type DiffRow, type Variant } from '@/lib/genome';
-import { Repo, type Commit, type MergeResult, type Oid } from '@/lib/vcs';
+import { Repo, type Commit, type Oid } from '@/lib/vcs';
 import { runPipeline as runRealPipeline, type Delta } from '@/lib/agents';
 import { CHALLENGE_STEPS, SIMULATION_NOTE, type SimMetrics } from '@/lib/cellsim';
 import {
   checkRunFromPipeline,
+  evaluateMerge,
+  recordSignoff,
   resolveSignoff as resolvePolicySignoff,
   type CheckRun,
+  type MergeDecision,
 } from '@/lib/merge-gate';
 import { agentRole, runView as projectRun, type RunView as RunProjection } from '@/lib/run-view';
 import { digestRequest, type ScreenResult } from '@/lib/safety/policy';
@@ -81,7 +84,7 @@ export function shortOid(oid: Oid): string {
   return oid.slice(0, 12);
 }
 
-interface Proposal {
+export interface Proposal {
   /** Branch to create for this proposal; `main` commits onto the mainline. */
   readonly branch: string;
   /** Branch to fork from. */
@@ -100,7 +103,7 @@ interface Proposal {
  * The demo history. Ordered so that the mainline's merge is the newest commit,
  * which keeps `main` in lane 0 of the rendered graph.
  */
-const PROPOSALS: readonly Proposal[] = Object.freeze([
+export const PROPOSALS: readonly Proposal[] = Object.freeze([
   {
     branch: MAIN,
     forkFrom: MAIN,
@@ -196,6 +199,7 @@ const SEEDED_MERGE: MergeRequest = Object.freeze({ into: MAIN, from: 'fix/hbb-co
 interface BuiltCommit {
   readonly oid: Oid;
   readonly commit: Commit;
+  readonly branch: string | null;
   readonly bases: string;
   readonly edit: LocusVariant | null;
   readonly run: PipelineRun | null;
@@ -205,12 +209,15 @@ interface BuiltCommit {
 export interface ScenarioInput {
   readonly appliedMerges?: readonly MergeRequest[];
   readonly signoffs?: readonly SignoffRequest[];
+  readonly proposals?: readonly Proposal[];
 }
 
 export interface Scenario {
   readonly view: ScenarioView;
   /** Server-side only: used by the merge action to resolve branch tips. */
   readonly repo: Repo;
+  readonly built: ReadonlyMap<Oid, BuiltCommit>;
+  readonly checks: ReadonlyMap<string, CheckRun>;
   readonly runByBranch: ReadonlyMap<string, PipelineRun>;
   readonly tipOf: ReadonlyMap<string, Oid>;
 }
@@ -639,6 +646,7 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
 
   const record = (
     oid: Oid,
+    branch: string | null,
     bases: string,
     label: string,
     edit: LocusVariant | null,
@@ -649,6 +657,7 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
     built.set(oid, {
       oid,
       commit,
+      branch,
       bases,
       edit,
       run,
@@ -666,11 +675,11 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
     parents: [],
   });
   repo.branch(MAIN, rootOid);
-  record(rootOid, reference.bases, reference.label, null, null);
+  record(rootOid, null, reference.bases, reference.label, null, null);
   tipOf.set(MAIN, rootOid);
 
   // ── Proposals ───────────────────────────────────────────────────────────
-  for (const proposal of PROPOSALS) {
+  for (const proposal of input.proposals ?? PROPOSALS) {
     const continuing = proposal.branch !== MAIN && tipOf.has(proposal.branch);
     const forkTip = tipOf.get(proposal.forkFrom);
     if (forkTip === undefined) throw new Error(`cannot fork from ${proposal.forkFrom}`);
@@ -725,7 +734,7 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
     // check is attributed to this commit now that its oid exists. A check
     // recorded against any other commit does not clear this one.
     const attributed: PipelineRun = { ...run, check: { ...run.check, commit: oid } };
-    record(oid, bases, label, blocked ? null : variant, attributed);
+    record(oid, proposal.branch, bases, label, blocked ? null : variant, attributed);
     tipOf.set(proposal.branch, oid);
     runByBranch.set(proposal.branch, attributed);
   }
@@ -737,16 +746,17 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
   const signoffFor = (branch: string): Signoff | undefined =>
     resolveSignoff(runByBranch.get(branch), signoffRequests, branch);
 
+  const checks = checksFromBuilt(built, signoffRequests);
+
   for (const request of requested) {
-    const gate = mergeGate(request, runByBranch, signoffFor(request.from));
-    if (gate !== null) continue; // refused; never applied to the history
     const ours = tipOf.get(request.into);
     const theirs = tipOf.get(request.from);
     if (ours === undefined || theirs === undefined) continue;
+    if (repo.mergeBase(ours, theirs) === theirs) continue;
     repo.checkout(request.into);
-    const result: MergeResult = repo.merge(ours, theirs);
-    if (!('oid' in result)) continue; // conflict; nothing is committed
-    const mergeCommit = repo.read(result.oid);
+    const decision = evaluateMerge({ repo, ours, theirs, checks });
+    if (!decision.allowed) continue; // refused or conflict; never applied to the history
+    const mergeCommit = repo.read(decision.oid);
     if (mergeCommit.kind !== 'commit') continue;
     const treeObj = repo.read(mergeCommit.tree);
     if (treeObj.kind !== 'tree') continue;
@@ -758,20 +768,21 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
         : (built.get(ours)?.bases ?? reference.bases);
     const label =
       blob !== undefined && blob.kind === 'blob' ? blob.sequence.label : reference.label;
-    record(result.oid, bases, label, null, null);
-    tipOf.set(request.into, result.oid);
+    record(decision.oid, null, bases, label, null, null);
+    tipOf.set(request.into, decision.oid);
     appliedMerges.push(request);
   }
 
   return {
     repo,
+    built,
+    checks,
     runByBranch,
     tipOf,
     view: buildView({
       locus,
       built,
       tipOf,
-      runByBranch,
       signoffFor,
       appliedMerges: appliedMerges.filter(
         (m) => !(m.into === SEEDED_MERGE.into && m.from === SEEDED_MERGE.from),
@@ -895,36 +906,106 @@ export function resolveSignoff(
 }
 
 /**
- * Is this merge refused before `Repo.merge` is even consulted?
- *
- * This is the merge gate, and it is deliberately *here* — in the pure layer,
- * on the server — not in the UI. A failing or escalated check does not merely
- * annotate the merge button; it short-circuits the merge itself, so a client
- * that posts a merge request directly still cannot get past it (SPEC §7.4,
- * §7.5, §9.6).
+ * Build the check map for `evaluateMerge` from every `BuiltCommit`'s
+ * attributed check — never from `runByBranch`, which holds only the branch
+ * tip and would leave earlier commits on a multi-commit branch ungated.
  */
-export function mergeGate(
-  request: MergeRequest,
-  runByBranch: ReadonlyMap<string, PipelineRun>,
-  signoff: Signoff | undefined,
-): { readonly reason: string; readonly category: string; readonly verdict: RunVerdictView; readonly requiresSignoffBy: string | null } | null {
-  const run = runByBranch.get(request.from);
-  if (run === undefined) return null; // nothing was proposed on that branch
-  const gate = isMergeable(run, signoff === undefined ? [] : [signoff]);
-  if (gate.ok) return null;
-  return {
-    reason: gate.reason,
-    category: run.screen.category,
-    verdict: run.verdict,
-    requiresSignoffBy: run.screen.requiresSignoff ? (run.screen.signoffRole ?? null) : null,
-  };
+function checksFromBuilt(
+  built: ReadonlyMap<Oid, BuiltCommit>,
+  signoffs: readonly SignoffRequest[],
+): ReadonlyMap<string, CheckRun> {
+  const checks = new Map<string, CheckRun>();
+  for (const entry of built.values()) {
+    if (entry.run === null) continue;
+    const signoff =
+      entry.branch === null
+        ? undefined
+        : resolveSignoff(entry.run, signoffs, entry.branch);
+    const check =
+      signoff === undefined
+        ? entry.run.check
+        : recordSignoff(entry.run.check, signoff.by);
+    checks.set(check.id, check);
+    checks.set(entry.oid, check);
+  }
+  return checks;
+}
+
+type GateRefusalDecision = Exclude<
+  MergeDecision,
+  { readonly allowed: true } | { readonly kind: 'content-conflict' }
+>;
+
+function blockedFromDecision(
+  decision: GateRefusalDecision,
+  built: ReadonlyMap<Oid, BuiltCommit>,
+): {
+  readonly reason: string;
+  readonly category: string;
+  readonly verdict: RunVerdictView;
+  readonly requiresSignoffBy: string | null;
+} {
+  switch (decision.kind) {
+    case 'check-failed': {
+      const runs = decision.blocking
+        .map((c) => built.get(c.commit)?.run ?? null)
+        .filter((r): r is PipelineRun => r !== null);
+      const run = runs.find((r) => r.verdict === 'blocked') ?? runs[0];
+      if (run !== undefined) {
+        const gate = isMergeable(run, []);
+        return {
+          reason: gate.ok
+            ? (decision.reasons[0] ?? 'One or more check runs failed.')
+            : gate.reason,
+          category: run.screen.category,
+          verdict: run.verdict,
+          requiresSignoffBy: null,
+        };
+      }
+      return {
+        reason: decision.reasons[0] ?? 'One or more check runs failed.',
+        category: 'CHECK_FAILED',
+        verdict: 'fail',
+        requiresSignoffBy: null,
+      };
+    }
+    case 'awaiting-signoff': {
+      const first = decision.blocking[0];
+      const run = first === undefined ? null : (built.get(first.commit)?.run ?? null);
+      if (run !== null) {
+        const gate = isMergeable(run, []);
+        return {
+          reason: gate.ok
+            ? `Held for named sign-off from ${decision.signoffRole}.`
+            : gate.reason,
+          category: run.screen.category,
+          verdict: run.verdict,
+          requiresSignoffBy: decision.signoffRole,
+        };
+      }
+      return {
+        reason:
+          `Escalated by policy and held for named sign-off from ` +
+          `${decision.signoffRole}. Nothing auto-approves an escalation.`,
+        category: 'ESCALATED',
+        verdict: 'escalated',
+        requiresSignoffBy: decision.signoffRole,
+      };
+    }
+    case 'check-missing':
+      return {
+        reason: `${decision.commits.length} introduced commit(s) have no completed check run.`,
+        category: 'CHECK_MISSING',
+        verdict: 'fail',
+        requiresSignoffBy: null,
+      };
+  }
 }
 
 interface ViewInput {
   readonly locus: Locus;
   readonly built: ReadonlyMap<Oid, BuiltCommit>;
   readonly tipOf: ReadonlyMap<string, Oid>;
-  readonly runByBranch: ReadonlyMap<string, PipelineRun>;
   readonly signoffFor: (branch: string) => Signoff | undefined;
   readonly appliedMerges: readonly MergeRequest[];
   readonly signoffs: readonly SignoffRequest[];
@@ -947,6 +1028,9 @@ function buildView(input: ViewInput): ScenarioView {
     const entry = built.get(node.oid);
     if (entry === undefined) throw new Error(`layout produced an unknown node ${node.oid}`);
     const signoff = (() => {
+      if (entry.branch !== null && entry.run !== null) {
+        return resolveSignoff(entry.run, input.signoffs, entry.branch);
+      }
       const branch = (branchesAt.get(node.oid) ?? []).find(
         (name) => input.signoffFor(name) !== undefined,
       );
@@ -1003,14 +1087,9 @@ function buildView(input: ViewInput): ScenarioView {
     .sort((a, b) => (a[0] === MAIN ? -1 : b[0] === MAIN ? 1 : a[0].localeCompare(b[0])))
     .map(([name, tip]) => {
       const commit = commitByOid.get(tip);
-      const run = input.runByBranch.get(name);
-      const signoff = input.signoffFor(name);
-      const gate =
-        run === undefined
-          ? null
-          : mergeGate({ into: MAIN, from: name }, input.runByBranch, signoff);
       // Commits on this branch that main cannot already reach.
       let ahead = 0;
+      let mergeBlockedReason: string | null = null;
       const seen = new Set<string>();
       const stack = [tip];
       while (stack.length > 0) {
@@ -1018,6 +1097,14 @@ function buildView(input: ViewInput): ScenarioView {
         if (oid === undefined || seen.has(oid) || headAncestry.has(oid)) continue;
         seen.add(oid);
         ahead += 1;
+        const introduced = commitByOid.get(oid);
+        if (mergeBlockedReason === null && introduced !== undefined) {
+          if (introduced.run === null) {
+            mergeBlockedReason = '1 introduced commit(s) have no completed check run.';
+          } else if (introduced.run.mergeBlockedReason !== null) {
+            mergeBlockedReason = introduced.run.mergeBlockedReason;
+          }
+        }
         for (const parent of built.get(oid)?.commit.parents ?? []) stack.push(parent);
       }
       return {
@@ -1028,7 +1115,7 @@ function buildView(input: ViewInput): ScenarioView {
         status: commit?.status ?? 'none',
         tipMessage: commit?.message ?? '',
         ahead,
-        mergeBlockedReason: gate === null ? null : gate.reason,
+        mergeBlockedReason,
       };
     });
 
@@ -1108,29 +1195,11 @@ function buildView(input: ViewInput): ScenarioView {
 
 /**
  * Attempt a merge. The gate is checked first, server-side, from the rebuilt
- * pipeline results — not from anything the client sent.
+ * pipeline results across every commit the merge introduces — not from the
+ * branch tip alone and not from anything the client sent.
  */
 export function attemptMerge(input: ScenarioInput, request: MergeRequest): MergeOutcome {
   const before = buildScenario(input);
-  const signoff = resolveSignoff(
-    before.runByBranch.get(request.from),
-    input.signoffs ?? [],
-    request.from,
-  );
-
-  const blocked = mergeGate(request, before.runByBranch, signoff);
-  if (blocked !== null) {
-    return {
-      kind: 'blocked',
-      into: request.into,
-      from: request.from,
-      reason: blocked.reason,
-      category: blocked.category,
-      verdict: blocked.verdict,
-      requiresSignoffBy: blocked.requiresSignoffBy,
-    };
-  }
-
   const ours = before.tipOf.get(request.into);
   const theirs = before.tipOf.get(request.from);
   if (ours === undefined || theirs === undefined) {
@@ -1155,31 +1224,49 @@ export function attemptMerge(input: ScenarioInput, request: MergeRequest): Merge
   }
 
   before.repo.checkout(request.into);
-  const result = before.repo.merge(ours, theirs);
+  const decision = evaluateMerge({
+    repo: before.repo,
+    ours,
+    theirs,
+    checks: before.checks,
+  });
 
-  if (!('oid' in result)) {
-    const describe = (oid: string | null): string => {
-      if (oid === null) return 'absent';
-      const obj = before.repo.read(oid);
-      if (obj.kind !== 'blob') return shortOid(oid);
-      return `${obj.sequence.label} (${shortOid(oid)})`;
-    };
+  if (!decision.allowed) {
+    if (decision.kind === 'content-conflict') {
+      const describe = (oid: string | null): string => {
+        if (oid === null) return 'absent';
+        const obj = before.repo.read(oid);
+        if (obj.kind !== 'blob') return shortOid(oid);
+        return `${obj.sequence.label} (${shortOid(oid)})`;
+      };
+      return {
+        kind: 'conflict',
+        into: request.into,
+        from: request.from,
+        baseOid: before.repo.mergeBase(ours, theirs),
+        conflicts: decision.conflicts.map(
+          (conflict): ConflictView => ({
+            gene: conflict.gene,
+            base: conflict.base,
+            ours: conflict.ours,
+            theirs: conflict.theirs,
+            baseLabel: describe(conflict.base),
+            oursLabel: describe(conflict.ours),
+            theirsLabel: describe(conflict.theirs),
+          }),
+        ),
+      };
+    }
+
+    const blocked = blockedFromDecision(decision, before.built);
     return {
-      kind: 'conflict',
+      kind: 'blocked',
       into: request.into,
       from: request.from,
-      baseOid: before.repo.mergeBase(ours, theirs),
-      conflicts: result.conflicts.map(
-        (conflict): ConflictView => ({
-          gene: conflict.gene,
-          base: conflict.base,
-          ours: conflict.ours,
-          theirs: conflict.theirs,
-          baseLabel: describe(conflict.base),
-          oursLabel: describe(conflict.ours),
-          theirsLabel: describe(conflict.theirs),
-        }),
-      ),
+      reason: blocked.reason,
+      category: blocked.category,
+      verdict: blocked.verdict,
+      requiresSignoffBy: blocked.requiresSignoffBy,
     };
   }
 

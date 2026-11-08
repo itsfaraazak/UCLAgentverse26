@@ -105,7 +105,7 @@ function present(result: ScreenResult): UploadScreening {
     reason: result.reason,
     requiresSignoff: result.requiresSignoff,
     signoffRole: result.signoffRole ?? null,
-    flaggedGenes: result.flaggedGenes,
+    flaggedGenes: result.redacted ? [] : [...result.flaggedGenes],
     requestDigest: result.requestDigest,
     redacted: result.redacted,
   };

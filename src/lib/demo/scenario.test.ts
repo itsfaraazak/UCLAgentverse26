@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PROPOSALS,
   attemptMerge,
   buildScenario,
   resolveSignoff,
   runProposal,
   tendencyForSequence,
+  type Proposal,
 } from './scenario';
 import { requireLocus, requireVariant } from '@/lib/fixtures/loci';
 import { applyVariant } from '@/lib/genome';
@@ -382,6 +384,52 @@ describe('merge gating', () => {
     );
     expect(branch('refused/tp53-disruption').mergeBlockedReason).toContain('cannot be signed off');
     expect(branch('review/marker-on-repair').mergeBlockedReason).toBeNull();
+  });
+
+  it('refuses a two-commit branch whose first commit is blocked even when its tip passes', () => {
+    const twoCommitBranch = 'review/blocked-then-repair';
+    const proposals: readonly Proposal[] = [
+      ...PROPOSALS,
+      {
+        branch: twoCommitBranch,
+        forkFrom: 'main',
+        message: 'Refused proposal — no edit was planned',
+        requestText:
+          'Disrupt TP53 in a somatic cell line to study proliferation dynamics.',
+        targets: ['TP53'],
+        variantId: null,
+        hoursAfterBase: 20,
+        runId: 'run-blocked-first',
+      },
+      {
+        branch: twoCommitBranch,
+        forkFrom: twoCommitBranch,
+        message: 'Restore the reference codon at HBB codon 7 on top of the refused commit',
+        requestText:
+          'Restore the reference codon at HBB codon 7 to correct the sickle ' +
+          'substitution in somatic cells.',
+        targets: ['HBB'],
+        variantId: 'HBB_repair',
+        hoursAfterBase: 21,
+        runId: 'run-passing-tip',
+      },
+    ];
+
+    // The branch tip's own run passed, so consulting `runByBranch` alone would
+    // see a green check and merge the blocked first commit onto `main`.
+    const built = buildScenario({ proposals });
+    expect(built.runByBranch.get(twoCommitBranch)?.verdict).toBe('pass');
+
+    const outcome = attemptMerge({ proposals }, { into: 'main', from: twoCommitBranch });
+    expect(outcome.kind).toBe('blocked');
+    if (outcome.kind !== 'blocked') return;
+    expect(outcome.verdict).toBe('blocked');
+    expect(outcome.category).toBe('TUMOUR_SUPPRESSOR_DISRUPTION');
+    expect(outcome.reason).toContain('cannot be signed off');
+
+    const railBranch = built.view.branches.find((b) => b.name === twoCommitBranch);
+    expect(railBranch?.ahead).toBe(2);
+    expect(railBranch?.mergeBlockedReason).toContain('cannot be signed off');
   });
 });
 
