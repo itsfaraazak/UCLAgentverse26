@@ -35,7 +35,7 @@ import {
   checkRunFromPipeline,
   evaluateMerge,
   introducedCommits,
-  recordSignoff,
+  resolveSignoff,
 } from '@/lib/merge-gate';
 import type { CheckRun } from '@/lib/merge-gate';
 import {
@@ -86,6 +86,9 @@ import type {
   ScreenView,
   WorkspaceView,
 } from './types';
+
+/** A sign-off is only as good as the name on it, so the name is required. */
+const APPROVER_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}'’. -]{1,119}$/u;
 
 const DEFAULT_BRANCH = 'main';
 const FIXTURE_AUTHOR = 'sigmafold-fixture';
@@ -780,14 +783,27 @@ export function buildMergeProposal(args: {
     );
   }
 
-  const signatures = (args.signedOffBy ?? []).map((s) => s.trim()).filter((s) => s.length > 0);
+  // A signature is a person's name and is shape-checked before it can reach a
+  // check or the view. Without this the box accepts arbitrary text, and
+  // someone refused by the gate could paste their refused request into it and
+  // have it rendered straight back (SPEC §7.3).
+  const signatures = (args.signedOffBy ?? [])
+    .map((candidate) => candidate.trim().slice(0, 120))
+    .filter((candidate) => APPROVER_PATTERN.test(candidate));
+
   const checks = new Map<string, CheckRun>();
   for (const [id, check] of seed.checks) {
     const first = signatures[0];
-    checks.set(
-      id,
-      check.requiresSignoff && first !== undefined ? recordSignoff(check, first) : check,
-    );
+    if (first === undefined) {
+      checks.set(id, check);
+      continue;
+    }
+    // `resolveSignoff` is the single authority: it derives the role from the
+    // policy's verdict and refuses a blocked run, a run that is not awaiting a
+    // sign-off, and an unnamed actor. A signature therefore cannot widen what
+    // the policy allows (SPEC §7.5).
+    const resolved = resolveSignoff(check, first);
+    checks.set(id, resolved.ok ? resolved.check : check);
   }
 
   const base = fresh.repo.mergeBase(into.head, incoming.head);
