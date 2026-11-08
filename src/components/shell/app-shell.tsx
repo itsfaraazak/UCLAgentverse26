@@ -11,6 +11,11 @@
  * All data arrives as a prop. This component holds only *view* state: which
  * branch is selected, which tab is open, which panes are collapsed. Nothing
  * on screen is computed here.
+ *
+ * Created genotype lines are *not* view state. They live in the URL as
+ * repeated `line` params, the server replays them, and the result arrives
+ * here as a prop — so leaving for `/ide`, `/bench` or `/graph` and coming
+ * back, or reloading, keeps them. See `model/overlay-url.ts`.
  */
 
 import { useCallback, useMemo, useState } from 'react';
@@ -22,6 +27,7 @@ import './shell.css';
 import type { BranchSpec, ScreenView, WorkspaceView } from './model/types';
 import type { ShellCommand } from './model/commands';
 import { SURFACES } from './model/surfaces';
+import { withOverlay } from './model/overlay-url';
 import { BranchRail } from './branch-rail';
 import { AgentConsole } from './agent-console';
 import { RedTeamConsole } from './redteam-console';
@@ -35,20 +41,66 @@ type Pane = 'rail' | 'mid' | 'work';
 
 export interface AppShellProps {
   readonly workspace: WorkspaceView;
+  /**
+   * The replay list the server built this workspace from — already validated
+   * on that side. The shell re-sends it with every action and writes it back
+   * into the URL, but never invents an entry.
+   */
+  readonly overlay: readonly BranchSpec[];
+  /**
+   * Set when the URL carried entries that could not be restored. Reported by
+   * category and count by the server; rendered verbatim here and never
+   * composed from the offending input.
+   */
+  readonly overlayNote: string | null;
 }
 
-export function AppShell({ workspace: initial }: AppShellProps) {
-  // The workspace is server-rendered, then replaced wholesale when the user
-  // creates a branch. `overlay` is the replay list the server needs to rebuild
-  // that state on later calls — see `BranchSpec`.
+/**
+ * Open on the most interesting line rather than the reference: the first
+ * branch that carries an edit. Derived, not named. Also the fallback when the
+ * selected line is no longer in the workspace.
+ */
+function preferredBranch(workspace: WorkspaceView): string {
+  const edited = workspace.branches.find((b) => b.tipEdit !== null);
+  return (edited ?? workspace.branches[0])?.name ?? workspace.defaultBranch;
+}
+
+export function AppShell({
+  workspace: initial,
+  overlay: initialOverlay,
+  overlayNote,
+}: AppShellProps) {
+  // The workspace is server-rendered, then replaced optimistically when the
+  // user creates a branch so the new line is on screen without waiting for a
+  // round trip. `overlay` is the replay list the server needs to rebuild that
+  // state on later calls — see `BranchSpec`.
   const [workspace, setWorkspace] = useState(initial);
-  const [overlay, setOverlay] = useState<readonly BranchSpec[]>([]);
-  const [current, setCurrent] = useState(() => {
-    // Open on the most interesting line rather than the reference: the first
-    // branch that carries an edit. Derived, not named.
-    const edited = initial.branches.find((b) => b.tipEdit !== null);
-    return (edited ?? initial.branches[0])?.name ?? initial.defaultBranch;
-  });
+  const [overlay, setOverlay] = useState<readonly BranchSpec[]>(initialOverlay);
+  const [current, setCurrent] = useState(() => preferredBranch(initial));
+
+  // Resync when the server sends a new snapshot.
+  //
+  // These three were seeded from props once and then never looked at the
+  // props again, so a `router.refresh()` or a soft navigation back to `/`
+  // carrying different data kept rendering the first snapshot. That was
+  // latent until created lines moved into the URL; now the server's answer to
+  // a `router.replace` *is* how a created line arrives, which makes it
+  // load-bearing. Compared by identity and applied during render — the React
+  // pattern for prop-derived state — rather than in an effect, so nothing
+  // renders from the stale snapshot first.
+  const [synced, setSynced] = useState(initial);
+  if (initial !== synced) {
+    setSynced(initial);
+    setWorkspace(initial);
+    setOverlay(initialOverlay);
+    // The selected line may not exist in the new snapshot — a shared link
+    // without it, or a replay that dropped it. Keep the selection when it
+    // survives, fall back to a branch that exists when it does not, so the
+    // rail never points at nothing.
+    setCurrent((name) =>
+      initial.branches.some((b) => b.name === name) ? name : preferredBranch(initial),
+    );
+  }
   const [tab, setTab] = useState<WorkspaceTab>('overview');
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [midCollapsed, setMidCollapsed] = useState(false);
@@ -165,7 +217,10 @@ export function AppShell({ workspace: initial }: AppShellProps) {
         hint: surface.href,
         icon: surface.icon,
         keywords: ['variant', 'surface', surface.href.replace('/', ''), surface.concept],
-        run: () => router.push(surface.href),
+        // The created lines ride along in the query string. A variant surface
+        // need not render them — but it must not drop them, or coming back
+        // here would land on a workspace missing the user's own work.
+        run: () => router.push(withOverlay(surface.href, overlay)),
       });
     }
 
@@ -201,6 +256,7 @@ export function AppShell({ workspace: initial }: AppShellProps) {
     branch,
     current,
     midCollapsed,
+    overlay,
     railCollapsed,
     router,
     selectBranch,
@@ -259,6 +315,11 @@ export function AppShell({ workspace: initial }: AppShellProps) {
           onCreated={(next, nextOverlay, created) => {
             setWorkspace(next);
             setOverlay(nextOverlay);
+            // Put the line in the URL so it survives leaving this surface and
+            // coming back, and a reload. `replace`, not `push`: the created
+            // line is not a place in the history, and pushing would make the
+            // back button walk one entry per created line.
+            router.replace(withOverlay('/', nextOverlay), { scroll: false });
             // Switch to what was just created: the point of creating a line is
             // to look at its diff.
             selectBranch(created);
@@ -318,6 +379,19 @@ export function AppShell({ workspace: initial }: AppShellProps) {
       </section>
 
       <main className="work" data-pane="work" data-visible={pane === 'work'}>
+        {overlayNote === null ? null : (
+          // The workspace pane is the one that is visible at every width, so
+          // a link that could not be fully restored says so where it will
+          // actually be read. The text names counts and categories only — the
+          // offending name or edit id is never echoed back into the page.
+          <p
+            className="work__sub shrink-0 border-b px-4 py-2"
+            role="status"
+            data-testid="overlay-note"
+          >
+            {overlayNote}
+          </p>
+        )}
         <WorkspacePanel
           locus={workspace.locus}
           branches={workspace.branches}

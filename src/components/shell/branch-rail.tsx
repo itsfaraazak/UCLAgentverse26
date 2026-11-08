@@ -26,6 +26,7 @@ import type {
 } from './model/types';
 import { NewBranch } from './new-branch';
 import { SURFACES } from './model/surfaces';
+import { withOverlay } from './model/overlay-url';
 import type { SurfaceIconName } from './model/surfaces';
 import { StatusMark, statusLabel, toneForRun } from './status';
 
@@ -160,7 +161,9 @@ export function BranchRail({
             return (
               <li key={surface.href} className="contents">
                 <Link
-                  href={surface.href}
+                  // Carries the created lines across, so a judge who opens
+                  // another surface and comes back still has their work.
+                  href={withOverlay(surface.href, overlay)}
                   className="row branch-row"
                   title={`${surface.label} — ${surface.concept}`}
                 >

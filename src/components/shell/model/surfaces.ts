@@ -2,10 +2,10 @@
  * The product's alternative surfaces.
  *
  * SPEC §6 specifies three variants over the same core — a code-editor
- * triptych, a lab bench and a commit-graph client. They are routed at
- * `/ide`, `/bench` and `/graph` on the integration branch
- * (`sigmafold/paramveer`), which merges this shell in; they do not exist in
- * this branch's checkout, so the links 404 here and resolve after the merge.
+ * triptych, a lab bench and a commit-graph client, routed at `/ide`, `/bench`
+ * and `/graph`. All three are present and reachable in the integrated build;
+ * this comment previously said they 404 here, which was true only before the
+ * variants were merged in.
  *
  * This is a route table, not domain data. Everything describing a *genotype*
  * is derived from `data/loci.json` and `lib/*` — but which URLs this

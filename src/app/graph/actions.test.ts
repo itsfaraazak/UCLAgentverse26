@@ -65,13 +65,19 @@ describe('/graph — the approver guard holds at every entry point', () => {
   });
 
   it('still accepts a well-formed name arriving through the session state', async () => {
-    const view = await loadScenario(state([{ branch: ESCALATED, by: REAL_NAME }]));
-    expect(view.signoffs.map((s) => s.by)).toEqual([REAL_NAME]);
+    // One call, not two: `attemptMerge`'s clean arm carries the rebuilt
+    // scenario, so both halves of the positive control — the sign-off is
+    // recorded, and it clears the hold — come from a single scenario build.
+    // Building twice made this the slowest test in the suite by a wide
+    // margin, because each build runs the ten-agent classified pipeline for
+    // every branch, simulation included.
     const merged = await attemptMerge(state([{ branch: ESCALATED, by: REAL_NAME }]), {
       into: 'main',
       from: ESCALATED,
     });
     expect(merged.kind).toBe('clean');
+    if (merged.kind !== 'clean') return;
+    expect(merged.scenario.signoffs.map((s) => s.by)).toEqual([REAL_NAME]);
   });
 
   it('derives the sign-off role from policy, never from the client', async () => {

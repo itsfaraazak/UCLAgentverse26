@@ -26,6 +26,7 @@ import {
   buildWorkspace,
   screenConsoleRequest,
 } from '@/components/shell/model/workspace';
+import { validateOverlay } from '@/components/shell/model/overlay-url';
 import type {
   BranchSpec,
   DiffView,
@@ -63,60 +64,11 @@ export async function screenRequestAction(input: {
 }
 
 /**
- * Branch names this server will accept. Mirrors what `Repo.branch` tolerates,
- * and keeps a name that could be mistaken for an oid or a path out of the ref
- * namespace.
+ * The overlay's rules live in `components/shell/model/overlay-url.ts`, which
+ * this module and the URL parser on `/` both import. They used to be written
+ * out here; once the same list became reachable from the query string, a
+ * second copy was a second thing to keep in step, so there is now one.
  */
-const BRANCH_NAME = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/;
-const MAX_BRANCH_NAME = 64;
-
-/**
- * How many created branches one client may replay.
- *
- * The overlay is client-controlled and is replayed in full on every call: a
- * non-empty overlay deliberately bypasses the memo and re-seeds the
- * repository, and each spec adds an `applyVariant` plus a sha256 commit. A
- * chained overlay also grows each branch's commit list, and rendering reads
- * every commit of every branch — so cost climbs with the square of the list.
- * Unbounded, that is a one-request stall of a single-threaded server, which
- * is the same hazard `screenRequestAction` already caps its text against.
- * Twenty-five lines is far more than the demo needs.
- */
-const MAX_OVERLAY = 25;
-
-/**
- * Validate the whole replay list, not just the newest entry.
- *
- * Every action that accepts an overlay runs this. `createBranchAction` used
- * to check only the spec it was adding, which left an inherited list — and
- * the lists handed to `diffAction` and `mergeProposalAction` — trusted
- * verbatim.
- *
- * `variantId` is deliberately not checked here: `buildWorkspace` resolves it
- * through `requireVariant`, which fails closed on anything not in
- * `data/loci.json`. Duplicating that would risk the two disagreeing.
- */
-function validateOverlay(overlay: readonly BranchSpec[]): readonly BranchSpec[] {
-  if (overlay.length > MAX_OVERLAY) {
-    throw new Error(`At most ${MAX_OVERLAY} created branches are supported.`);
-  }
-  const seen = new Set<string>();
-  for (const spec of overlay) {
-    if (spec.name.length === 0 || spec.name.length > MAX_BRANCH_NAME) {
-      throw new Error(`Branch names are limited to ${MAX_BRANCH_NAME} characters.`);
-    }
-    if (!BRANCH_NAME.test(spec.name)) {
-      throw new Error(
-        'Use letters, digits, and . _ / - only, starting with a letter or digit.',
-      );
-    }
-    if (seen.has(spec.name)) {
-      throw new Error(`Branch '${spec.name}' appears twice.`);
-    }
-    seen.add(spec.name);
-  }
-  return overlay;
-}
 
 /** The three-register diff of a branch's genotype against the reference. */
 export async function diffAction(
