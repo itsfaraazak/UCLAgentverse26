@@ -61,15 +61,15 @@ export function Titlebar({
     <header className="flex h-10 shrink-0 items-center gap-2 border-b border-chrome-border bg-chrome px-2.5">
       {/* Traffic lights. */}
       <div className="flex shrink-0 items-center gap-[7px] pr-1" aria-hidden>
-        <span className="size-3 rounded-full bg-[#ec6a5e]" />
-        <span className="size-3 rounded-full bg-[#f4bf4f]" />
-        <span className="size-3 rounded-full bg-[#61c454]" />
+        <span className="size-3 rounded-full bg-[#ff5f57] ring-1 ring-black/15 ring-inset" />
+        <span className="size-3 rounded-full bg-[#febc2e] ring-1 ring-black/15 ring-inset" />
+        <span className="size-3 rounded-full bg-[#28c840] ring-1 ring-black/15 ring-inset" />
       </div>
 
       <div className="flex min-w-0 items-center gap-1.5">
         <GitPullRequest className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
         <h1 className="truncate text-[12.5px] font-semibold">
-          SigmaFold
+          <span className="font-display">SigmaFold</span>
           <span className="font-normal text-muted-foreground"> — {gene} review</span>
         </h1>
         <span className="hidden truncate text-[11px] text-muted-foreground sm:inline">

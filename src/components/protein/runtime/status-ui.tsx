@@ -40,10 +40,10 @@ export function RendererBadge({ state }: RendererBadgeProps) {
       title={title}
       className={cn(
         'inline-flex h-5 shrink-0 items-center gap-1 rounded-full border px-2 font-mono text-[10px] leading-none tracking-tight',
-        'border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400',
+        'border-border text-muted-foreground',
         state.phase === 'active' &&
           state.kind === 'webgpu' &&
-          'border-emerald-500/50 text-emerald-700 dark:text-emerald-400',
+          'border-verdict-pass/50 text-verdict-pass',
       )}
     >
       <Cpu aria-hidden="true" className="size-3" />
@@ -80,13 +80,13 @@ export function FailurePanel({ kind, detail, onRetry, children }: FailurePanelPr
     <div
       role="alert"
       data-failure={kind}
-      className="absolute inset-0 flex flex-col gap-2 overflow-auto bg-zinc-50/95 p-3 text-sm text-zinc-800 dark:bg-zinc-900/95 dark:text-zinc-200"
+      className="absolute inset-0 flex flex-col gap-2 overflow-auto bg-card p-3 text-sm text-card-foreground"
     >
       <div className="flex items-start gap-2">
-        <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+        <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-verdict-escalate" />
         <div className="min-w-0">
           <p className="font-medium">{failureTitle(kind)}</p>
-          <p className="break-words text-xs text-zinc-600 dark:text-zinc-400">{detail}</p>
+          <p className="break-words text-xs text-muted-foreground">{detail}</p>
         </div>
       </div>
       <div className="min-w-0 text-xs leading-relaxed">{children}</div>
@@ -103,7 +103,7 @@ export function FailurePanel({ kind, detail, onRetry, children }: FailurePanelPr
 export function LoadingOverlay({ label }: { readonly label: string }) {
   return (
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-      <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs text-zinc-700 shadow-sm dark:bg-zinc-900/80 dark:text-zinc-300">
+      <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
         <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin motion-reduce:animate-none" />
         {label}
       </span>

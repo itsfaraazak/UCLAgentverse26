@@ -75,7 +75,7 @@ export function Titlebar({ repoName, headBranch, commitCount, branchCount }: Tit
       <Separator orientation="vertical" className="h-5" />
       <div className="flex min-w-0 items-center gap-2">
         <Dna className="size-4 shrink-0 text-primary" aria-hidden="true" />
-        <h1 className="truncate text-[13px] font-semibold tracking-tight">SigmaFold</h1>
+        <h1 className="font-display truncate text-[13px]">SigmaFold</h1>
         <span className="text-muted-foreground/60" aria-hidden="true">
           /
         </span>

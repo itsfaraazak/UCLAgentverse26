@@ -405,6 +405,15 @@
     font-variant-ligatures: none;
   }
 
+  /* One icon weight. The shell passed strokeWidth={1.75}, a few icons
+     passed {2}, and the variants used lucide's default 2, so icons at the
+     same size drew at visibly different weights side by side. A CSS
+     stroke-width outranks the SVG attribute lucide writes, so this settles it
+     for every lucide icon, the shadcn primitives' included. */
+  svg.lucide {
+    stroke-width: 1.75;
+  }
+
   /* Visible focus is a hard requirement (SPEC §5), and the default outline
      disappears against dark surfaces. */
   :focus-visible {
