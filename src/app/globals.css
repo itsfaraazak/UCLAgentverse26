@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tailwind v4 resolves `dark:` against prefers-color-scheme by default, but
+   this app's theme is an explicit class on <html> written before first paint.
+   Without this the token set and the `dark:` utilities could disagree. */
+@custom-variant dark (&:is(.dark *));
+
 /* ──────────────────────────────────────────────────────────────────────────
    SigmaFold theme.
 
@@ -254,4 +259,127 @@
       background-color: color-mix(in oklab, var(--card) 55%, transparent);
     }
   }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Variant layer: /bench (lab-bench).
+
+   The instrument surfaces are additive — they sit on top of the shared
+   palette above rather than redefining it, so the bench reads as the same
+   product as /ide and /graph with an instrument skin, not a second theme.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Instrument surfaces */
+  --bezel: oklch(0.9 0.004 264);
+  --bezel-edge: oklch(0.82 0.006 264);
+  --recess: oklch(0.915 0.004 264);
+  --grid-line: oklch(0.21 0.012 264 / 0.07);
+
+  /* Instrument accents — lamps, traces, gauge arcs. Derived from the shared
+     verdict tokens where they mean the same thing, so a passing check is the
+     same green on a gauge as in the IDE's check list. */
+  --signal: oklch(0.56 0.14 215);
+  --signal-warn: var(--verdict-escalate);
+  --signal-alarm: var(--verdict-block);
+  --signal-ok: var(--verdict-pass);
+  --trace: oklch(0.45 0.12 235);
+  --cell-discoid: oklch(0.55 0.19 20);
+  --cell-sickled: oklch(0.42 0.17 300);
+  --lumen: oklch(0.88 0.02 240);
+}
+
+.dark {
+  --bezel: oklch(0.225 0.011 264);
+  --bezel-edge: oklch(0.33 0.013 264);
+  --recess: oklch(0.13 0.008 264);
+  --grid-line: oklch(0.955 0.004 264 / 0.08);
+
+  --signal: oklch(0.82 0.14 200);
+  --trace: oklch(0.82 0.13 200);
+  --cell-discoid: oklch(0.68 0.19 22);
+  --cell-sickled: oklch(0.7 0.17 305);
+  --lumen: oklch(0.26 0.02 240);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --bezel: oklch(0.225 0.011 264);
+    --bezel-edge: oklch(0.33 0.013 264);
+    --recess: oklch(0.13 0.008 264);
+    --grid-line: oklch(0.955 0.004 264 / 0.08);
+    --signal: oklch(0.82 0.14 200);
+    --trace: oklch(0.82 0.13 200);
+    --cell-discoid: oklch(0.68 0.19 22);
+    --cell-sickled: oklch(0.7 0.17 305);
+    --lumen: oklch(0.26 0.02 240);
+  }
+}
+
+@theme inline {
+  --color-bezel: var(--bezel);
+  --color-bezel-edge: var(--bezel-edge);
+  --color-recess: var(--recess);
+  --color-signal: var(--signal);
+  --color-signal-warn: var(--signal-warn);
+  --color-signal-alarm: var(--signal-alarm);
+  --color-signal-ok: var(--signal-ok);
+  --color-trace: var(--trace);
+  --color-lumen: var(--lumen);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+}
+
+/* Tabular figures for live readouts. The shared `body` rule already sets
+   these; this utility is for elements that opt out of it locally. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* A milled-aluminium bezel: top highlight, bottom shadow, hairline edge. */
+@utility bezel-surface {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bezel) 92%, white 8%),
+    var(--bezel)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 30%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 10%, transparent),
+    0 1px 2px color-mix(in oklab, black 12%, transparent);
+}
+
+/* A recessed well for control inputs — the opposite lighting of a bezel. */
+@utility recess-surface {
+  background: var(--recess);
+  box-shadow:
+    inset 0 2px 5px color-mix(in oklab, black 22%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, white 14%, transparent);
+}
+
+/* The bench's translucent chrome. Shares the shared `.vibrancy` recipe so
+   the three variants' chrome is the same material. */
+@utility vibrancy-surface {
+  background-color: color-mix(in oklab, var(--card) 72%, transparent);
+
+  @supports (backdrop-filter: blur(1px)) {
+    backdrop-filter: saturate(180%) blur(20px);
+    background-color: color-mix(in oklab, var(--card) 55%, transparent);
+  }
+}
+
+@utility engraved-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
