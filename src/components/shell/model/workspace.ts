@@ -40,11 +40,14 @@ import {
 import type { CheckRun } from '@/lib/merge-gate';
 import {
   isAssayPayload,
+  isClassificationPayload,
+  isConflictPayload,
   isEditPlanPayload,
   isIntentPayload,
   isOffTargetPayload,
   isScreenPayload,
   isStructuralPayload,
+  isTherapyMatchPayload,
   isVerdictPayload,
   pipelineAgentOrder,
   runPipeline,
@@ -453,7 +456,12 @@ function metricRows(label: string, metrics: SimMetrics | null): DetailRow[] {
   ];
 }
 
-function stepFor(position: number, agent: string, deltas: readonly Delta[]): AgentStepView {
+function stepFor(
+  position: number,
+  agent: string,
+  deltas: readonly Delta[],
+  blocked: boolean,
+): AgentStepView {
   // The local maps cover the seven-agent run; `lib/run-view` is the authority
   // for the agents the ACMG stage adds, so a classified run's rows carry a
   // role and a kind rather than rendering blank.
@@ -473,7 +481,13 @@ function stepFor(position: number, agent: string, deltas: readonly Delta[]): Age
       deltaId: null,
       createdAt: null,
       outcome: 'not-run',
-      headline: 'Did not run — the gate terminated the pipeline.',
+      // A step can be absent without the gate refusing anything: the therapy
+      // lookup only runs on a merge-allowed run. Attributing every absence to
+      // the gate would label a screened-and-allowed run a biosafety refusal.
+      // Wording mirrors `lib/run-view` so every surface says the same thing.
+      headline: blocked
+        ? 'Not executed — the biosafety gate ended the run at step 2.'
+        : 'Not executed.',
       detail: [],
     };
   }
@@ -672,6 +686,95 @@ function stepFor(position: number, agent: string, deltas: readonly Delta[]): Age
     };
   }
 
+  // The three ACMG payloads are dispatched on `delta.kind` as well as shape,
+  // as `lib/run-view` does, so a payload cannot be read as the wrong kind.
+  // Each pushes its `limitation`: `ACMG_SCOPE_LIMITATION` must be shown
+  // wherever a classification is (lib/acmg/score.ts), and dropping it here
+  // would leave `/` the one surface showing the call without its caveat.
+  if (delta.kind === 'classification' && isClassificationPayload(payload)) {
+    const detail: DetailRow[] = [
+      { label: 'Classified', value: payload.classified ? 'yes' : 'no' },
+      { label: 'Classification', value: payload.classification ?? 'none' },
+      { label: 'Points', value: payload.points === null ? 'none' : String(payload.points) },
+    ];
+    if (payload.hgvs !== null) detail.push({ label: 'HGVS', value: payload.hgvs });
+    for (const criterion of payload.criteria) {
+      detail.push({
+        label: criterion.code,
+        value: `${criterion.met ? `met · ${criterion.weight}` : 'not met'} — ${criterion.note}`,
+      });
+    }
+    if (payload.priorClassification !== null) {
+      detail.push({ label: 'Prior call', value: payload.priorClassification });
+    }
+    detail.push(
+      { label: 'Note', value: payload.note },
+      { label: 'Citation', value: payload.citation },
+      { label: 'Limitation', value: payload.limitation },
+    );
+    return {
+      ...common,
+      // An unclassified variant is not a failure: nothing was scored and
+      // nothing is held. The conflict stage is the one that can hold a merge.
+      outcome: 'passed',
+      headline:
+        payload.classification === null
+          ? 'Not classified'
+          : `${payload.classification} · ${payload.points ?? 'no'} points`,
+      detail,
+    };
+  }
+
+  if (delta.kind === 'conflict' && isConflictPayload(payload)) {
+    return {
+      ...common,
+      // Crossing the actionable threshold requires sign-off, so the row must
+      // not read as passed while it is holding the merge.
+      outcome: payload.crossesActionableThreshold ? 'escalated' : 'passed',
+      headline: !payload.assessed
+        ? 'Not assessed'
+        : payload.crossesActionableThreshold
+          ? 'Crosses the actionable threshold — sign-off required'
+          : payload.conflict
+            ? 'Disagrees with the prior call'
+            : 'No conflict with the prior call',
+      detail: [
+        { label: 'Assessed', value: payload.assessed ? 'yes' : 'no' },
+        { label: 'Prior call', value: payload.priorClassification ?? 'none' },
+        { label: 'New call', value: payload.newClassification ?? 'none' },
+        { label: 'Disagrees', value: payload.conflict ? 'yes' : 'no' },
+        {
+          label: 'Crosses actionable threshold',
+          value: payload.crossesActionableThreshold ? 'yes — sign-off required' : 'no',
+        },
+        { label: 'Note', value: payload.note },
+        { label: 'Limitation', value: payload.limitation },
+      ],
+    };
+  }
+
+  if (delta.kind === 'therapy_match' && isTherapyMatchPayload(payload)) {
+    return {
+      ...common,
+      outcome: 'passed',
+      headline: payload.result.replace(/_/g, ' '),
+      detail: [
+        { label: 'Classification', value: payload.classification },
+        { label: 'Result', value: payload.result.replace(/_/g, ' ') },
+        {
+          label: 'Therapies',
+          value:
+            payload.therapies.length === 0
+              ? 'none in the curated table'
+              : payload.therapies.map((t) => t.name).join(', '),
+        },
+        { label: 'Note', value: payload.note },
+        { label: 'Disclaimer', value: payload.disclaimer },
+        { label: 'Limitation', value: payload.limitation },
+      ],
+    };
+  }
+
   return {
     ...common,
     outcome: 'passed',
@@ -692,7 +795,7 @@ function runView(args: {
   // what the run executed. Pinning the seven-agent order dropped the three
   // ACMG rows, hiding a stage that can hold a merge.
   const steps = pipelineStepsFor(args.result.classified).map((spec, i) =>
-    stepFor(i + 1, spec.agent, deltas),
+    stepFor(i + 1, spec.agent, deltas, args.result.blocked),
   );
 
   const screenDelta = deltas.find((d) => d.kind === 'screen');
