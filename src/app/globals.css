@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * SigmaFold — variant/lab-bench.
+ * Designed dark-first: the surfaces are anodised metal and smoked glass, the
+ * accents are instrument accents, and every numeric readout is tabular.
+ * Light mode is a brightly-lit bench, not an inversion.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.5rem;
+
+  --background: oklch(0.967 0.003 264);
+  --foreground: oklch(0.21 0.012 264);
+  --card: oklch(0.995 0.001 264);
+  --card-foreground: oklch(0.21 0.012 264);
+  --popover: oklch(0.995 0.001 264);
+  --popover-foreground: oklch(0.21 0.012 264);
+  --primary: oklch(0.42 0.1 250);
+  --primary-foreground: oklch(0.99 0.002 264);
+  --secondary: oklch(0.93 0.005 264);
+  --secondary-foreground: oklch(0.26 0.012 264);
+  --muted: oklch(0.935 0.004 264);
+  --muted-foreground: oklch(0.49 0.012 264);
+  --accent: oklch(0.92 0.02 230);
+  --accent-foreground: oklch(0.24 0.02 250);
+  --destructive: oklch(0.56 0.2 25);
+  --destructive-foreground: oklch(0.99 0.002 264);
+  --border: oklch(0.87 0.005 264);
+  --input: oklch(0.9 0.005 264);
+  --ring: oklch(0.52 0.13 235);
+
+  /* Instrument surfaces */
+  --bezel: oklch(0.9 0.004 264);
+  --bezel-edge: oklch(0.82 0.006 264);
+  --recess: oklch(0.915 0.004 264);
+  --vibrancy: oklch(0.99 0.002 264 / 0.72);
+  --grid-line: oklch(0.21 0.012 264 / 0.07);
+
+  /* Instrument accents — used for lamps, traces and gauge arcs */
+  --signal: oklch(0.56 0.14 215);
+  --signal-warn: oklch(0.65 0.15 75);
+  --signal-alarm: oklch(0.54 0.2 25);
+  --signal-ok: oklch(0.56 0.14 160);
+  --trace: oklch(0.45 0.12 235);
+  --cell-discoid: oklch(0.55 0.19 20);
+  --cell-sickled: oklch(0.42 0.17 300);
+  --lumen: oklch(0.88 0.02 240);
+}
+
+.dark {
+  --background: oklch(0.155 0.009 264);
+  --foreground: oklch(0.955 0.004 264);
+  --card: oklch(0.195 0.01 264);
+  --card-foreground: oklch(0.955 0.004 264);
+  --popover: oklch(0.205 0.01 264);
+  --popover-foreground: oklch(0.955 0.004 264);
+  --primary: oklch(0.78 0.13 200);
+  --primary-foreground: oklch(0.17 0.015 250);
+  --secondary: oklch(0.255 0.012 264);
+  --secondary-foreground: oklch(0.955 0.004 264);
+  --muted: oklch(0.245 0.011 264);
+  --muted-foreground: oklch(0.72 0.012 264);
+  --accent: oklch(0.29 0.03 230);
+  --accent-foreground: oklch(0.96 0.01 220);
+  --destructive: oklch(0.68 0.19 25);
+  --destructive-foreground: oklch(0.16 0.015 25);
+  --border: oklch(0.31 0.012 264);
+  --input: oklch(0.33 0.013 264);
+  --ring: oklch(0.72 0.12 205);
+
+  --bezel: oklch(0.225 0.011 264);
+  --bezel-edge: oklch(0.33 0.013 264);
+  --recess: oklch(0.13 0.008 264);
+  --vibrancy: oklch(0.21 0.011 264 / 0.66);
+  --grid-line: oklch(0.955 0.004 264 / 0.08);
+
+  --signal: oklch(0.82 0.14 200);
+  --signal-warn: oklch(0.82 0.15 85);
+  --signal-alarm: oklch(0.69 0.2 25);
+  --signal-ok: oklch(0.78 0.15 160);
+  --trace: oklch(0.82 0.13 200);
+  --cell-discoid: oklch(0.68 0.19 22);
+  --cell-sickled: oklch(0.7 0.17 305);
+  --lumen: oklch(0.26 0.02 240);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-bezel: var(--bezel);
+  --color-bezel-edge: var(--bezel-edge);
+  --color-recess: var(--recess);
+  --color-signal: var(--signal);
+  --color-signal-warn: var(--signal-warn);
+  --color-signal-alarm: var(--signal-alarm);
+  --color-signal-ok: var(--signal-ok);
+  --color-trace: var(--trace);
+  --color-lumen: var(--lumen);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue",
+    "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* A milled-aluminium bezel: top highlight, bottom shadow, hairline edge. */
+@utility bezel-surface {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bezel) 92%, white 8%),
+    var(--bezel)
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 30%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, black 10%, transparent),
+    0 1px 2px color-mix(in oklab, black 12%, transparent);
+}
+
+/* A recessed well for control inputs — the opposite lighting of a bezel. */
+@utility recess-surface {
+  background: var(--recess);
+  box-shadow:
+    inset 0 2px 5px color-mix(in oklab, black 22%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, white 14%, transparent);
+}
+
+/* Translucent vibrancy, as used by the window chrome and the sidebar. */
+@utility vibrancy-surface {
+  background: var(--vibrancy);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+@utility engraved-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
