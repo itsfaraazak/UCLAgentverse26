@@ -309,13 +309,11 @@ back from any claim to the evidence it rests on.
 and no delete. When the verifier disagrees with the structural agent, it does not edit the
 structural agent's delta; it adds a `verdict` delta whose `parents` include the claim it is
 contradicting. The record then **forks**: both the optimistic structural claim and the
-verifier's refutation are present, attributed, and ordered relative to each other. The
-alternative — letting a later agent overwrite an earlier one — would produce a record that
-cannot answer the question an audit trail exists to answer, which is not "what do we currently
-believe" but "who claimed what, on what basis, and who disagreed". Mutation destroys exactly
-the disagreement that makes the trail worth keeping. It also keeps the structure honest about
-the pipeline's own failure mode: an edit that step 4 liked and step 7 failed should *look* like
-a disagreement when you read it back, not like a clean rejection.
+verifier's refutation are present, attributed, and ordered relative to each other. Letting a
+later agent overwrite an earlier one would destroy exactly the disagreement an audit trail
+exists to record — not "what do we currently believe" but "who claimed what, on what basis, and
+who disagreed". An edit that step 4 liked and step 7 failed should *look* like a disagreement
+when you read it back, not like a clean rejection.
 
 Deltas from a run that terminated at the gate are still a record. A `screen` delta with a
 `block` verdict carries the policy category and the request digest — enough to prove a request
@@ -384,8 +382,6 @@ switcher with the merge gate, no placeholder content, and accessible controls in
 ---
 
 ## 7. Limitations
-
-Stated plainly, neither undersold nor oversold.
 
 - **The simulation is illustrative.** A seeded 2D particle model of flow through a constriction,
   with parameters chosen so the genotypes read differently on screen. `src/data/loci.json` says
