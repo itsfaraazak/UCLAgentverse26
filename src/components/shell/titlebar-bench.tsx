@@ -65,7 +65,8 @@ export function TitleBar({
 
         <div className="min-w-0">
           <h1 className="truncate text-sm font-semibold tracking-tight">
-            SigmaFold <span className="text-muted-foreground">— Bench</span>
+            <span className="font-display">SigmaFold</span>{' '}
+            <span className="text-muted-foreground">— Bench</span>
           </h1>
           <p className="truncate text-[0.6875rem] text-muted-foreground">{subtitle}</p>
         </div>

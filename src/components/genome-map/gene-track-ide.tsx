@@ -162,9 +162,9 @@ export function GeneTrack({
               y={axisY}
               width={Math.max(w, 2)}
               height={exonH}
-              rx={compact ? 2 : 4}
+              rx={compact ? 2 : 3}
               fill={modelled ? 'var(--exon-modelled)' : 'var(--exon-context)'}
-              fillOpacity={modelled ? 0.9 : 1}
+              fillOpacity={1}
             />
             {!compact && w > 54 && (
               <text
@@ -235,7 +235,7 @@ export function GeneTrack({
                 y={axisY - 10}
                 textAnchor="middle"
                 className="nums text-[10px]"
-                style={{ fill: 'var(--muted-foreground)', fontFamily: 'var(--font-mono)' }}
+                style={{ fill: 'var(--muted-foreground)' }}
               >
                 {c}
               </text>
@@ -266,8 +266,8 @@ export function GeneTrack({
               x={Math.min(Math.max(markerX, 44), WIDTH - 44)}
               y={axisY + exonH + 50}
               textAnchor="middle"
-              className="nums text-[12px] font-semibold"
-              style={{ fill: 'var(--marker)', fontFamily: 'var(--font-mono)' }}
+              className="nums text-[11px] font-semibold"
+              style={{ fill: 'var(--marker)' }}
             >
               codon {markerCodon}
             </text>

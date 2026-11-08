@@ -6,6 +6,8 @@ import {
   GitCommitVertical,
   GitMerge,
   Hash,
+  ShieldAlert,
+  ShieldX,
   Tag,
   User,
 } from 'lucide-react';
@@ -44,7 +46,7 @@ export function InspectorSheet({
     <Sheet open={open && commit !== null} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="vibrancy-strong w-full gap-0 overflow-hidden data-[side=right]:sm:max-w-[min(46rem,92vw)]"
+        className="w-full gap-0 overflow-hidden data-[side=right]:sm:max-w-[min(46rem,92vw)]"
         aria-label="Commit inspector"
       >
         {commit !== null && (
@@ -82,7 +84,7 @@ function InspectorBody({
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${look.pill}`}
           >
-            <look.Icon className="size-2.5" aria-hidden="true" />
+            <look.Icon className="size-3" aria-hidden="true" />
             {look.short}
           </span>
         </div>
@@ -94,17 +96,17 @@ function InspectorBody({
         </SheetDescription>
         <dl className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] text-muted-foreground">
           <div className="flex items-center gap-1.5">
-            <Hash className="size-3" aria-hidden="true" />
+            <Hash className="size-3.5" aria-hidden="true" />
             <dt className="sr-only">Object id</dt>
             <dd className="font-mono tnum">{commit.short}</dd>
           </div>
           <div className="flex items-center gap-1.5">
-            <User className="size-3" aria-hidden="true" />
+            <User className="size-3.5" aria-hidden="true" />
             <dt className="sr-only">Author</dt>
             <dd className="font-mono">{commit.author}</dd>
           </div>
           <div className="flex items-center gap-1.5">
-            <Clock className="size-3" aria-hidden="true" />
+            <Clock className="size-3.5" aria-hidden="true" />
             <dt className="sr-only">Committed</dt>
             <dd className="tnum">
               {new Date(commit.timestamp).toISOString().replace('T', ' ').slice(0, 16)} UTC
@@ -112,7 +114,7 @@ function InspectorBody({
           </div>
           {commit.branches.length > 0 && (
             <div className="flex items-center gap-1.5">
-              <Tag className="size-3" aria-hidden="true" />
+              <Tag className="size-3.5" aria-hidden="true" />
               <dt className="sr-only">Branch tips</dt>
               <dd className="font-mono">{commit.branches.join(', ')}</dd>
             </div>
@@ -120,14 +122,21 @@ function InspectorBody({
         </dl>
         {commit.run?.mergeBlockedReason != null && (
           <p
-            className={`mt-2 rounded-lg border px-3 py-2 text-[11.5px] leading-relaxed ${
+            className={`mt-2 flex items-start gap-1.5 rounded-md px-3 py-2 text-[11.5px] leading-relaxed ${
               commit.status === 'escalated'
-                ? 'border-escalate/40 bg-escalate-soft/50 text-escalate'
-                : 'border-block/40 bg-block-soft/50 text-block'
+                ? 'bg-escalate-soft/50 text-escalate'
+                : 'bg-block-soft/50 text-block'
             }`}
           >
-            <strong className="font-semibold">Merge blocked.</strong>{' '}
-            {commit.run.mergeBlockedReason}
+            {commit.status === 'escalated' ? (
+              <ShieldAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            ) : (
+              <ShieldX className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            )}
+            <span>
+              <strong className="font-semibold">Merge blocked.</strong>{' '}
+              {commit.run.mergeBlockedReason}
+            </span>
           </p>
         )}
       </SheetHeader>
@@ -212,7 +221,7 @@ function EditDetail({ commit }: { readonly commit: CommitView }) {
   return (
     <section className="flex flex-col gap-2" aria-label="Edit detail">
       <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-        <FlaskConical className="size-4 text-primary" aria-hidden="true" />
+        <FlaskConical className="size-4 text-muted-foreground" aria-hidden="true" />
         Structural consequence
       </h3>
       <dl className="grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-[11.5px]">
@@ -220,7 +229,8 @@ function EditDetail({ commit }: { readonly commit: CommitView }) {
         <dd className="font-medium">{edit.label}</dd>
         <dt className="text-muted-foreground">Change</dt>
         <dd className="font-mono">
-          {edit.gene} codon {edit.codonIndex}: {edit.refCodon} → {edit.altCodon} (
+          {edit.gene} codon {edit.codonIndex}: <span className="seq">{edit.refCodon}</span> →{' '}
+          <span className="seq">{edit.altCodon}</span> (
           {edit.refAaName} → {edit.altAaName})
         </dd>
         <dt className="text-muted-foreground">Kind</dt>
@@ -292,7 +302,7 @@ function GenotypeDetail({
             <span
               key={index}
               className={
-                reference.charAt(index) !== aa ? 'font-bold text-block underline' : undefined
+                reference.charAt(index) !== aa ? 'font-semibold text-block underline' : undefined
               }
             >
               {aa}

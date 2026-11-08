@@ -24,13 +24,13 @@ export function CheckList({ run }: CheckListProps) {
     <section className="flex flex-col gap-3" aria-label="Agent checks">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <ListChecks className="size-4 text-primary" aria-hidden="true" />
+          <ListChecks className="size-4 text-muted-foreground" aria-hidden="true" />
           Agent checks
         </h3>
         <span
           className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${verdict.pill}`}
         >
-          <verdict.Icon className="size-2.5" aria-hidden="true" />
+          <verdict.Icon className="size-3" aria-hidden="true" />
           {run.verdict}
         </span>
         <span className="ml-auto font-mono text-[11px] text-muted-foreground tnum">
@@ -39,7 +39,7 @@ export function CheckList({ run }: CheckListProps) {
       </header>
 
       {/* The policy verdict, always shown, never templated with request text. */}
-      <div className="rounded-xl border bg-card/60 p-3">
+      <div className="hairline rounded-lg border p-3">
         <p className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
           <ShieldCheck className="size-3.5" aria-hidden="true" />
           Biosafety screen
@@ -69,14 +69,14 @@ export function CheckList({ run }: CheckListProps) {
         </p>
         {run.policy.redacted && (
           <p className="mt-2 flex items-start gap-1.5 rounded-md bg-block-soft/50 px-2 py-1.5 text-[11px] leading-relaxed text-block">
-            <Info className="mt-px size-3 shrink-0" aria-hidden="true" />
+            <Info className="mt-px size-3.5 shrink-0" aria-hidden="true" />
             This request was refused by category. Its text was never stored, logged or
             rendered — only the digest above identifies it.
           </p>
         )}
         {run.signoff !== null && (
           <p className="mt-2 flex items-start gap-1.5 rounded-md bg-pass-soft/50 px-2 py-1.5 text-[11px] leading-relaxed text-pass">
-            <ShieldCheck className="mt-px size-3 shrink-0" aria-hidden="true" />
+            <ShieldCheck className="mt-px size-3.5 shrink-0" aria-hidden="true" />
             Signed off by <span className="font-mono">{run.signoff.by}</span> as{' '}
             <span className="font-mono">{run.signoff.role}</span>.
           </p>
@@ -120,7 +120,7 @@ function CheckRow({
     <li>
       <Collapsible>
         <CollapsibleTrigger
-          className="group/check flex w-full items-start gap-2.5 rounded-lg border bg-card/50 px-3 py-2 text-left transition-colors hover:bg-card focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="group/check hairline flex w-full items-start gap-2.5 rounded-md border px-3 py-2 text-left transition-colors hover:bg-accent/50 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           disabled={delta === null}
         >
           <span
@@ -169,9 +169,9 @@ function CheckRow({
         </CollapsibleTrigger>
         {delta !== null && (
           <CollapsibleContent>
-            <div className="mt-1 ml-3 rounded-lg border border-dashed bg-card/30 px-3 py-2.5">
+            <div className="mt-1 ml-3 border-l px-3 py-2.5">
               <p className="flex flex-wrap items-center gap-x-2 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                <GitFork className="size-3" aria-hidden="true" />
+                <GitFork className="size-3.5" aria-hidden="true" />
                 delta {delta.id}
                 <span className="font-mono normal-case">{delta.kind}</span>
               </p>

@@ -3,8 +3,8 @@
 /**
  * The primary interaction of the whole app: oxygen tension.
  *
- * A recessed, physical-feeling slider with a milled thumb, a measured scale
- * and a hypoxia band below the sickling onset. Built on the shadcn Slider so
+ * A slider with a measured scale and a hypoxia band below the sickling
+ * onset. Built on the shadcn Slider so
  * it keeps keyboard support, roles and focus handling.
  */
 
@@ -45,7 +45,7 @@ export function PO2Control({
   return (
     <section
       aria-labelledby="po2-control-heading"
-      className="recess-surface rounded-xl border border-bezel-edge/70 p-5"
+      className="recess-surface rounded-lg border border-border p-5"
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
@@ -69,7 +69,7 @@ export function PO2Control({
               hypoxic ? 'text-signal-alarm' : 'text-signal',
             )}
           >
-            <span className="text-6xl font-semibold">{Math.round(value)}</span>
+            <span className="text-5xl font-semibold">{Math.round(value)}</span>
             <span className="ml-2 text-base text-muted-foreground">{unit}</span>
           </div>
           <div className="flex flex-col gap-1">
@@ -99,7 +99,7 @@ export function PO2Control({
         {/* Hypoxia band: the region where polymerization is favoured. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-1 bottom-6 left-0 rounded-l-md bg-signal-alarm/12 ring-1 ring-signal-alarm/25 ring-inset"
+          className="pointer-events-none absolute -top-1 bottom-6 left-0 rounded-l-sm bg-signal-alarm/12"
           style={{ width: `${onsetPct}%` }}
         />
         <Slider
@@ -115,16 +115,13 @@ export function PO2Control({
           }}
           className={cn(
             'relative',
-            '[&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-track]]:rounded-full',
-            '[&_[data-slot=slider-track]]:bg-background/80 [&_[data-slot=slider-track]]:shadow-[inset_0_1px_3px_rgba(0,0,0,0.45)]',
-            '[&_[data-slot=slider-range]]:bg-gradient-to-r',
+            '[&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:rounded-full',
+            '[&_[data-slot=slider-track]]:bg-muted',
             hypoxic
-              ? '[&_[data-slot=slider-range]]:from-signal-alarm/70 [&_[data-slot=slider-range]]:to-signal-alarm'
-              : '[&_[data-slot=slider-range]]:from-signal/60 [&_[data-slot=slider-range]]:to-signal',
-            '[&_[data-slot=slider-thumb]]:size-7 [&_[data-slot=slider-thumb]]:bg-gradient-to-b',
-            '[&_[data-slot=slider-thumb]]:from-bezel [&_[data-slot=slider-thumb]]:to-bezel-edge',
-            '[&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-foreground/25',
-            '[&_[data-slot=slider-thumb]]:shadow-[0_2px_6px_rgba(0,0,0,0.45)]',
+              ? '[&_[data-slot=slider-range]]:bg-signal-alarm'
+              : '[&_[data-slot=slider-range]]:bg-signal',
+            '[&_[data-slot=slider-thumb]]:size-5 [&_[data-slot=slider-thumb]]:bg-card',
+            '[&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-foreground/40',
           )}
         />
         <svg

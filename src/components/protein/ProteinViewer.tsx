@@ -215,8 +215,7 @@ export function ProteinViewer({
       aria-labelledby={ids.title}
       data-slot="protein-viewer"
       className={cn(
-        'flex w-full min-w-0 flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900',
-        'dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100',
+        'flex w-full min-w-0 flex-col gap-3 rounded-lg border bg-card p-3 text-card-foreground',
         className,
       )}
     >
@@ -225,7 +224,7 @@ export function ProteinViewer({
           <h2 id={ids.title} className="text-sm font-semibold leading-tight">
             Structure view · {change.gene} {residueLabel}
           </h2>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+          <p className="text-xs text-muted-foreground">
             Deposited experimental structure (PDB {activeId}), not a prediction
           </p>
         </div>
@@ -267,7 +266,7 @@ export function ProteinViewer({
         </ToggleGroup>
       )}
 
-      <div className="relative aspect-[4/3] min-h-[200px] w-full overflow-hidden rounded-lg bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-950">
+      <div className="relative aspect-[4/3] min-h-[200px] w-full overflow-hidden rounded-lg bg-muted/50">
         <div
           ref={hostRef}
           role="img"
@@ -276,7 +275,7 @@ export function ProteinViewer({
           aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown + - 0 F"
           tabIndex={ready ? 0 : -1}
           onKeyDown={onKeyDown}
-          className="absolute inset-0 cursor-grab rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset active:cursor-grabbing"
+          className="absolute inset-0 cursor-grab rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset active:cursor-grabbing"
         />
         {state.phase === 'loading' && <LoadingOverlay label={LOADING_LABEL[state.step]} />}
         {state.phase === 'error' && (
@@ -286,7 +285,7 @@ export function ProteinViewer({
               {describeChange(change)}.
             </p>
             {change.summary !== null && <p className="mt-1">{change.summary}</p>}
-            <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 text-muted-foreground">
               The full text description is below.
             </p>
           </FailurePanel>
@@ -343,7 +342,7 @@ function Legend({
   const carrierNames = structure ? moleculesFor(structure, carriers, true) : [];
   const otherNames = structure ? moleculesFor(structure, carriers, false) : [];
   return (
-    <ul aria-label="Legend" className="grid gap-1 text-xs text-zinc-700 dark:text-zinc-300">
+    <ul aria-label="Legend" className="grid gap-1 text-xs text-foreground/80">
       <li className="flex gap-2">
         <Swatch className="bg-[#e11d74]" />
         <span>
@@ -383,13 +382,13 @@ function TextAlternative({
 }) {
   const structure = state.phase === 'ready' ? state.structure : null;
   return (
-    <div id={id} className="grid gap-2 border-t border-zinc-200 pt-2 text-xs leading-relaxed dark:border-zinc-800">
+    <div id={id} className="grid gap-2 border-t border-border pt-2 text-xs leading-relaxed">
       <p>
         <span className="font-medium">Residue change: </span>
         {describeChange(change)}.
       </p>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-        <dt className="text-zinc-500 dark:text-zinc-400">Variant</dt>
+        <dt className="text-muted-foreground">Variant</dt>
         <dd>
           {change.variantLabel}
           {change.proteinHgvs !== null && <> · {change.proteinHgvs}</>}
@@ -397,19 +396,19 @@ function TextAlternative({
         </dd>
         {change.summary !== null && (
           <>
-            <dt className="text-zinc-500 dark:text-zinc-400">Summary</dt>
+            <dt className="text-muted-foreground">Summary</dt>
             <dd>{change.summary}</dd>
           </>
         )}
         {change.consequence !== null && (
           <>
-            <dt className="text-zinc-500 dark:text-zinc-400">Consequence</dt>
+            <dt className="text-muted-foreground">Consequence</dt>
             <dd>{change.consequence}</dd>
           </>
         )}
         {change.confidence !== null && (
           <>
-            <dt className="text-zinc-500 dark:text-zinc-400">Confidence</dt>
+            <dt className="text-muted-foreground">Confidence</dt>
             <dd>
               {change.confidence} · {change.provenance}
             </dd>
@@ -417,11 +416,11 @@ function TextAlternative({
         )}
         {change.numberingNote !== null && (
           <>
-            <dt className="text-zinc-500 dark:text-zinc-400">Numbering</dt>
+            <dt className="text-muted-foreground">Numbering</dt>
             <dd>{change.numberingNote}</dd>
           </>
         )}
-        <dt className="text-zinc-500 dark:text-zinc-400">Structure</dt>
+        <dt className="text-muted-foreground">Structure</dt>
         <dd>
           PDB {activeId}
           {structure?.title ? <> — “{structure.title}” (as deposited)</> : null}
@@ -434,14 +433,14 @@ function TextAlternative({
         </dd>
       </dl>
       {structure && structure.highlightedChains.length === 0 && (
-        <p role="status" className="rounded-md bg-amber-50 p-2 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
+        <p role="status" className="rounded-md bg-verdict-escalate-soft p-2 text-foreground">
           No chain in PDB {activeId} carries the expected residue at position {change.pdbResidueNumber}
           {structure.otherChainsAtPosition.length > 0 &&
             ` (found ${structure.otherChainsAtPosition.map((o) => `${o.resName} in ${o.chainId}`).join(', ')})`}
           , so nothing is highlighted rather than marking an unrelated residue.
         </p>
       )}
-      <p className="flex gap-2 rounded-md bg-zinc-100 p-2 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+      <p className="flex gap-2 rounded-md bg-muted p-2 text-foreground/80">
         <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
         <span>
           {change.limitation !== null && (

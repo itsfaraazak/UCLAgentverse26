@@ -61,15 +61,15 @@ export function Titlebar({
     <header className="flex h-10 shrink-0 items-center gap-2 border-b border-chrome-border bg-chrome px-2.5">
       {/* Traffic lights. */}
       <div className="flex shrink-0 items-center gap-[7px] pr-1" aria-hidden>
-        <span className="size-[11px] rounded-full bg-[#ec6a5e] ring-1 ring-black/10 ring-inset" />
-        <span className="size-[11px] rounded-full bg-[#f4bf4f] ring-1 ring-black/10 ring-inset" />
-        <span className="size-[11px] rounded-full bg-[#61c454] ring-1 ring-black/10 ring-inset" />
+        <span className="size-3 rounded-full bg-[#ff5f57] ring-1 ring-black/15 ring-inset" />
+        <span className="size-3 rounded-full bg-[#febc2e] ring-1 ring-black/15 ring-inset" />
+        <span className="size-3 rounded-full bg-[#28c840] ring-1 ring-black/15 ring-inset" />
       </div>
 
       <div className="flex min-w-0 items-center gap-1.5">
         <GitPullRequest className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
         <h1 className="truncate text-[12.5px] font-semibold">
-          SigmaFold
+          <span className="font-display">SigmaFold</span>
           <span className="font-normal text-muted-foreground"> — {gene} review</span>
         </h1>
         <span className="hidden truncate text-[11px] text-muted-foreground sm:inline">
@@ -78,8 +78,8 @@ export function Titlebar({
       </div>
 
       {/* Branch / head, the way a status bar states a checkout. */}
-      <div className="mx-auto hidden min-w-0 items-center gap-1.5 rounded-md border border-chrome-border bg-card/70 px-2 py-0.5 md:flex">
-        <GitBranch className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+      <div className="mx-auto hidden min-w-0 items-center gap-1.5 rounded-md border border-chrome-border px-2 py-0.5 md:flex">
+        <GitBranch className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
         <span className="truncate font-mono text-[11px]">{branch}</span>
         {baseBranch !== null && (
           <>
@@ -94,7 +94,7 @@ export function Titlebar({
 
       <VariantSwitcher current="/ide" />
 
-        <div className="ml-auto flex shrink-0 items-center gap-1">
+      <div className="ml-auto flex shrink-0 items-center gap-1">
         <Button
           size="xs"
           variant="outline"

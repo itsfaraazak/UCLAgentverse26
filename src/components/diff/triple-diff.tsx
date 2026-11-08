@@ -38,12 +38,12 @@ export function TripleDiff({ diff }: TripleDiffProps) {
     <section className="flex flex-col gap-3" aria-label="Sequence diff">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <Columns3 className="size-4 text-primary" aria-hidden="true" />
+          <Columns3 className="size-4 text-muted-foreground" aria-hidden="true" />
           Diff
         </h3>
         <p className="flex min-w-0 items-center gap-1.5 text-[11.5px] text-muted-foreground">
           <span className="truncate font-mono">{diff.refLabel}</span>
-          <ArrowLeftRight className="size-3 shrink-0" aria-hidden="true" />
+          <ArrowLeftRight className="size-3.5 shrink-0" aria-hidden="true" />
           <span className="truncate font-mono">{diff.altLabel}</span>
         </p>
         <div className="ml-auto flex items-center gap-2">
@@ -68,31 +68,31 @@ export function TripleDiff({ diff }: TripleDiffProps) {
               : '.')}
       </p>
 
-      <div className="overflow-hidden rounded-xl border">
+      <div className="hairline overflow-hidden rounded-lg border">
         <div className="max-h-[22rem] overflow-auto">
           <table className="w-full border-collapse text-left text-[11.5px]">
             <caption className="sr-only">
               Codon-by-codon diff of {diff.refLabel} against {diff.altLabel}, in three
               synchronised registers: DNA bases, codon index, and amino acid.
             </caption>
-            <thead className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
+            <thead className="sticky top-0 z-10 bg-card">
               <tr className="border-b text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                <th scope="col" className="px-2.5 py-2 font-sans">
+                <th scope="col" className="px-2.5 py-2">
                   Codon
                 </th>
-                <th scope="col" className="px-2.5 py-2 font-sans">
+                <th scope="col" className="px-2.5 py-2">
                   DNA ref
                 </th>
-                <th scope="col" className="px-2.5 py-2 font-sans">
+                <th scope="col" className="px-2.5 py-2">
                   DNA alt
                 </th>
-                <th scope="col" className="px-2.5 py-2 font-sans">
+                <th scope="col" className="px-2.5 py-2">
                   AA ref
                 </th>
-                <th scope="col" className="px-2.5 py-2 font-sans">
+                <th scope="col" className="px-2.5 py-2">
                   AA alt
                 </th>
-                <th scope="col" className="px-2.5 py-2 font-sans">
+                <th scope="col" className="px-2.5 py-2">
                   Status
                 </th>
               </tr>
@@ -113,7 +113,7 @@ export function TripleDiff({ diff }: TripleDiffProps) {
                   <td className="seq px-2.5 py-1.5">{row.refAa ?? '–'}</td>
                   <td
                     className={`seq px-2.5 py-1.5 ${
-                      row.status === 'changed' && !row.silent ? 'font-bold text-block' : ''
+                      row.status === 'changed' && !row.silent ? 'font-semibold text-block' : ''
                     }`}
                   >
                     {row.altAa ?? '–'}
@@ -122,7 +122,7 @@ export function TripleDiff({ diff }: TripleDiffProps) {
                     {row.status === 'same' ? (
                       <Dot className="size-3.5 text-muted-foreground/50" aria-label="unchanged" />
                     ) : (
-                      <span className="font-sans text-[10px] font-semibold tracking-wide uppercase">
+                      <span className="text-[10px] font-semibold tracking-wide uppercase">
                         {row.silent ? 'synonymous' : row.status}
                       </span>
                     )}
@@ -131,7 +131,7 @@ export function TripleDiff({ diff }: TripleDiffProps) {
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-2.5 py-6 text-center font-sans text-muted-foreground">
+                  <td colSpan={6} className="px-2.5 py-6 text-center text-muted-foreground">
                     No changed codons.
                   </td>
                 </tr>
@@ -152,7 +152,7 @@ function Bases({ codon, other }: { readonly codon: string | null; readonly other
       {codon.split('').map((base, index) => {
         const differs = other === null || other.charAt(index) !== base;
         return (
-          <span key={index} className={differs ? 'font-bold text-block underline' : undefined}>
+          <span key={index} className={differs ? 'font-semibold text-block underline' : undefined}>
             {base}
           </span>
         );

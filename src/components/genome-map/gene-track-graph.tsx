@@ -70,7 +70,7 @@ export function GeneTrack({ locus, edit, changedCodons }: GeneTrackProps) {
     <section className="flex flex-col gap-3" aria-label="Gene track diagram">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <Microscope className="size-4 text-primary" aria-hidden="true" />
+          <Microscope className="size-4 text-muted-foreground" aria-hidden="true" />
           Gene track
         </h3>
         <p className="text-[11.5px] text-muted-foreground">
@@ -103,7 +103,7 @@ export function GeneTrack({ locus, edit, changedCodons }: GeneTrackProps) {
         </ToggleGroup>
       </header>
 
-      <div className="overflow-hidden rounded-xl border bg-card/60">
+      <div className="hairline overflow-hidden rounded-lg border">
         <svg
           viewBox={`0 0 ${WIDTH} 152`}
           className="h-auto w-full"
@@ -283,9 +283,14 @@ export function GeneTrack({ locus, edit, changedCodons }: GeneTrackProps) {
                 textAnchor="middle"
                 className="fill-foreground text-[9.5px] font-semibold"
               >
-                {edit === null
-                  ? `codon ${marked}`
-                  : `codon ${marked} · ${edit.refCodon}→${edit.altCodon}`}
+                {edit === null ? (
+                  `codon ${marked}`
+                ) : (
+                  <>
+                    {`codon ${marked} · `}
+                    <tspan className="seq">{`${edit.refCodon}→${edit.altCodon}`}</tspan>
+                  </>
+                )}
               </text>
               {edit !== null && (
                 <text

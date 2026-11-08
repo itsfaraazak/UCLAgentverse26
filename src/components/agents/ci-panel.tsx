@@ -97,21 +97,21 @@ function CheckRowView({
         className="flex w-full items-start gap-2 px-2.5 py-1.5 text-left hover:bg-muted/50"
       >
         <ChevronRight
-          className={`mt-[3px] size-3 shrink-0 text-muted-foreground transition-transform ${
+          className={`mt-px size-3.5 shrink-0 text-muted-foreground transition-transform ${
             open ? 'rotate-90' : ''
           }`}
           aria-hidden
         />
-        <span className="nums mt-[1px] w-3 shrink-0 font-mono text-[11px] text-muted-foreground">
+        <span className="nums mt-px w-3 shrink-0 text-[11px] text-muted-foreground">
           {step.step}
         </span>
-        <StatusIcon className={`mt-[2px] size-3.5 shrink-0 ${style.fg}`} aria-hidden />
+        <StatusIcon className={`mt-px size-3.5 shrink-0 ${style.fg}`} aria-hidden />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5">
-            <AgentIcon className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+            <AgentIcon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
             <span className="truncate font-mono text-[12px] font-medium">{step.agent}</span>
             <span
-              className={`ml-auto shrink-0 rounded-sm border px-1 font-mono text-[9.5px] tracking-wide uppercase ${style.chip}`}
+              className={`ml-auto shrink-0 rounded-sm px-1 text-[9.5px] font-medium tracking-wide uppercase ${style.chip}`}
             >
               {style.label}
             </span>
@@ -123,20 +123,20 @@ function CheckRowView({
       </button>
 
       {open && (
-        <div id={panelId} className="border-t border-border/40 bg-card/50 px-2.5 py-2">
+        <div id={panelId} className="bg-card px-2.5 py-2">
           <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">{agentRole(step.agent)}</p>
           <dl className="grid grid-cols-[minmax(0,10rem)_1fr] gap-x-3 gap-y-1 text-[11px]">
             {step.details.map((d: StepDetail) => (
               <div key={d.label} className="col-span-2 grid grid-cols-subgrid">
-                <dt className="font-mono text-muted-foreground">{d.label}</dt>
+                <dt className="text-muted-foreground">{d.label}</dt>
                 <dd className="nums leading-snug break-words">{d.value}</dd>
               </div>
             ))}
           </dl>
 
           {step.limitation !== null && (
-            <p className="mt-2 flex items-start gap-1.5 rounded-md border border-border bg-muted/50 px-2 py-1.5 text-[10.5px] leading-snug text-muted-foreground">
-              <Info className="mt-[1px] size-3 shrink-0" aria-hidden />
+            <p className="mt-2 flex items-start gap-1.5 text-[10.5px] leading-snug text-muted-foreground">
+              <Info className="size-3.5 shrink-0" aria-hidden />
               <span>
                 <span className="font-semibold">Limits of this check: </span>
                 {step.limitation}
@@ -147,7 +147,7 @@ function CheckRowView({
           {delta !== undefined && (
             <p className="nums mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5 font-mono text-[10px] text-muted-foreground">
               <span className="inline-flex items-center gap-1">
-                <Hash className="size-2.5" aria-hidden />
+                <Hash className="size-3" aria-hidden />
                 {delta.id}
               </span>
               <span>kind {delta.kind}</span>
@@ -162,17 +162,48 @@ function CheckRowView({
   );
 }
 
+/**
+ * The merge outcome as icon + label + reason, so the decision never rests on
+ * the box's tint alone.
+ */
+function MergeOutcome({ merge }: { readonly merge: MergeDecisionView }) {
+  const style = merge.allowed
+    ? CHECK_STATUS_STYLE.passed
+    : merge.kind === 'awaiting-signoff'
+      ? CHECK_STATUS_STYLE.escalated
+      : merge.kind === 'content-conflict'
+        ? CHECK_STATUS_STYLE.warning
+        : CHECK_STATUS_STYLE.failed;
+  const Icon = style.icon;
+  const label = merge.allowed
+    ? null
+    : merge.kind === 'awaiting-signoff'
+      ? 'Merge held'
+      : merge.kind === 'content-conflict'
+        ? 'Merge conflict'
+        : 'Merge refused';
+  return (
+    <p className="flex items-start gap-1.5">
+      <Icon className="mt-px size-3.5 shrink-0" aria-hidden />
+      <span>
+        {label !== null && <span className="font-semibold">{label}. </span>}
+        {merge.allowed ? 'Merge allowed.' : merge.reasons.join(' ')}
+      </span>
+    </p>
+  );
+}
+
 function mergeTone(merge: MergeDecisionView): string {
   if (merge.allowed) {
-    return 'border-status-pass/30 bg-status-pass/10 text-status-pass';
+    return 'bg-status-pass/10 text-status-pass';
   }
   if (merge.kind === 'awaiting-signoff') {
-    return 'border-status-escalated/30 bg-status-escalated/10 text-status-escalated';
+    return 'bg-status-escalated/10 text-status-escalated';
   }
   if (merge.kind === 'content-conflict') {
-    return 'border-verdict-conflict/30 bg-verdict-conflict-soft text-verdict-conflict';
+    return 'bg-verdict-conflict-soft text-verdict-conflict';
   }
-  return 'border-status-fail/30 bg-status-fail/10 text-status-fail';
+  return 'bg-status-fail/10 text-status-fail';
 }
 
 export function CiPanel({
@@ -210,8 +241,8 @@ export function CiPanel({
 
   return (
     <section aria-label="Agent CI panel" className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center gap-1.5 border-b border-chrome-border bg-chrome/95 px-2.5 py-1.5">
-        <Activity className="size-3 text-muted-foreground" aria-hidden />
+      <div className="flex shrink-0 items-center gap-1.5 border-b border-chrome-border bg-chrome px-2.5 py-1.5">
+        <Activity className="size-3.5 text-muted-foreground" aria-hidden />
         <h2 className="text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
           Checks
         </h2>
@@ -247,8 +278,8 @@ export function CiPanel({
               const Icon = AGENT_ICON[agent] ?? ListTree;
               return (
                 <li key={agent} className="flex items-center gap-2 text-[11.5px] text-muted-foreground">
-                  <span className="nums w-3 font-mono text-[10px]">{i + 1}</span>
-                  <Icon className="size-3 shrink-0" aria-hidden />
+                  <span className="nums w-3 text-[10px]">{i + 1}</span>
+                  <Icon className="size-3.5 shrink-0" aria-hidden />
                   <span className="min-w-0">
                     <span className="font-mono">{agent}</span>
                     <span className="mt-0.5 block text-[10.5px] leading-snug">
@@ -256,7 +287,7 @@ export function CiPanel({
                     </span>
                   </span>
                   {i === 1 && (
-                    <span className="rounded-sm border border-status-blocked/40 bg-status-blocked/10 px-1 font-mono text-[9px] tracking-wide text-status-blocked uppercase">
+                    <span className="rounded-sm bg-status-blocked/10 px-1 text-[9.5px] font-medium tracking-wide text-status-blocked uppercase">
                       gate
                     </span>
                   )}
@@ -268,7 +299,7 @@ export function CiPanel({
       ) : (
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           {conclusionStyle !== null && ConclusionIcon !== undefined && (
-            <div className={`shrink-0 border-b border-border px-2.5 py-2`}>
+            <div className="shrink-0 border-b border-border px-2.5 py-2">
               <p className="flex items-center gap-1.5">
                 <ConclusionIcon className={`size-4 shrink-0 ${conclusionStyle.fg}`} aria-hidden />
                 <span className={`text-[12.5px] font-semibold ${conclusionStyle.fg}`}>
@@ -303,7 +334,7 @@ export function CiPanel({
             </p>
             <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{run.screen.reason}</p>
             {run.screen.redacted && (
-              <p className="mt-1.5 rounded-md border border-status-blocked/30 bg-status-blocked/10 px-2 py-1 text-[10.5px] leading-snug text-status-blocked">
+              <p className="mt-1.5 text-[10.5px] leading-snug text-status-blocked">
                 The request text was not retained and is not displayed. Only the category{' '}
                 <span className="font-mono">{run.screen.category}</span>, this reason, and the digest{' '}
                 <span className="font-mono">{run.screen.requestDigest}</span> are on the record.
@@ -365,13 +396,13 @@ export function CiPanel({
 
           {recordedSignOff !== null && (
             <p className="shrink-0 border-b border-border bg-status-pass/8 px-2.5 py-2 text-[11px] text-status-pass">
-              <PenLine className="mr-1 inline size-3" aria-hidden />
+              <PenLine className="mr-1 inline size-3.5 align-[-3px]" aria-hidden />
               Signed off by <span className="font-mono">{recordedSignOff.approver}</span> as{' '}
               <span className="font-mono">{recordedSignOff.role}</span>.
             </p>
           )}
 
-          <div className="mt-auto shrink-0 border-t border-chrome-border bg-chrome/80 px-2.5 py-2">
+          <div className="mt-auto shrink-0 border-t border-chrome-border bg-chrome px-2.5 py-2">
             <div className="flex items-center gap-1.5">
               <GitMerge className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
               <h3 className="text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
@@ -392,8 +423,8 @@ export function CiPanel({
               {branch} → {mergeTarget ?? merge?.target ?? '(no base branch)'}
             </p>
             {merge !== null && (
-              <div className={`mt-1.5 rounded-md border px-2 py-1.5 text-[11px] leading-snug ${mergeTone(merge)}`}>
-                <p>{merge.allowed ? 'Merge allowed.' : merge.reasons.join(' ')}</p>
+              <div className={`mt-1.5 rounded-md px-2 py-1.5 text-[11px] leading-snug ${mergeTone(merge)}`}>
+                <MergeOutcome merge={merge} />
                 {merge.conflicts.length > 0 && (
                   <p className="mt-0.5 font-mono text-[10px]">
                     conflicts: {merge.conflicts.join(', ')}
@@ -402,7 +433,7 @@ export function CiPanel({
               </div>
             )}
             {merge !== null && merge.mergedOid !== null && (
-              <p className="mt-1.5 nums rounded-md border border-border bg-card px-2 py-1.5 font-mono text-[10.5px] leading-snug">
+              <p className="mt-1.5 nums font-mono text-[10.5px] leading-snug">
                 merged {merge.mergedOid}
                 {merge.target !== null ? ` → ${merge.target}` : ''}
               </p>

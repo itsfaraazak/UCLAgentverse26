@@ -72,7 +72,7 @@ export function GeneTrack({
   return (
     <section
       aria-labelledby="gene-track-heading"
-      className="bezel-surface rounded-xl border border-bezel-edge/70 p-4"
+      className="bezel-surface rounded-lg border border-border p-4"
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -261,12 +261,15 @@ export function GeneTrack({
               textAnchor="middle"
               className="fill-signal-alarm font-mono text-[10px] font-semibold"
             >
-              <tspan>{`c.${markerCodon}`}</tspan>
+              {`c.${markerCodon}`}
               {refCodon !== null && altCodon !== null ? (
                 <tspan className="seq">{` ${refCodon}→${altCodon}`}</tspan>
               ) : null}
               {refAa !== null && altAa !== null ? (
-                <tspan className="seq">{` · ${refAa}→${altAa}`}</tspan>
+                <>
+                  {' · '}
+                  <tspan className="seq">{`${refAa}→${altAa}`}</tspan>
+                </>
               ) : null}
             </text>
           </g>

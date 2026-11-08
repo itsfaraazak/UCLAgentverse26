@@ -103,7 +103,7 @@ export function RedteamConsole({ onRefusal }: RedteamConsoleProps) {
     <section className="flex min-h-0 flex-col" aria-label="Red-team console">
       <header className="flex shrink-0 items-center gap-2 px-3 pt-3 pb-2">
         <h2 className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <Swords className="size-4 text-primary" aria-hidden="true" />
+          <Swords className="size-4 text-muted-foreground" aria-hidden="true" />
           Red-team console
         </h2>
         {entries.length > 0 && (
@@ -198,7 +198,7 @@ export function RedteamConsole({ onRefusal }: RedteamConsoleProps) {
         {entries.map((entry) => (
           <li key={entry.id} className="mb-2 last:mb-0">
             {entry.kind === 'error' ? (
-              <p className="flex items-start gap-2 rounded-lg border border-block/40 bg-block-soft/50 px-3 py-2.5 text-[11.5px] text-block">
+              <p className="flex items-start gap-2 rounded-md bg-block-soft/50 px-3 py-2.5 text-[11.5px] text-block">
                 <TriangleAlert className="mt-px size-3.5 shrink-0" aria-hidden="true" />
                 {entry.message}
               </p>
@@ -219,17 +219,17 @@ function ConsoleEntry({ entry }: { readonly entry: ConsoleRunView }) {
   const Icon = tone === 'pass' ? ShieldCheck : tone === 'escalate' ? ShieldAlert : ShieldX;
   const toneClass =
     tone === 'pass'
-      ? 'border-pass/40 bg-pass-soft/50 text-pass'
+      ? 'bg-pass-soft/50 text-pass'
       : tone === 'escalate'
-        ? 'border-escalate/40 bg-escalate-soft/50 text-escalate'
-        : 'border-block/40 bg-block-soft/50 text-block';
+        ? 'bg-escalate-soft/50 text-escalate'
+        : 'bg-block-soft/50 text-block';
   const ran = checks.filter((c) => c.status !== 'skipped').length;
 
   return (
-    <article className={`rounded-lg border px-3 py-2.5 ${toneClass}`}>
+    <article className={`rounded-md px-3 py-2.5 ${toneClass}`}>
       <header className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-        <span className="text-[11px] font-bold tracking-wider uppercase">{policy.verdict}</span>
+        <span className="text-[11px] font-semibold tracking-wider uppercase">{policy.verdict}</span>
         <span className="font-mono text-[10.5px] font-semibold">{policy.category}</span>
         <span className="ml-auto font-mono text-[10px] text-foreground/60 tnum">
           {policy.requestDigest}
@@ -268,7 +268,7 @@ function ConsoleEntry({ entry }: { readonly entry: ConsoleRunView }) {
 
       {policy.redacted && (
         <p className="mt-1.5 flex items-start gap-1.5 text-[10.5px] leading-relaxed">
-          <EyeOff className="mt-px size-3 shrink-0" aria-hidden="true" />
+          <EyeOff className="mt-px size-3.5 shrink-0" aria-hidden="true" />
           Redacted. The request text was not retained — this entry shows the policy category
           and reason only. The pipeline stopped at the gate, so steps 3–7 never ran.
         </p>
@@ -287,7 +287,7 @@ function ConsoleEntry({ entry }: { readonly entry: ConsoleRunView }) {
           Show the seven checks
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="mt-2 rounded-lg bg-card/80 p-2.5 text-foreground">
+          <div className="mt-2 rounded-md bg-card p-2.5 text-foreground">
             <CheckList run={entry.run} />
           </div>
         </CollapsibleContent>
