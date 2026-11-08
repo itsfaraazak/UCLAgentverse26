@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { Repo, canonicalJson, oidOf, isCleanMerge } from './index';
+import { Repo, canonicalJson, oidOf, isCleanMerge, shortOid, SHORT_OID_LENGTH } from './index';
 import type { Oid } from './index';
 import type { Sequence } from '../genome';
 
@@ -295,11 +295,11 @@ describe('mergeBase and three-way merge', () => {
     expect(repo.head()).toBe(oid);
   });
 
-  it('a dominated merge-base no longer produces a spurious both-sides conflict (SPEC §4.6 #17)', () => {
+  it('a dominated merge-base does not produce a spurious both-sides conflict (SPEC §4.6 #17)', () => {
     // W -- M -- A (HBB: AAA → CCC → GGG)
     //  \     \- B  parents [W, M], tree still CCC
-    // The old BFS-from-b returned W when walking B first (W is B's first
-    // parent). Three-way vs W saw CCC vs GGG as both changed from AAA →
+    // A BFS-from-b walk returns W, B's first parent, but W is dominated by M:
+    // three-way against W reads CCC vs GGG as both changed from AAA, i.e. a
     // conflict. The BCA is M, so B matches the base and A's edit is one-sided.
     const repo = new Repo();
     const w = repo.commit({
@@ -348,5 +348,25 @@ describe('mergeBase and three-way merge', () => {
     if (tree.kind !== 'tree') return;
     const hbb = repo.read(tree.entries.HBB ?? '');
     expect(hbb.kind === 'blob' && hbb.sequence.bases).toBe('GGG');
+  });
+});
+
+describe('shortOid', () => {
+  it('abbreviates to the width SPEC §4.2 displays', () => {
+    const oid = oidOf({ kind: 'blob', sequence: { bases: 'ATG', label: 'x' } });
+    expect(oid).toHaveLength(64);
+    expect(shortOid(oid)).toBe(oid.slice(0, 12));
+    expect(shortOid(oid)).toHaveLength(SHORT_OID_LENGTH);
+  });
+
+  it('accepts an explicit width and rejects a nonsensical one', () => {
+    const oid = 'a'.repeat(64);
+    expect(shortOid(oid, 7)).toBe('aaaaaaa');
+    expect(() => shortOid(oid, 0)).toThrow(/positive integer/);
+    expect(() => shortOid(oid, 1.5)).toThrow(/positive integer/);
+  });
+
+  it('leaves an oid shorter than the width alone', () => {
+    expect(shortOid('abc')).toBe('abc');
   });
 });

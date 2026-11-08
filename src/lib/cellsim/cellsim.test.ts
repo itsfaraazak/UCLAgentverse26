@@ -3,10 +3,12 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import lociFile from '@/data/loci.json';
 import {
+  ASSAY_MODEL_LIMITATION,
   CellSim,
   Mulberry32,
   PO2_RANGE,
   SIMULATION_DEFAULTS,
+  SIMULATION_NOTE,
   runAssay,
 } from './index';
 
@@ -155,5 +157,17 @@ describe('CellSim genotype × pO2 behaviour', () => {
     const snap = new CellSim({ polymerizationTendency: WT, seed: 1 }).run(5);
     expect(snap.cells.length).toBe(SIMULATION_DEFAULTS.cellCount);
     expect(snap.geom.opening).toBeGreaterThan(0);
+  });
+});
+
+describe('model limits are stated in the module, not per surface', () => {
+  it('carries the fixture note on the parameters', () => {
+    expect(SIMULATION_NOTE).toContain('not calibrated');
+    expect(SIMULATION_NOTE).toContain('illustrative');
+  });
+
+  it('carries a short limitation string for a panel', () => {
+    expect(ASSAY_MODEL_LIMITATION).toMatch(/illustrative/i);
+    expect(ASSAY_MODEL_LIMITATION).toMatch(/not validated/i);
   });
 });

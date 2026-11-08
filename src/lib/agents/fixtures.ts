@@ -1,10 +1,10 @@
 /**
  * Private locus-fixture helpers for the agent pipeline.
  *
- * `lib/genome` does not exist in this worktree and must not be imported.
- * These lookups are the minimum needed to parse intents and copy curated
- * annotations out of `data/loci.json` — no translation, no variant
- * application, no construct design.
+ * Deliberately does not import `lib/genome`. These lookups are the minimum
+ * needed to parse intents and copy curated annotations out of
+ * `data/loci.json` — no translation, no variant application, no construct
+ * design.
  */
 
 import lociFile from '@/data/loci.json';

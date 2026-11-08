@@ -24,12 +24,11 @@
  * Exit code 1 if any branch exports a name the reference does not — that is
  * the case that will fail to compile after the swap.
  *
- * Honest about its method: this is a regex scan of export statements, not a
- * typechecker. It catches missing and misnamed exports, which is the common
- * failure. It does NOT compare type shapes — two modules can export the same
- * names with incompatible signatures and this script will call that clean. The
- * real typecheck is `pnpm build` after the swap; this just finds the obvious
- * breakage early and cheaply.
+ * Method and its limits: this is a regex scan of export statements, not a
+ * typechecker. It catches missing and misnamed exports, the common failure. It
+ * does NOT compare type shapes — two modules can export the same names with
+ * incompatible signatures and this script will call that clean. The real
+ * typecheck is `pnpm build` after the swap.
  */
 
 import { execFileSync } from 'node:child_process';

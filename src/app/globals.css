@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tailwind v4 resolves `dark:` against prefers-color-scheme by default, but
+   this app's theme is an explicit class on <html> written before first paint.
+   Without this the token set and the `dark:` utilities could disagree. */
+@custom-variant dark (&:is(.dark *));
+
 /* ──────────────────────────────────────────────────────────────────────────
    SigmaFold theme.
 
@@ -20,7 +25,15 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --radius: 0.625rem;
+  /* One radius scale: 0.25 / 0.375 / 0.5 / 0.75rem for sm / md / lg / xl —
+     the same four steps as sprout-careers-better. Rows and chips use md,
+     panels lg, overlays xl. Nothing larger; full-round is for dots and pills
+     only. */
+  --radius: 0.5rem;
+
+  /* A true hairline where the display can draw one (see the media query
+     below). Every rule and outline in the app is this width. */
+  --hairline: 1px;
 
   --background: oklch(0.985 0.002 250);
   --foreground: oklch(0.21 0.012 255);
@@ -39,7 +52,7 @@
   --secondary-foreground: oklch(0.27 0.014 255);
 
   --muted: oklch(0.955 0.004 250);
-  --muted-foreground: oklch(0.52 0.014 257);
+  --muted-foreground: oklch(0.49 0.013 257);
 
   --accent: oklch(0.945 0.008 253);
   --accent-foreground: oklch(0.27 0.014 255);
@@ -51,12 +64,61 @@
   --input: oklch(0.9 0.005 252);
   --ring: oklch(0.56 0.16 258);
 
-  /* Pipeline verdict colours. The biosafety gate's three outcomes must be
-     distinguishable by more than hue alone — every surface using these also
-     carries an icon and a text label (SPEC §5, accessibility). */
-  --verdict-pass: oklch(0.6 0.14 155);
-  --verdict-escalate: oklch(0.72 0.16 75);
-  --verdict-block: oklch(0.58 0.21 27);
+  /* Pipeline verdict colours — the single source of verdict tone for all
+     three surfaces. The gate's outcomes must be distinguishable by more than
+     hue alone, so every surface using these also carries an icon and a text
+     label (SPEC §5).
+
+     Darkened from the first pass (0.6 / 0.72): verdict text has to clear WCAG
+     AA against both `card` and its own soft tint, and it did not. That is
+     checked by src/lib/theme/contrast.test.ts, which reads this file, rather
+     than asserted in a comment. `conflict` is a merge conflict — not a
+     verdict the pipeline issues, but it reads as one in the UI. */
+  --verdict-pass: oklch(0.47 0.13 152);
+  --verdict-pass-soft: oklch(0.94 0.045 152);
+  --verdict-escalate: oklch(0.52 0.14 68);
+  --verdict-escalate-soft: oklch(0.95 0.055 80);
+  --verdict-block: oklch(0.54 0.2 24);
+  --verdict-block-soft: oklch(0.95 0.045 24);
+  --verdict-conflict: oklch(0.52 0.19 310);
+  --verdict-conflict-soft: oklch(0.95 0.04 310);
+  --verdict-neutral: oklch(0.49 0.012 258);
+  --verdict-neutral-soft: oklch(0.95 0.004 255);
+
+  /* Check-run statuses, as the run lists and gauges render them. Derived from
+     the verdict tones wherever they mean the same thing, so a passing check is
+     the same green in /ide's check list, /bench's gauge and /graph's node.
+     `warn` and `skipped` have no verdict equivalent. */
+  --status-pass: var(--verdict-pass);
+  --status-warn: oklch(0.47 0.11 80);
+  --status-fail: var(--verdict-block);
+  --status-blocked: oklch(0.42 0.2 12);
+  --status-escalated: var(--verdict-escalate);
+  --status-skipped: var(--verdict-neutral);
+
+  /* Diff registers, shared by all three diff views. */
+  --diff-same-fg: oklch(0.46 0.009 286);
+  --diff-changed: oklch(0.44 0.15 28);
+  --diff-changed-bg: oklch(0.955 0.035 28);
+  --diff-silent: oklch(0.44 0.09 86);
+  --diff-silent-bg: oklch(0.962 0.045 92);
+  --diff-added: oklch(0.42 0.11 150);
+  --diff-added-bg: oklch(0.952 0.04 150);
+  --diff-removed: oklch(0.45 0.13 15);
+  --diff-removed-bg: oklch(0.955 0.03 15);
+
+  /* Cell canvas and gene track. */
+  --cell-wall: oklch(0.86 0.006 286);
+  --cell-plasma: oklch(0.985 0.003 240);
+  --exon-modelled: oklch(0.55 0.11 258);
+  --exon-context: oklch(0.86 0.012 286);
+  --intron: oklch(0.9 0.004 286);
+  --marker: oklch(0.49 0.18 25);
+
+  /* Window chrome. */
+  --chrome: oklch(0.955 0.003 286);
+  --chrome-border: oklch(0.878 0.004 286);
+  --gutter: oklch(0.976 0.003 286);
 
   --chart-1: oklch(0.56 0.16 258);
   --chart-2: oklch(0.6 0.14 155);
@@ -94,9 +156,44 @@
   --input: oklch(1 0 0 / 16%);
   --ring: oklch(0.68 0.15 256);
 
-  --verdict-pass: oklch(0.7 0.14 157);
-  --verdict-escalate: oklch(0.79 0.15 78);
-  --verdict-block: oklch(0.66 0.19 25);
+  --verdict-pass: oklch(0.76 0.15 155);
+  --verdict-pass-soft: oklch(0.3 0.06 155);
+  --verdict-escalate: oklch(0.82 0.15 82);
+  --verdict-escalate-soft: oklch(0.33 0.06 82);
+  --verdict-block: oklch(0.72 0.18 25);
+  --verdict-block-soft: oklch(0.32 0.075 25);
+  --verdict-conflict: oklch(0.75 0.16 312);
+  --verdict-conflict-soft: oklch(0.32 0.07 312);
+  --verdict-neutral: oklch(0.71 0.012 256);
+  --verdict-neutral-soft: oklch(0.28 0.012 264);
+
+  --status-pass: var(--verdict-pass);
+  --status-warn: oklch(0.83 0.13 88);
+  --status-fail: var(--verdict-block);
+  --status-blocked: oklch(0.72 0.19 14);
+  --status-escalated: var(--verdict-escalate);
+  --status-skipped: var(--verdict-neutral);
+
+  --diff-same-fg: oklch(0.67 0.008 286);
+  --diff-changed: oklch(0.79 0.14 32);
+  --diff-changed-bg: oklch(0.265 0.05 30);
+  --diff-silent: oklch(0.83 0.13 92);
+  --diff-silent-bg: oklch(0.265 0.045 92);
+  --diff-added: oklch(0.79 0.14 155);
+  --diff-added-bg: oklch(0.265 0.045 155);
+  --diff-removed: oklch(0.78 0.14 18);
+  --diff-removed-bg: oklch(0.265 0.045 18);
+
+  --cell-wall: oklch(0.36 0.008 286);
+  --cell-plasma: oklch(0.21 0.008 240);
+  --exon-modelled: oklch(0.68 0.12 255);
+  --exon-context: oklch(0.36 0.012 286);
+  --intron: oklch(0.3 0.006 286);
+  --marker: oklch(0.76 0.17 26);
+
+  --chrome: oklch(0.195 0.006 286);
+  --chrome-border: oklch(0.283 0.007 286);
+  --gutter: oklch(0.188 0.006 286);
 
   --chart-1: oklch(0.68 0.15 256);
   --chart-2: oklch(0.7 0.14 157);
@@ -106,35 +203,101 @@
 }
 
 /* Follow the OS when no explicit .dark/.light class is set, so the app feels
-   native on first load. An explicit class always wins. */
+   native on first load and a no-JS reader still gets a coherent theme. An
+   explicit class always wins. Mirrors the `.dark` block above — add a dark
+   token there and here together. */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --background: oklch(0.17 0.008 258);
     --foreground: oklch(0.96 0.003 250);
+
     --card: oklch(0.21 0.01 258);
     --card-foreground: oklch(0.96 0.003 250);
+
     --popover: oklch(0.23 0.011 258);
     --popover-foreground: oklch(0.96 0.003 250);
+
     --primary: oklch(0.68 0.15 256);
     --primary-foreground: oklch(0.17 0.008 258);
+
     --secondary: oklch(0.26 0.012 258);
     --secondary-foreground: oklch(0.96 0.003 250);
+
     --muted: oklch(0.26 0.012 258);
     --muted-foreground: oklch(0.71 0.012 256);
+
     --accent: oklch(0.3 0.015 258);
     --accent-foreground: oklch(0.96 0.003 250);
+
     --destructive: oklch(0.66 0.19 25);
     --destructive-foreground: oklch(0.17 0.008 258);
+
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 16%);
     --ring: oklch(0.68 0.15 256);
-    --verdict-pass: oklch(0.7 0.14 157);
-    --verdict-escalate: oklch(0.79 0.15 78);
-    --verdict-block: oklch(0.66 0.19 25);
+
+    --verdict-pass: oklch(0.76 0.15 155);
+    --verdict-pass-soft: oklch(0.3 0.06 155);
+    --verdict-escalate: oklch(0.82 0.15 82);
+    --verdict-escalate-soft: oklch(0.33 0.06 82);
+    --verdict-block: oklch(0.72 0.18 25);
+    --verdict-block-soft: oklch(0.32 0.075 25);
+    --verdict-conflict: oklch(0.75 0.16 312);
+    --verdict-conflict-soft: oklch(0.32 0.07 312);
+    --verdict-neutral: oklch(0.71 0.012 256);
+    --verdict-neutral-soft: oklch(0.28 0.012 264);
+
+    --status-pass: var(--verdict-pass);
+    --status-warn: oklch(0.83 0.13 88);
+    --status-fail: var(--verdict-block);
+    --status-blocked: oklch(0.72 0.19 14);
+    --status-escalated: var(--verdict-escalate);
+    --status-skipped: var(--verdict-neutral);
+
+    --diff-same-fg: oklch(0.67 0.008 286);
+    --diff-changed: oklch(0.79 0.14 32);
+    --diff-changed-bg: oklch(0.265 0.05 30);
+    --diff-silent: oklch(0.83 0.13 92);
+    --diff-silent-bg: oklch(0.265 0.045 92);
+    --diff-added: oklch(0.79 0.14 155);
+    --diff-added-bg: oklch(0.265 0.045 155);
+    --diff-removed: oklch(0.78 0.14 18);
+    --diff-removed-bg: oklch(0.265 0.045 18);
+
+    --cell-wall: oklch(0.36 0.008 286);
+    --cell-plasma: oklch(0.21 0.008 240);
+    --exon-modelled: oklch(0.68 0.12 255);
+    --exon-context: oklch(0.36 0.012 286);
+    --intron: oklch(0.3 0.006 286);
+    --marker: oklch(0.76 0.17 26);
+
+    --chrome: oklch(0.195 0.006 286);
+    --chrome-border: oklch(0.283 0.007 286);
+    --gutter: oklch(0.188 0.006 286);
+
+    --chart-1: oklch(0.68 0.15 256);
+    --chart-2: oklch(0.7 0.14 157);
+    --chart-3: oklch(0.79 0.15 78);
+    --chart-4: oklch(0.66 0.19 25);
+    --chart-5: oklch(0.67 0.13 302);
+  }
+}
+
+@media (min-resolution: 2dppx) {
+  :root {
+    --hairline: 0.5px;
   }
 }
 
 @theme inline {
+  /* Almost no shadows. The resting primitives (buttons, inputs, cards) are
+     separated by hairlines, not elevation; only floating surfaces — popovers,
+     menus, dialogs — keep a real shadow, because they genuinely sit above the
+     page. */
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -156,8 +319,43 @@
   --color-ring: var(--ring);
 
   --color-verdict-pass: var(--verdict-pass);
+  --color-verdict-pass-soft: var(--verdict-pass-soft);
   --color-verdict-escalate: var(--verdict-escalate);
+  --color-verdict-escalate-soft: var(--verdict-escalate-soft);
   --color-verdict-block: var(--verdict-block);
+  --color-verdict-block-soft: var(--verdict-block-soft);
+  --color-verdict-conflict: var(--verdict-conflict);
+  --color-verdict-conflict-soft: var(--verdict-conflict-soft);
+  --color-verdict-neutral: var(--verdict-neutral);
+  --color-verdict-neutral-soft: var(--verdict-neutral-soft);
+
+  --color-status-pass: var(--status-pass);
+  --color-status-warn: var(--status-warn);
+  --color-status-fail: var(--status-fail);
+  --color-status-blocked: var(--status-blocked);
+  --color-status-escalated: var(--status-escalated);
+  --color-status-skipped: var(--status-skipped);
+
+  --color-diff-same-fg: var(--diff-same-fg);
+  --color-diff-changed: var(--diff-changed);
+  --color-diff-changed-bg: var(--diff-changed-bg);
+  --color-diff-silent: var(--diff-silent);
+  --color-diff-silent-bg: var(--diff-silent-bg);
+  --color-diff-added: var(--diff-added);
+  --color-diff-added-bg: var(--diff-added-bg);
+  --color-diff-removed: var(--diff-removed);
+  --color-diff-removed-bg: var(--diff-removed-bg);
+
+  --color-cell-wall: var(--cell-wall);
+  --color-cell-plasma: var(--cell-plasma);
+  --color-exon-modelled: var(--exon-modelled);
+  --color-exon-context: var(--exon-context);
+  --color-intron: var(--intron);
+  --color-marker: var(--marker);
+
+  --color-chrome: var(--chrome);
+  --color-chrome-border: var(--chrome-border);
+  --color-gutter: var(--gutter);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -193,6 +391,29 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* JetBrains Mono is the only monospace face, and its coding ligatures fuse
+     adjacent characters (`->`, `==`, `0x`, `www`). Sequence text must use
+     `.seq`; this is the safety net for every other monospace run — oids,
+     digests, paths, kbd hints — so no glyph is ever merged with its
+     neighbour. `font-variant-ligatures: none` also covers contextual
+     alternates, and survives a later `font-feature-settings` override. */
+  code,
+  kbd,
+  samp,
+  pre,
+  .font-mono {
+    font-variant-ligatures: none;
+  }
+
+  /* One icon weight. The shell passed strokeWidth={1.75}, a few icons
+     passed {2}, and the variants used lucide's default 2, so icons at the
+     same size drew at visibly different weights side by side. A CSS
+     stroke-width outranks the SVG attribute lucide writes, so this settles it
+     for every lucide icon, the shadcn primitives' included. */
+  svg.lucide {
+    stroke-width: 1.75;
+  }
+
   /* Visible focus is a hard requirement (SPEC §5), and the default outline
      disappears against dark surfaces. */
   :focus-visible {
@@ -225,7 +446,7 @@
      app shell from reading as a grid of boxes. */
   .hairline {
     border-color: color-mix(in oklab, var(--border) 85%, transparent);
-    border-width: 0.5px;
+    border-width: var(--hairline);
   }
 
   /*
@@ -248,6 +469,12 @@
     text-transform: uppercase;
   }
 
+  /* Tabular, fixed-advance digits for codon indices and metric readouts.
+     `body` already sets these; this is for elements that opt out locally. */
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Translucent chrome, for the sidebar and titlebar surfaces that give the
      app its native feel. Degrades to a solid surface where unsupported. */
   .vibrancy {
@@ -259,5 +486,270 @@
       backdrop-filter: saturate(180%) blur(20px);
       background-color: color-mix(in oklab, var(--card) 55%, transparent);
     }
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Variant layer: /bench (lab-bench).
+
+   The instrument surfaces are additive — they sit on top of the shared
+   palette above rather than redefining it, so the bench reads as the same
+   product as /ide and /graph with an instrument skin, not a second theme.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Instrument surfaces */
+  --bezel: oklch(0.9 0.004 264);
+  --bezel-edge: oklch(0.82 0.006 264);
+  --recess: oklch(0.915 0.004 264);
+  --grid-line: oklch(0.21 0.012 264 / 0.04);
+
+  /* Instrument accents — lamps, traces, gauge arcs. Derived from the shared
+     verdict tokens where they mean the same thing, so a passing check is the
+     same green on a gauge as in the IDE's check list. */
+  /* One accent hue for the whole product: the instrument's "live" signal and
+     its traces are the primary blue, not a second cyan. */
+  --signal: var(--primary);
+  --signal-warn: var(--verdict-escalate);
+  --signal-alarm: var(--verdict-block);
+  --signal-ok: var(--verdict-pass);
+  --trace: var(--primary);
+  --cell-discoid: oklch(0.55 0.19 20);
+  --cell-sickled: oklch(0.42 0.17 300);
+  --lumen: oklch(0.88 0.02 240);
+}
+
+.dark {
+  --bezel: oklch(0.225 0.011 264);
+  --bezel-edge: oklch(0.33 0.013 264);
+  --recess: oklch(0.13 0.008 264);
+  --grid-line: oklch(0.955 0.004 264 / 0.045);
+
+  --signal: var(--primary);
+  --trace: var(--primary);
+  --cell-discoid: oklch(0.68 0.19 22);
+  --cell-sickled: oklch(0.7 0.17 305);
+  --lumen: oklch(0.26 0.02 240);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --bezel: oklch(0.225 0.011 264);
+    --bezel-edge: oklch(0.33 0.013 264);
+    --recess: oklch(0.13 0.008 264);
+    --grid-line: oklch(0.955 0.004 264 / 0.045);
+    --signal: var(--primary);
+    --trace: var(--primary);
+    --cell-discoid: oklch(0.68 0.19 22);
+    --cell-sickled: oklch(0.7 0.17 305);
+    --lumen: oklch(0.26 0.02 240);
+  }
+}
+
+@theme inline {
+  --color-bezel: var(--bezel);
+  --color-bezel-edge: var(--bezel-edge);
+  --color-recess: var(--recess);
+  --color-signal: var(--signal);
+  --color-signal-warn: var(--signal-warn);
+  --color-signal-alarm: var(--signal-alarm);
+  --color-signal-ok: var(--signal-ok);
+  --color-trace: var(--trace);
+  --color-lumen: var(--lumen);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Variant layer: /graph (graph-first).
+
+   The graph variant styles verdicts with short aliases (`text-block`,
+   `bg-pass-soft`, …) and draws its DAG lanes from --graph-lane-N. Both were
+   defined on variant/graph-first and dropped when its globals.css was
+   resolved into the shared one, which left /graph's verdict tints, conflict
+   notices, changed-base highlights and lane strokes with no colour at all.
+
+   The aliases point at the shared verdict tokens, so they inherit the AA
+   guarantee contrast.test.ts enforces rather than restating it. Lane colours
+   are categorical data — which line of history a commit is on — not accents.
+   They are also used as 10px branch-name text, so each one clears 4.5:1 on
+   both --card and --accent (the selected row) in both themes. Lanes 2, 3 and
+   5 were darkened in light mode to get there. contrast.test.ts does not
+   cover the lanes yet: re-measure if you touch them.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --graph-lane-1: oklch(0.52 0.16 258);
+  --graph-lane-2: oklch(0.48 0.14 152);
+  --graph-lane-3: oklch(0.5 0.15 48);
+  --graph-lane-4: oklch(0.54 0.18 310);
+  --graph-lane-5: oklch(0.47 0.14 196);
+  --graph-lane-6: oklch(0.54 0.17 10);
+  --graph-grid: oklch(0.52 0.02 262 / 0.06);
+}
+
+.dark {
+  --graph-lane-1: oklch(0.74 0.14 258);
+  --graph-lane-2: oklch(0.78 0.14 155);
+  --graph-lane-3: oklch(0.8 0.14 62);
+  --graph-lane-4: oklch(0.76 0.16 312);
+  --graph-lane-5: oklch(0.76 0.12 200);
+  --graph-lane-6: oklch(0.74 0.16 14);
+  --graph-grid: oklch(0.99 0.004 250 / 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --graph-lane-1: oklch(0.74 0.14 258);
+    --graph-lane-2: oklch(0.78 0.14 155);
+    --graph-lane-3: oklch(0.8 0.14 62);
+    --graph-lane-4: oklch(0.76 0.16 312);
+    --graph-lane-5: oklch(0.76 0.12 200);
+    --graph-lane-6: oklch(0.74 0.16 14);
+    --graph-grid: oklch(0.99 0.004 250 / 0.05);
+  }
+}
+
+@theme inline {
+  --color-pass: var(--verdict-pass);
+  --color-pass-soft: var(--verdict-pass-soft);
+  --color-escalate: var(--verdict-escalate);
+  --color-escalate-soft: var(--verdict-escalate-soft);
+  --color-block: var(--verdict-block);
+  --color-block-soft: var(--verdict-block-soft);
+  --color-conflict: var(--verdict-conflict);
+  --color-conflict-soft: var(--verdict-conflict-soft);
+  --color-neutral-verdict: var(--verdict-neutral);
+  --color-neutral-verdict-soft: var(--verdict-neutral-soft);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+}
+
+/* Tabular figures for live readouts. The shared `body` rule already sets
+   these; this utility is for elements that opt out of it locally. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The bench's instrument panels. These were a milled-aluminium gradient with
+   a drop shadow and a deep inset well; together with a border on every panel
+   that was three treatments at once. A panel is now a flat surface and its
+   border is the only edge — the bench keeps its instrument layout, not the
+   skeuomorphic lighting. */
+@utility bezel-surface {
+  background: var(--card);
+}
+
+/* A control well: one step quieter than a panel, still flat. */
+@utility recess-surface {
+  background: color-mix(in oklab, var(--muted) 55%, var(--card));
+}
+
+/* The bench's translucent chrome. Shares the shared `.vibrancy` recipe so
+   the three variants' chrome is the same material. */
+@utility vibrancy-surface {
+  background-color: color-mix(in oklab, var(--card) 72%, transparent);
+
+  @supports (backdrop-filter: blur(1px)) {
+    backdrop-filter: saturate(180%) blur(20px);
+    background-color: color-mix(in oklab, var(--card) 55%, transparent);
+  }
+}
+
+@utility engraved-grid {
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Thin scrollbars, so the dense panes read as editor panes rather than as web
+   page scroll areas. */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 99px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* The triptych's panes own their scrolling; the window never bounces. */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Surface switcher.
+
+   One product, four surfaces (the shell, /ide, /bench, /graph). It sits in
+   each surface's own titlebar, so it lives here rather than in the shell's
+   stylesheet — the three variants do not load shell.css.
+   ────────────────────────────────────────────────────────────────────────── */
+.vswitch {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--muted) 60%, transparent);
+}
+
+.vswitch__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.4375rem;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.vswitch__item:hover {
+  background: color-mix(in oklab, var(--accent) 70%, transparent);
+  color: var(--foreground);
+}
+
+.vswitch__item[aria-current='page'] {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 var(--hairline) var(--border);
+}
+
+.vswitch__item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* On a narrow window the icons carry it; the titlebar is already dense. */
+@media (max-width: 1100px) {
+  .vswitch__label {
+    display: none;
   }
 }

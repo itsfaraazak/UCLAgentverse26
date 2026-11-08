@@ -1,0 +1,16 @@
+{
+  "_disclaimer": "Illustrative lookup table, not a real-time clinical database and not a substitute for a clinician or genetic counselor. Entries describe publicly documented, regulator-approved therapies only.",
+  "_source": "Ported from feature/deltagene-prototype deltagene/data/therapy_table.json",
+  "byGene": {
+    "HBB": [
+      {
+        "provenance": "public-reference",
+        "name": "Casgevy (exagamglogene autotemcel)",
+        "approvedFor": "Sickle cell disease with recurrent vaso-occlusive crises (FDA approval 8 Dec 2023; age extensions since)",
+        "mechanism": "Autologous CD34+ haematopoietic stem cells edited ex vivo with CRISPR-Cas9 at the BCL11A erythroid enhancer, de-repressing fetal haemoglobin (HbF) to counter sickling.",
+        "developer": "Vertex Pharmaceuticals / CRISPR Therapeutics",
+        "citation": "FDA approval letter, https://fda.gov/media/175179/download"
+      }
+    ]
+  }
+}

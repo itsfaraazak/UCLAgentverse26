@@ -53,3 +53,24 @@ export function oidOfCanonical(json: string): string {
 export function oidOf(value: unknown): string {
   return oidOfCanonical(canonicalJson(value));
 }
+
+/**
+ * How many characters of an oid the UI shows (SPEC §4.2).
+ *
+ * All three surfaces display abbreviated oids, and each had reimplemented
+ * this. One definition here means an oid is abbreviated the same way
+ * everywhere, and the width is stated once.
+ */
+export const SHORT_OID_LENGTH = 12;
+
+/**
+ * Abbreviate an oid for display. Never use the result to look an object up —
+ * `Repo.read` takes a full oid, and this prefix is not checked for
+ * uniqueness, unlike Git's abbreviated hashes.
+ */
+export function shortOid(oid: string, length: number = SHORT_OID_LENGTH): string {
+  if (!Number.isInteger(length) || length < 1) {
+    throw new Error(`shortOid: length must be a positive integer, got ${length}`);
+  }
+  return oid.slice(0, length);
+}

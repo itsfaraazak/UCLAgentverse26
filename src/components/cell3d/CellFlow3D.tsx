@@ -216,8 +216,7 @@ export function CellFlow3D({
       aria-labelledby={ids.title}
       data-slot="cell-flow-3d"
       className={cn(
-        'flex w-full min-w-0 flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900',
-        'dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100',
+        'flex w-full min-w-0 flex-col gap-3 rounded-lg border bg-card p-3 text-card-foreground',
         className,
       )}
     >
@@ -226,7 +225,7 @@ export function CellFlow3D({
           <h2 id={ids.title} className="text-sm font-semibold leading-tight">
             Capillary flow · 3D
           </h2>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400">Illustrative model, not validated haemorheology</p>
+          <p className="text-xs text-muted-foreground">Illustrative model, not validated haemorheology</p>
         </div>
         <RendererBadge
           state={
@@ -239,7 +238,7 @@ export function CellFlow3D({
         />
       </header>
 
-      <div className="relative aspect-[16/7] min-h-[180px] w-full overflow-hidden rounded-lg bg-gradient-to-b from-rose-50/60 to-zinc-100 dark:from-zinc-900 dark:to-zinc-950">
+      <div className="relative aspect-[16/7] min-h-[180px] w-full overflow-hidden rounded-lg bg-muted/50">
         <div
           ref={hostRef}
           role="img"
@@ -285,11 +284,11 @@ export function CellFlow3D({
           Reset view
         </Button>
         {reducedMotion && (
-          <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Reduced motion: starts paused</span>
+          <span className="text-[11px] text-muted-foreground">Reduced motion: starts paused</span>
         )}
       </div>
 
-      <ul aria-label="Legend" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-700 dark:text-zinc-300">
+      <ul aria-label="Legend" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/80">
         <li className="flex items-center gap-1.5">
           <span aria-hidden="true" className="inline-block size-2.5 rounded-full bg-[#dc2626]" />
           Discoid cell (round)
@@ -308,37 +307,37 @@ export function CellFlow3D({
         </li>
       </ul>
 
-      <div id={ids.metrics} className="grid gap-2 border-t border-zinc-200 pt-2 text-xs dark:border-zinc-800">
+      <div id={ids.metrics} className="grid gap-2 border-t border-border pt-2 text-xs">
         <p aria-live="polite" className="font-medium">
           {band === null ? 'Simulation starting…' : BAND_TEXT[band]}
         </p>
         <dl className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono tabular-nums sm:grid-cols-3">
           <div>
-            <dt className="font-sans text-zinc-500 dark:text-zinc-400">Occlusion</dt>
+            <dt className="font-sans text-muted-foreground">Occlusion</dt>
             <dd>{live === null ? '—' : percent(live.occlusion)}</dd>
           </div>
           <div>
-            <dt className="font-sans text-zinc-500 dark:text-zinc-400">Mean flow</dt>
+            <dt className="font-sans text-muted-foreground">Mean flow</dt>
             <dd>{live === null ? '—' : `${flow(live.meanFlow)} u/tick`}</dd>
           </div>
           <div>
-            <dt className="font-sans text-zinc-500 dark:text-zinc-400">Sickled</dt>
+            <dt className="font-sans text-muted-foreground">Sickled</dt>
             <dd>{live === null ? '—' : percent(live.sickledFraction)}</dd>
           </div>
           <div>
-            <dt className="font-sans text-zinc-500 dark:text-zinc-400">pO₂</dt>
+            <dt className="font-sans text-muted-foreground">pO₂</dt>
             <dd>{live === null ? '—' : `${live.pO2.toFixed(0)} mmHg`}</dd>
           </div>
           <div>
-            <dt className="font-sans text-zinc-500 dark:text-zinc-400">Polymerisation</dt>
+            <dt className="font-sans text-muted-foreground">Polymerisation</dt>
             <dd>{live === null ? '—' : live.polymerizationTendency.toFixed(2)}</dd>
           </div>
           <div>
-            <dt className="font-sans text-zinc-500 dark:text-zinc-400">Tick</dt>
+            <dt className="font-sans text-muted-foreground">Tick</dt>
             <dd>{live === null ? '—' : live.tick}</dd>
           </div>
         </dl>
-        <p className="flex gap-2 rounded-md bg-zinc-100 p-2 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+        <p className="flex gap-2 rounded-md bg-muted p-2 text-foreground/80">
           <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
           <span>
             {ASSAY_MODEL_LIMITATION} The simulation is two-dimensional: cells move in the vessel’s mid-plane and the

@@ -544,7 +544,7 @@ describe('property: merge algebra', () => {
   });
 
   it('merge(a, a) is a no-op (SPEC §4.6 #16)', () => {
-    // Decided: return the existing oid; do not write a merge commit with
+    // Returns the existing oid; does not write a merge commit with
     // parents [a, a]. §4.5 #4's metadata rules apply only to merges that
     // combine two distinct commits.
     const repo = new Repo();
@@ -702,8 +702,9 @@ describe('property: mergeBase on DAGs', () => {
   });
 
   it('returns a best common ancestor and is symmetric (SPEC §4.6 #17)', () => {
-    // BFS-from-b used to return W (dominated) for mergeBase(A, B) because B
-    // lists W as its first parent, and disagreed with mergeBase(B, A).
+    // A naive BFS-from-b returns the dominated ancestor W for mergeBase(A, B),
+    // because B lists W as its first parent, and so disagrees with
+    // mergeBase(B, A). This shape guards against that.
     const repo = new Repo();
     const w = repo.commit({
       tree: blobTree(repo, { HBB: seq('AAA', 'w') }),
