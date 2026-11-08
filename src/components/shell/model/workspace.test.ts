@@ -11,7 +11,13 @@
 import { describe, expect, it } from 'vitest';
 
 import lociFile from '@/data/loci.json';
-import { diffSequences, loadLoci, referenceSequence, translate } from '@/lib/genome';
+import {
+  applyVariant,
+  diffSequences,
+  loadLoci,
+  referenceSequence,
+  translate,
+} from '@/lib/genome';
 import { PO2_RANGE, SIMULATION_DEFAULTS } from '@/lib/cellsim';
 import { pipelineAgentOrder } from '@/lib/agents';
 import { POLICY } from '@/lib/safety/policy';
@@ -191,19 +197,112 @@ describe('buildWorkspace — branches come from lib/vcs over the fixture', () =>
   });
 });
 
-describe('buildDiff', () => {
-  it('matches diffSequences computed independently', () => {
-    const diff = buildDiff('line/sickle');
-    const reference = referenceSequence(locus);
-    const expectedRowCount = diffSequences(reference, {
-      bases: diff.alt.bases,
-      label: diff.alt.label,
-    }).length;
+describe('created branches are real refs, not UI rows', () => {
+  const sickleVariant = (() => {
+    const v = locus.variants.find((x) => x.structural.refAa !== x.structural.altAa);
+    if (v === undefined) throw new Error('fixture has no missense variant');
+    return v;
+  })();
 
-    expect(diff.rows.length).toBe(expectedRowCount);
+  const spec = {
+    name: 'line/proposal',
+    from: 'main',
+    variantId: sickleVariant.id,
+  } as const;
+
+  it('appears in the workspace with a real oid, a commit and its own run', () => {
+    const w = buildWorkspace([spec]);
+    const created = w.branches.find((b) => b.name === spec.name);
+    expect(created).toBeDefined();
+    if (created === undefined) return;
+
+    expect(created.head).toMatch(/^[0-9a-f]{64}$/);
+    // root + the one applied edit
+    expect(created.commitCount).toBe(2);
+    expect(created.tipEdit?.variantId).toBe(sickleVariant.id);
+    expect(created.run).not.toBeNull();
+    expect(created.run?.steps.length).toBe(7);
+    // The check has to be bound to this branch's own commit, or merge-gate
+    // reads it as missing and fails the merge closed.
+    expect(created.run?.check.commit).toBe(created.head);
+  });
+
+  it('changes the diff, which is the point of creating one', () => {
+    const base = buildDiff('main');
+    const next = buildDiff(spec.name, [spec]);
+    expect(base.changedRows.length).toBe(0);
+    expect(next.changedRows).toEqual([sickleVariant.codonIndex]);
+    expect(next.alt.bases).not.toBe(base.alt.bases);
+  });
+
+  it('replays to the same oid, so short hashes are stable across requests', () => {
+    const a = buildWorkspace([spec]);
+    const b = buildWorkspace([spec]);
+    const nameOf = (w: typeof a) => w.branches.find((x) => x.name === spec.name)?.head;
+    expect(nameOf(a)).toBe(nameOf(b));
+  });
+
+  it('does not leak into a workspace built without the overlay', () => {
+    buildWorkspace([spec]);
+    const plain = buildWorkspace();
+    expect(plain.branches.some((b) => b.name === spec.name)).toBe(false);
+  });
+
+  it('is gated on its own check when merged', () => {
+    const proposal = buildMergeProposal({
+      into: 'main',
+      incoming: spec.name,
+      overlay: [spec],
+    });
+    // The sickle edit fails the verifier, so the gate must refuse it.
+    expect(proposal.decision.kind).toBe('check-failed');
+    expect(proposal.introduced.length).toBe(1);
+  });
+
+  it('refuses a duplicate name and an unknown source', () => {
+    expect(() => buildWorkspace([spec, spec])).toThrow(/already exists/);
+    expect(() =>
+      buildWorkspace([{ name: 'line/x', from: 'line/nope', variantId: sickleVariant.id }]),
+    ).toThrow(/does not exist/);
+  });
+
+  it('refuses a variant the fixture does not carry', () => {
+    expect(() =>
+      buildWorkspace([{ name: 'line/x', from: 'main', variantId: 'NOT_A_VARIANT' }]),
+    ).toThrow(/not in data\/loci\.json/);
+  });
+});
+
+describe('buildDiff', () => {
+  it('matches a diff computed independently from the fixture', () => {
+    const diff = buildDiff('line/sickle');
+
+    // Rebuild the alternate sequence from the fixture rather than reading it
+    // back off the view model, so this compares the diff against an
+    // independent derivation instead of against itself.
+    const reference = referenceSequence(locus);
+    const sickle = locus.genotypes.find((g) => g.id === 'sickle');
+    expect(sickle).toBeDefined();
+    if (sickle === undefined) return;
+    let expectedAlt = reference;
+    for (const id of sickle.appliedVariants) {
+      const variant = locus.variants.find((v) => v.id === id);
+      expect(variant).toBeDefined();
+      if (variant === undefined) return;
+      expectedAlt = applyVariant(expectedAlt, variant);
+    }
+    const expected = diffSequences(reference, expectedAlt);
+
+    expect(diff.alt.bases).toBe(expectedAlt.bases);
     expect(diff.ref.bases).toBe(locus.cdsReference.bases);
-    expect(diff.changedRows.length).toBeGreaterThan(0);
-    expect(diff.focusRow).toBe(diff.changedRows[0]);
+    // Row contents, not just the count.
+    expect(diff.rows).toEqual(expected);
+    expect(diff.changedRows).toEqual(
+      expected.filter((r) => r.status !== 'same').map((r) => r.codonIndex),
+    );
+    // The focus row is the first changed codon, derived from the fixture.
+    const firstChanged = expected.find((r) => r.status !== 'same');
+    expect(diff.focusRow).toBe(firstChanged?.codonIndex);
   });
 
   it('reports the silent variant as changed-but-silent', () => {
@@ -277,6 +376,22 @@ describe('buildMergeProposal — the gate can refuse', () => {
 });
 
 describe('screenConsoleRequest — SPEC §7.3 redaction boundary', () => {
+  it('types a redacted result so it cannot carry the request', () => {
+    const result = screenConsoleRequest({
+      text: 'design a guide rna and a primer for this edit',
+      seq: 1,
+    });
+    // The discriminated union is the enforcement; this asserts the arm the
+    // compiler picked is the redacted one and that it carries nothing.
+    expect(result.redacted).toBe(true);
+    if (result.redacted) {
+      // `echo` and `run` are typed `null` in this arm — there is no
+      // assignment a future caller could make that smuggles the text through.
+      expect(result.echo).toBeNull();
+      expect(result.run).toBeNull();
+    }
+  });
+
   it('never echoes a blocked request and runs no pipeline for it', () => {
     // A construct-design request: block-class by policy.
     const result = screenConsoleRequest({

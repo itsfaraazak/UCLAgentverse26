@@ -111,8 +111,13 @@ export function locusView(locus: Locus): LocusView {
     codonEnd: exon.codonEnd,
     note: exon.note,
     // An exon is "modelled" when any of it falls inside the CDS window the
-    // app can actually diff and translate. Exon 2 qualifies on its first
-    // codon only, which is exactly what the fixture's note describes.
+    // app can actually diff and translate.
+    //
+    // Computed rather than asserted, because the window is fixture data and
+    // has already changed once: it was the first 31 codons, and is now the
+    // whole NM_000518.5 CDS, which makes every exon modelled. A hardcoded
+    // flag would have silently kept greying exons 2 and 3 as "context" after
+    // they became fully modelled.
     modelled:
       exon.codonStart <= lastModelledCodon &&
       exon.codonEnd >= locus.cdsReference.startCodon,

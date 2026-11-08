@@ -40,6 +40,12 @@ import { StatusMark } from './status';
 import type { StatusTone } from './status';
 
 export interface RedTeamConsoleProps {
+  /**
+   * The example request shown in the empty field, derived from the locus by
+   * the caller. SPEC §5 forbids placeholder content, and a typed-in gene
+   * symbol and codon index would go stale silently when the fixture changes.
+   */
+  readonly example: string;
   /** Notified when a screened request produced a full pipeline run. */
   readonly onRun?: (view: ScreenView) => void;
 }
@@ -66,7 +72,7 @@ function verdictWord(view: ScreenView): string {
   }
 }
 
-export function RedTeamConsole({ onRun }: RedTeamConsoleProps) {
+export function RedTeamConsole({ example, onRun }: RedTeamConsoleProps) {
   const [entries, setEntries] = useState<readonly ScreenView[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -123,7 +129,7 @@ export function RedTeamConsole({ onRun }: RedTeamConsoleProps) {
           name="request"
           className="rt__input"
           rows={2}
-          placeholder="e.g. repair the HBB sickle allele at codon 7"
+          placeholder={example}
           onKeyDown={(event) => {
             // ⌘/Ctrl+Enter submits; plain Enter keeps a newline, because a
             // request can reasonably run to two lines.
@@ -178,12 +184,15 @@ export function RedTeamConsole({ onRun }: RedTeamConsoleProps) {
 
               {/* Either the request, when policy allows showing it, or an
                   explicit statement that it was discarded — never a blank. */}
+              {/* `ScreenView` is a discriminated union, so in the redacted arm
+                  `echo` is typed `null` — there is no branch here that could
+                  render a refused request even by mistake. */}
               {entry.redacted ? (
                 <p className="rt__redacted">
                   <SquareAsterisk className="h-3 w-3" strokeWidth={1.75} aria-hidden="true" />
                   Request withheld by policy. Not stored, not logged, not echoed.
                 </p>
-              ) : entry.echo === null ? null : (
+              ) : (
                 <p className="rt__digest">
                   <span className="not-italic">Request:</span> {entry.echo}
                 </p>

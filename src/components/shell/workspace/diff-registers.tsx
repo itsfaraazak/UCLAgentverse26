@@ -52,31 +52,46 @@ const KIND_META: Readonly<Record<ChangeKind, KindMeta>> = {
   deletion: { label: "deletion", tone: "indel", icon: Minus },
 };
 
+/*
+ * Tones deliberately avoid the verdict triple.
+ *
+ * `--verdict-pass/escalate/block` mean "a check passed / escalated / was
+ * refused". A diff row is not a verdict: the sickle substitution and the
+ * repair that undoes it are both missense rows, and painting either of them
+ * block-red would assert a judgement the diff has not made — the gate makes
+ * that call, and it is reported in the run log and the merge view.
+ *
+ * So the single accent marks *where the edit is*, and the distinction between
+ * a missense change, a silent one and an indel is carried by prominence, by a
+ * distinct lucide icon, and by a word. Silent rows recede rather than taking
+ * the accent, because a codon change with no protein change genuinely matters
+ * less — which is a difference in emphasis, not a difference in hue.
+ */
 const ROW_TONE: Readonly<Record<Tone, string>> = {
   quiet: "text-muted-foreground",
-  strong: "bg-verdict-block/8 text-foreground",
-  silent: "bg-verdict-pass/8 text-foreground",
-  indel: "bg-verdict-escalate/10 text-foreground",
+  strong: "bg-primary/8 text-foreground",
+  silent: "text-foreground",
+  indel: "bg-primary/8 text-foreground",
 };
 
 const CHIP_TONE: Readonly<Record<Tone, string>> = {
   quiet: "",
-  strong: "bg-verdict-block/15",
-  silent: "bg-verdict-pass/15",
-  indel: "bg-verdict-escalate/20",
+  strong: "bg-primary/15",
+  silent: "bg-foreground/8",
+  indel: "bg-primary/15",
 };
 
 const ICON_TONE: Readonly<Record<Tone, string>> = {
   quiet: "",
-  strong: "text-verdict-block",
-  silent: "text-verdict-pass",
-  indel: "text-foreground",
+  strong: "text-primary",
+  silent: "text-muted-foreground",
+  indel: "text-primary",
 };
 
 const BASE_MARK_TONE: Readonly<Record<Tone, string>> = {
   quiet: "",
-  strong: "bg-verdict-block/25",
-  silent: "bg-verdict-pass/25",
+  strong: "bg-primary/25",
+  silent: "bg-foreground/12",
   indel: "",
 };
 

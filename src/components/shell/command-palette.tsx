@@ -164,8 +164,11 @@ function CommandPaletteRow({
 
   return (
     <CommandItem
-      value={command.label}
-      keywords={command.keywords ? [...command.keywords] : undefined}
+      // Keyed by id, not label: cmdk treats `value` as the row identity, so
+      // two commands with the same label would collapse into one selectable
+      // row. The label moves into `keywords` so it is still searched.
+      value={command.id}
+      keywords={[command.label, ...(command.keywords ?? [])]}
       disabled={command.disabled}
       onSelect={() => onSelect(command)}
       className="h-9 gap-2.5 py-0 text-sm text-foreground data-selected:bg-accent data-selected:text-accent-foreground [&_svg]:text-muted-foreground"
