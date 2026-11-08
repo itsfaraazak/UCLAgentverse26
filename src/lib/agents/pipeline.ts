@@ -5,6 +5,16 @@ import {
   SIMULATION_DEFAULTS,
   runAssay,
 } from '@/lib/cellsim';
+import type { AcmgVariantRecord } from '@/lib/acmg/registry';
+import {
+  ACMG_RECLASSIFICATION_SIGNOFF_ROLE,
+  AcmgClassificationAgent,
+  ClassificationConflictAgent,
+  TherapyLookupAgent,
+  classifyPlan,
+  conflictFromClassification,
+  therapyFromClassification,
+} from './classification';
 import { DeltaDAG } from './dag';
 import {
   allLoci,
@@ -18,6 +28,7 @@ import {
 import type {
   AssayAssessment,
   AssayPayload,
+  ConflictPayload,
   Delta,
   EditPlanPayload,
   IntentPayload,
@@ -31,6 +42,7 @@ import type {
 } from './types';
 import {
   isAssayPayload,
+  isConflictPayload,
   isEditPlanPayload,
   isIntentPayload,
   isScreenPayload,
@@ -63,6 +75,24 @@ const AGENT_ORDER = [
 
 export function pipelineAgentOrder(): readonly string[] {
   return AGENT_ORDER;
+}
+
+const CLASSIFIED_AGENT_ORDER = [
+  IntentAgent.name,
+  BiosafetyGateAgent.name,
+  EditPlannerAgent.name,
+  StructuralImpactAgent.name,
+  FunctionalAssayAgent.name,
+  OffTargetRiskAgent.name,
+  AcmgClassificationAgent.name,
+  ClassificationConflictAgent.name,
+  VerifierAgent.name,
+  TherapyLookupAgent.name,
+] as const;
+
+/** Order with `classify: true`. The gate is still second. */
+export function classifiedPipelineAgentOrder(): readonly string[] {
+  return CLASSIFIED_AGENT_ORDER;
 }
 
 export function parseIntent(text: string): IntentPayload {
@@ -359,10 +389,17 @@ export function verifyEdit(args: {
   screen: ScreenPayload;
   seed: number;
   steps: number;
+  /** Present only on a classified run. It can add a sign-off, never remove one. */
+  conflict?: ConflictPayload;
 }): VerdictPayload {
   const reasons: string[] = [];
-  const requiresSignoff = args.screen.requiresSignoff;
-  const signoffRole = args.screen.signoffRole;
+  const conflictCrossed = args.conflict?.crossesActionableThreshold === true;
+  const requiresSignoff = args.screen.requiresSignoff || conflictCrossed;
+  // One CheckRun carries one role. When the biosafety gate also escalated,
+  // its policy role wins and the reclassification review is stated as a
+  // reason rather than dropped.
+  const signoffRole =
+    args.screen.signoffRole ?? (conflictCrossed ? ACMG_RECLASSIFICATION_SIGNOFF_ROLE : undefined);
 
   if (!args.plan.resolved || args.plan.polymerizationTendency === null) {
     return {
@@ -370,7 +407,10 @@ export function verifyEdit(args: {
       mergeBlocked: true,
       requiresSignoff,
       signoffRole,
-      reasons: ['Verifier could not resolve a curated edit plan against data/loci.json.'],
+      reasons: [
+        'Verifier could not resolve a curated edit plan against data/loci.json.',
+        ...(conflictCrossed ? [reclassificationReason(args.conflict)] : []),
+      ],
       disagreedWithAssay: false,
       disagreedWithStructural: false,
       measured: { highPO2: null, lowPO2: null, referenceLowPO2: null },
@@ -441,8 +481,11 @@ export function verifyEdit(args: {
   }
 
   const mergeBlocked = !passed || requiresSignoff || args.screen.verdict === 'escalate';
-  if (requiresSignoff) {
+  if (args.screen.requiresSignoff) {
     reasons.push('Biosafety gate requires named human sign-off before merge.');
+  }
+  if (conflictCrossed) {
+    reasons.push(reclassificationReason(args.conflict));
   }
 
   return {
@@ -459,6 +502,16 @@ export function verifyEdit(args: {
       referenceLowPO2: referenceLow,
     },
   };
+}
+
+function reclassificationReason(conflict: ConflictPayload | undefined): string {
+  const prior = conflict?.priorClassification ?? 'unknown';
+  const next = conflict?.newClassification ?? 'unknown';
+  return (
+    `ACMG reclassification '${prior}' -> '${next}' crosses the actionable ` +
+    `Pathogenic/Uncertain line; ${ACMG_RECLASSIFICATION_SIGNOFF_ROLE} sign-off is required ` +
+    'before this classification informs any treatment-pathway decision.'
+  );
 }
 
 function wildtypePoly(gene: string | null): number {
@@ -493,6 +546,17 @@ export function runVerifierAgent(args: {
   const structuralDelta = latestOfKind(hist, 'structural');
   const assayDelta = latestOfKind(hist, 'assay');
   const screenDelta = latestOfKind(hist, 'screen');
+  const conflictDelta = latestOfKind(hist, 'conflict');
+  if (
+    conflictDelta !== undefined &&
+    !isConflictPayload(conflictDelta.payload)
+  ) {
+    throw new Error('VerifierAgent: conflict payload shape is invalid');
+  }
+  const conflict =
+    conflictDelta !== undefined && isConflictPayload(conflictDelta.payload)
+      ? conflictDelta.payload
+      : undefined;
   if (
     planDelta === undefined ||
     structuralDelta === undefined ||
@@ -516,6 +580,7 @@ export function runVerifierAgent(args: {
     screen: screenDelta.payload,
     seed: args.seed,
     steps: args.steps,
+    ...(conflict !== undefined ? { conflict } : {}),
   });
   return args.dag.add({
     kind: 'verdict',
@@ -527,7 +592,12 @@ export function runVerifierAgent(args: {
   });
 }
 
-export function runPipeline(input: PipelineInput): PipelineResult {
+export interface PipelineDeps {
+  /** ACMG evidence records; defaults to data/acmg-variants.json. */
+  readonly acmgRecords?: readonly AcmgVariantRecord[];
+}
+
+export function runPipeline(input: PipelineInput, deps: PipelineDeps = {}): PipelineResult {
   const dag = new DeltaDAG();
   const seed = input.seed ?? SIMULATION_DEFAULTS.seed;
   const pO2 = input.pO2 ?? SIMULATION_DEFAULTS.pO2;
@@ -613,12 +683,28 @@ export function runPipeline(input: PipelineInput): PipelineResult {
   const offtarget = offTargetFromIntent(intent);
   const offDelta = emit('offtarget', OffTargetRiskAgent.name, 'off-target-registry', offtarget);
 
+  const classification = input.classify === true ? classifyPlan(plan, deps.acmgRecords) : null;
+  let conflictCrossed = false;
+  let verifierParent = offDelta.id;
+  if (classification !== null) {
+    emit('classification', AcmgClassificationAgent.name, 'acmg-classification', classification);
+    const conflict = conflictFromClassification(classification);
+    conflictCrossed = conflict.crossesActionableThreshold;
+    const conflictDelta = emit(
+      'conflict',
+      ClassificationConflictAgent.name,
+      'classification-conflict',
+      conflict,
+    );
+    verifierParent = conflictDelta.id;
+  }
+
   if (parentId === null) {
     throw new Error('runPipeline: missing parent after off-target agent');
   }
   runVerifierAgent({
     dag,
-    parentId: offDelta.id,
+    parentId: verifierParent,
     createdAt,
     seed,
     steps,
@@ -630,17 +716,32 @@ export function runPipeline(input: PipelineInput): PipelineResult {
   }
   parentId = verdictDelta.id;
 
-  const escalated = gate.verdict === 'escalate';
+  createdAt += 1;
+
+  const escalated = gate.verdict === 'escalate' || conflictCrossed;
   const passed = isVerdictPayload(verdictDelta.payload) && verdictDelta.payload.passed;
-  const mergeAllowed = passed && !escalated;
+  const requiresSignoff = gate.requiresSignoff || conflictCrossed;
+  const mergeAllowed = passed && !escalated && !requiresSignoff;
+  const signoffRole =
+    gate.signoffRole ?? (conflictCrossed ? ACMG_RECLASSIFICATION_SIGNOFF_ROLE : undefined);
+
+  // Therapy is reachable only from a run that passed with nothing awaiting a
+  // human. An escalated run gets no lookup at all — not an empty one — so no
+  // therapy is ever shown beside a call that is still under review.
+  if (classification !== null && mergeAllowed) {
+    const therapy = therapyFromClassification(classification);
+    if (therapy !== null) {
+      emit('therapy_match', TherapyLookupAgent.name, 'therapy-lookup', therapy);
+    }
+  }
 
   return finish({
     blocked: false,
     escalated,
     passed,
     mergeAllowed,
-    requiresSignoff: gate.requiresSignoff,
-    signoffRole: gate.signoffRole,
+    requiresSignoff,
+    signoffRole,
   });
 }
 
