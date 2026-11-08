@@ -6,6 +6,16 @@ export {
   PartialCodonError,
   InsertionRefCodonError,
 } from './errors';
+export {
+  parseSequenceUpload,
+  MAX_UPLOAD_CHARS,
+  MAX_SEQUENCE_BASES,
+  SequenceTooLargeError,
+  EmptySequenceError,
+  MultipleRecordsError,
+  ExplainedInvalidBaseError,
+} from './fasta';
+export type { ParsedUpload, ParseUploadOptions } from './fasta';
 export { applyVariant, applyVariants } from './variant';
 export { diffSequences } from './diff';
 export {
