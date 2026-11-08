@@ -25,6 +25,8 @@ Every AI-proposed sequence change is checked in code, traced to real sources, ve
 
 ## Run it in one line
 
+Check it out already deployed here: https://dheer309--editverse-hosted-serve.us-east.modal.run/
+
 ```sh
 git clone -b proposed-new-app https://github.com/itsfaraazak/UCLAgentverse26.git && cd UCLAgentverse26 && ./run.sh
 ```
