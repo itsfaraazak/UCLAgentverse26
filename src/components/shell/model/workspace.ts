@@ -65,6 +65,7 @@ import {
   editViewOf,
   fixed,
   locusView,
+  operationWordFor,
   percent,
   requestFor,
   requireVariant,
@@ -812,6 +813,7 @@ export function buildWorkspace(overlay: readonly BranchSpec[] = []): WorkspaceVi
     branches: seed.branches.map((branch) => branchView(seed, branch)),
     defaultBranch: DEFAULT_BRANCH,
     variants: seed.locus.variants.map((v) => editViewOf(seed.locus, v)),
+    exampleRequest: exampleRequestFor(seed.locus),
     agentOrder: [...pipelineAgentOrder()],
     simulation: {
       seed: SIMULATION_DEFAULTS.seed,
@@ -824,6 +826,24 @@ export function buildWorkspace(overlay: readonly BranchSpec[] = []): WorkspaceVi
     },
     fixtureDisclaimer: rawLoci._disclaimer,
   };
+}
+
+/**
+ * An example request for the console, derived rather than written.
+ *
+ * Prefers the repair variant, since that is the in-scope therapeutic case the
+ * gate allows, and falls back to the first curated variant so a fixture
+ * without a repair still produces a real example.
+ */
+function exampleRequestFor(locus: Locus): string {
+  const repair = locus.variants.find(
+    (v) => operationWordFor(locus, v) === 'Repair',
+  );
+  const variant = repair ?? locus.variants[0];
+  if (variant === undefined) {
+    throw new Error('shell/model: locus has no curated variant to build an example from');
+  }
+  return requestFor(locus, variant);
 }
 
 /** The diff of a branch's genotype against the imported reference. */

@@ -231,26 +231,48 @@ export interface DiffView {
 }
 
 /** The result of screening free text. Never carries refused input. */
-export interface ScreenView {
+interface ScreenBase {
   readonly category: PolicyCategory;
   readonly verdict: Verdict;
   readonly reason: string;
   readonly requiresSignoff: boolean;
   readonly signoffRole: string | null;
   readonly flaggedGenes: readonly string[];
-  readonly requestDigest: string;
-  readonly redacted: boolean;
   /**
-   * The request text, echoed back **only** when policy permits it. `null` for
-   * every `redacted` verdict — the field is nulled on the server, so a
-   * block-class request cannot reach the client at all (SPEC §7.3).
+   * sha256 prefix of the request. One-way, so an entry stays auditable
+   * without the request being retained.
    */
-  readonly echo: string | null;
+  readonly requestDigest: string;
   /** Logical sequence number within the console session. */
   readonly seq: number;
-  /** Set when the screen also produced a full pipeline run. */
-  readonly run: RunView | null;
 }
+
+/**
+ * The result of screening free text.
+ *
+ * A discriminated union rather than a flat record with `redacted: boolean`,
+ * because SPEC §7.3 is binding: a refused request must not be echoed, logged
+ * or restated. With independent fields, `{ redacted: true, echo: '...' }`
+ * type-checks, and the invariant survives only as long as every author
+ * remembers it. Split this way, a redacted result *cannot carry* the text —
+ * `echo` is `null` in that arm, so the leak is unrepresentable rather than
+ * merely absent, and the compiler enforces what a comment used to ask for.
+ *
+ * The run is nulled on the same arm because a blocked request terminates at
+ * the gate: there is no downstream agent output to show, and projecting the
+ * DAG would reintroduce a path from the request to the screen.
+ */
+export type ScreenView =
+  | (ScreenBase & {
+      readonly redacted: true;
+      readonly echo: null;
+      readonly run: null;
+    })
+  | (ScreenBase & {
+      readonly redacted: false;
+      readonly echo: string;
+      readonly run: RunView;
+    });
 
 export interface SimulationDefaultsView {
   readonly seed: number;
@@ -274,6 +296,12 @@ export interface WorkspaceView {
    * annotation for.
    */
   readonly variants: readonly EditView[];
+  /**
+   * An example request for the red-team console's empty field, built from the
+   * locus by `requestFor` — the same derivation the branch check runs use, so
+   * the hint cannot drift from what the pipeline actually resolves.
+   */
+  readonly exampleRequest: string;
   readonly agentOrder: readonly string[];
   readonly simulation: SimulationDefaultsView;
   readonly fixtureDisclaimer: string;

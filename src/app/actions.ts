@@ -61,12 +61,68 @@ export async function screenRequestAction(input: {
   return screenConsoleRequest({ text, seq: input.seq });
 }
 
+/**
+ * Branch names this server will accept. Mirrors what `Repo.branch` tolerates,
+ * and keeps a name that could be mistaken for an oid or a path out of the ref
+ * namespace.
+ */
+const BRANCH_NAME = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/;
+const MAX_BRANCH_NAME = 64;
+
+/**
+ * How many created branches one client may replay.
+ *
+ * The overlay is client-controlled and is replayed in full on every call: a
+ * non-empty overlay deliberately bypasses the memo and re-seeds the
+ * repository, and each spec adds an `applyVariant` plus a sha256 commit. A
+ * chained overlay also grows each branch's commit list, and rendering reads
+ * every commit of every branch — so cost climbs with the square of the list.
+ * Unbounded, that is a one-request stall of a single-threaded server, which
+ * is the same hazard `screenRequestAction` already caps its text against.
+ * Twenty-five lines is far more than the demo needs.
+ */
+const MAX_OVERLAY = 25;
+
+/**
+ * Validate the whole replay list, not just the newest entry.
+ *
+ * Every action that accepts an overlay runs this. `createBranchAction` used
+ * to check only the spec it was adding, which left an inherited list — and
+ * the lists handed to `diffAction` and `mergeProposalAction` — trusted
+ * verbatim.
+ *
+ * `variantId` is deliberately not checked here: `buildWorkspace` resolves it
+ * through `requireVariant`, which fails closed on anything not in
+ * `data/loci.json`. Duplicating that would risk the two disagreeing.
+ */
+function validateOverlay(overlay: readonly BranchSpec[]): readonly BranchSpec[] {
+  if (overlay.length > MAX_OVERLAY) {
+    throw new Error(`At most ${MAX_OVERLAY} created branches are supported.`);
+  }
+  const seen = new Set<string>();
+  for (const spec of overlay) {
+    if (spec.name.length === 0 || spec.name.length > MAX_BRANCH_NAME) {
+      throw new Error(`Branch names are limited to ${MAX_BRANCH_NAME} characters.`);
+    }
+    if (!BRANCH_NAME.test(spec.name)) {
+      throw new Error(
+        'Use letters, digits, and . _ / - only, starting with a letter or digit.',
+      );
+    }
+    if (seen.has(spec.name)) {
+      throw new Error(`Branch '${spec.name}' appears twice.`);
+    }
+    seen.add(spec.name);
+  }
+  return overlay;
+}
+
 /** The three-register diff of a branch's genotype against the reference. */
 export async function diffAction(
   branch: string,
   overlay: readonly BranchSpec[] = [],
 ): Promise<DiffView> {
-  return buildDiff(branch, overlay);
+  return buildDiff(branch, validateOverlay(overlay));
 }
 
 /**
@@ -91,22 +147,10 @@ export async function createBranchAction(input: {
   if (name.length === 0) {
     throw new Error('A branch name is required.');
   }
-  if (name.length > 64) {
-    throw new Error('Branch names are limited to 64 characters.');
-  }
-  // Mirrors what `Repo.branch` will accept, and keeps a name that could be
-  // confused for an oid or a path out of the ref namespace.
-  if (!/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(name)) {
-    throw new Error(
-      'Use letters, digits, and . _ / - only, starting with a letter or digit.',
-    );
-  }
-  if (input.overlay.some((spec) => spec.name === name)) {
-    throw new Error(`Branch '${name}' already exists.`);
-  }
-
   const spec: BranchSpec = { name, from: input.from, variantId: input.variantId };
-  const overlay = [...input.overlay, spec];
+  // Validate the inherited list and the new spec together, so a tampered
+  // overlay cannot ride in alongside a well-formed addition.
+  const overlay = validateOverlay([...input.overlay, spec]);
   // buildWorkspace throws if `from` is unknown or the variant is not in the
   // fixture, so a bad request fails here rather than rendering a broken line.
   return { workspace: buildWorkspace(overlay), overlay };
@@ -130,6 +174,6 @@ export async function mergeProposalAction(input: {
     into: input.into,
     incoming: input.incoming,
     ...(input.signedOffBy === undefined ? {} : { signedOffBy: input.signedOffBy }),
-    ...(input.overlay === undefined ? {} : { overlay: input.overlay }),
+    overlay: validateOverlay(input.overlay ?? []),
   });
 }

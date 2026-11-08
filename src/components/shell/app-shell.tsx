@@ -313,7 +313,7 @@ export function AppShell({ workspace: initial }: AppShellProps) {
               }
             />
           )}
-          <RedTeamConsole onRun={setConsoleRun} />
+          <RedTeamConsole example={workspace.exampleRequest} onRun={setConsoleRun} />
         </div>
       </section>
 

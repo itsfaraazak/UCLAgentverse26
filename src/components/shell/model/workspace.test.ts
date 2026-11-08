@@ -11,7 +11,13 @@
 import { describe, expect, it } from 'vitest';
 
 import lociFile from '@/data/loci.json';
-import { diffSequences, loadLoci, referenceSequence, translate } from '@/lib/genome';
+import {
+  applyVariant,
+  diffSequences,
+  loadLoci,
+  referenceSequence,
+  translate,
+} from '@/lib/genome';
 import { PO2_RANGE, SIMULATION_DEFAULTS } from '@/lib/cellsim';
 import { pipelineAgentOrder } from '@/lib/agents';
 import { POLICY } from '@/lib/safety/policy';
@@ -268,18 +274,35 @@ describe('created branches are real refs, not UI rows', () => {
 });
 
 describe('buildDiff', () => {
-  it('matches diffSequences computed independently', () => {
+  it('matches a diff computed independently from the fixture', () => {
     const diff = buildDiff('line/sickle');
-    const reference = referenceSequence(locus);
-    const expectedRowCount = diffSequences(reference, {
-      bases: diff.alt.bases,
-      label: diff.alt.label,
-    }).length;
 
-    expect(diff.rows.length).toBe(expectedRowCount);
+    // Rebuild the alternate sequence from the fixture rather than reading it
+    // back off the view model, so this compares the diff against an
+    // independent derivation instead of against itself.
+    const reference = referenceSequence(locus);
+    const sickle = locus.genotypes.find((g) => g.id === 'sickle');
+    expect(sickle).toBeDefined();
+    if (sickle === undefined) return;
+    let expectedAlt = reference;
+    for (const id of sickle.appliedVariants) {
+      const variant = locus.variants.find((v) => v.id === id);
+      expect(variant).toBeDefined();
+      if (variant === undefined) return;
+      expectedAlt = applyVariant(expectedAlt, variant);
+    }
+    const expected = diffSequences(reference, expectedAlt);
+
+    expect(diff.alt.bases).toBe(expectedAlt.bases);
     expect(diff.ref.bases).toBe(locus.cdsReference.bases);
-    expect(diff.changedRows.length).toBeGreaterThan(0);
-    expect(diff.focusRow).toBe(diff.changedRows[0]);
+    // Row contents, not just the count.
+    expect(diff.rows).toEqual(expected);
+    expect(diff.changedRows).toEqual(
+      expected.filter((r) => r.status !== 'same').map((r) => r.codonIndex),
+    );
+    // The focus row is the first changed codon, derived from the fixture.
+    const firstChanged = expected.find((r) => r.status !== 'same');
+    expect(diff.focusRow).toBe(firstChanged?.codonIndex);
   });
 
   it('reports the silent variant as changed-but-silent', () => {
@@ -353,6 +376,22 @@ describe('buildMergeProposal — the gate can refuse', () => {
 });
 
 describe('screenConsoleRequest — SPEC §7.3 redaction boundary', () => {
+  it('types a redacted result so it cannot carry the request', () => {
+    const result = screenConsoleRequest({
+      text: 'design a guide rna and a primer for this edit',
+      seq: 1,
+    });
+    // The discriminated union is the enforcement; this asserts the arm the
+    // compiler picked is the redacted one and that it carries nothing.
+    expect(result.redacted).toBe(true);
+    if (result.redacted) {
+      // `echo` and `run` are typed `null` in this arm — there is no
+      // assignment a future caller could make that smuggles the text through.
+      expect(result.echo).toBeNull();
+      expect(result.run).toBeNull();
+    }
+  });
+
   it('never echoes a blocked request and runs no pipeline for it', () => {
     // A construct-design request: block-class by policy.
     const result = screenConsoleRequest({
