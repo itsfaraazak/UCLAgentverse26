@@ -190,6 +190,25 @@ Same seed + same params ⇒ identical metrics.
 
 **This is an illustrative model, not validated hemorheology. The UI must say so on the panel.**
 
+### 4.5 Ratified decisions
+
+§4.1–§4.4 left some details unspecified. The implementation surfaced them; these are now the
+contract. Reviewers should check against this list rather than filing them as findings.
+
+| # | Question | Decision |
+|---|---|---|
+| 1 | Does `translate` emit the stop codon? | **Yes** — `*` is included in the output, then translation halts. |
+| 2 | What is `DiffRow.codonIndex` after an indel? | The **1-based alignment row**, not a biological CDS index. For substitutions the two coincide; after an indel the two sequences' biological numbering diverges and `DiffRow` carries only the row. A UI showing CDS coordinates past an indel must derive them itself. |
+| 3 | `MergeConflict` shape | `{ gene: string; base: Oid \| null; ours: Oid \| null; theirs: Oid \| null }`. |
+| 4 | Merge commit metadata | `parents: [ours, theirs]`, author `sigmafold-merge`, `timestamp = max(ours, theirs) + 1` so oids stay deterministic. HEAD moves only if it currently points at `ours`. |
+| 5 | `commit(opts)` fields | Required `tree`, `author`, `message`. Optional `timestamp`, `parents` (defaults to `[HEAD]`, or `[]` at root), `edit`, `checkRunId`. |
+| 6 | Insertion coordinates in `applyVariant` | `altCodon` is inserted **at** `codonIndex`; the codon already there shifts right. Appending is `codonIndex === length + 1`. |
+| 7 | HBB modelled region length | **31 codons / 93 nt**, translating to `MVHLTPEEKSAVTALWGKVNVDEVGGEALGR`. An earlier `codonCount: 30` in `loci.json` was wrong and is fixed. Codon 31 straddles the exon 1 / exon 2 boundary, so the modelled region extends one codon past exon 1. |
+
+Note on #2: this is a real limitation, not a shortcut. Reporting a single index keeps `DiffRow`
+honest about the fact that one row cannot name a position in two diverged coordinate systems at
+once. Do not "fix" it by silently reusing the row number as a CDS coordinate.
+
 ## 5. UI requirements (all three variants)
 
 - **macOS app feel in the browser.** No Electron. Traffic-light chrome, translucent sidebar,
