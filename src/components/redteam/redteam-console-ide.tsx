@@ -87,11 +87,9 @@ export function RedTeamConsole() {
       const view = await screenRequestAction(request);
       const screen = view.screen;
       // A redacted verdict means the text is discarded here too: it is not
-      // kept for replay, and the input is cleared.
-      if (screen.redacted) {
-        setText('');
-      } else {
-      }
+      // kept for replay, and the input is cleared. An allowed request is left
+      // in the box so it can be edited and re-run.
+      if (screen.redacted) setText('');
       setRun(view);
       setTrail((prev) =>
         [{ ...screen, at: Date.now(), replayable: !screen.redacted }, ...prev].slice(0, 12),
