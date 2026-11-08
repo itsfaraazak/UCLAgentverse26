@@ -1,10 +1,10 @@
 <div align="center">
 
-# EditVerse
+# SigmaFold
 
 ### Git for protein hypotheses. An agent proposes, a gate verifies, a scientist signs off.
 
-Check it out at: https://dheer309--editverse-hosted-serve.us-east.modal.run/
+Check it out at: https://dheer309--SigmaFold-hosted-serve.us-east.modal.run/
 
 **An agent-assisted research workspace for human β-globin (*HBB*), the gene behind sickle cell disease.**
 Every AI-proposed sequence change is checked in code, traced to real sources, versioned like source code, and committed only when a human approves it.
@@ -15,7 +15,7 @@ Every AI-proposed sequence change is checked in code, traced to real sources, ve
 [![Dependencies](https://img.shields.io/badge/backend-zero%20pip%20dependencies-f59e0b?style=for-the-badge)](#run-it-in-two-minutes)
 [![Use](https://img.shields.io/badge/research%20use%20only-not%20clinical-ef4444?style=for-the-badge)](#responsible-design-risks-and-mitigations)
 
-<img src="docs/images/structure.png" alt="EditVerse 3D viewer showing the deposited deoxyhemoglobin S structure (RCSB 2HBS) with the beta chains focused" width="860">
+<img src="docs/images/structure.png" alt="SigmaFold 3D viewer showing the deposited deoxyhemoglobin S structure (RCSB 2HBS) with the beta chains focused" width="860">
 
 <sub>The built-in 3D viewer: experimental RCSB structure 2HBS, rendered locally with 3Dmol.js. Edits are marked on deposited coordinates and never passed off as predicted structures.</sub>
 
@@ -25,7 +25,7 @@ Every AI-proposed sequence change is checked in code, traced to real sources, ve
 
 ## Run it in one line
 
-Check it out here: https://dheer309--editverse-hosted-serve.us-east.modal.run/
+Check it out here: https://dheer309--SigmaFold-hosted-serve.us-east.modal.run/
 
 OR
 
@@ -45,7 +45,7 @@ That checks your machine, asks for your Gemini key (hidden input, optional), sta
 
 **The bottleneck:** hypotheses live in notebooks and chat windows. An LLM will happily suggest "mutate position 7 to V", but nothing records *why*, nothing separates literature from speculation, nobody can diff, branch or roll back an idea, and a confident paragraph looks the same as a checked fact. The scientist loses time re-deriving provenance and, worse, can't tell which suggestions deserve a wet-lab slot.
 
-**EditVerse makes the hypothesis loop fast *and* auditable.** The agent does the legwork (literature search, mapping a plain-English goal to concrete residue changes). The software enforces the rules. The scientist keeps the decision.
+**SigmaFold makes the hypothesis loop fast *and* auditable.** The agent does the legwork (literature search, mapping a plain-English goal to concrete residue changes). The software enforces the rules. The scientist keeps the decision.
 
 **Plausible next step to real use:** point the same loop at a lab's own (non-patient) variant shortlist, add experimental assay results as a third kind of commit, and hand the version history to the wet-lab team as the reasoning record. See [Limits and roadmap](#limits-and-roadmap).
 
@@ -139,7 +139,7 @@ flowchart TD
 
 ## The verification loop
 
-This is the core of EditVerse. **Model output is untrusted input.** Between the model and your data sits a stack of deterministic checks, and a human at the end.
+This is the core of SigmaFold. **Model output is untrusted input.** Between the model and your data sits a stack of deterministic checks, and a human at the end.
 
 | # | Gate | What it catches | Enforced by |
 | --- | --- | --- | --- |
@@ -290,8 +290,8 @@ Then open **http://127.0.0.1:8000**.
 | `PORT` | `8000` | Loopback port (`python3 backend/server.py` accepts `0` for an OS-assigned port; `run.sh` needs a real port) |
 | `STORE_DB_PATH` | `store.sqlite3` | SQLite workspace file |
 | `GIT_HISTORY_PATH` | `research-notes.git` | App-owned bare Git repo for versions. Do **not** point at an existing repository |
-| `EDITVERSE_FOLD_PROVIDER` | `atlas` | `atlas` (ESM Atlas) or `modal` (your worker) |
-| `EDITVERSE_FOLD_AUTOMATIC` | unset | `1` = auto-predict with Modal (**can incur charges**) |
+| `SigmaFold_FOLD_PROVIDER` | `atlas` | `atlas` (ESM Atlas) or `modal` (your worker) |
+| `SigmaFold_FOLD_AUTOMATIC` | unset | `1` = auto-predict with Modal (**can incur charges**) |
 
 **Run the checks:**
 
