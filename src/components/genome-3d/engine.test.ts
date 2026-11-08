@@ -5,7 +5,16 @@ import { createFakeRenderer } from '@/components/protein/__fixtures__/fake-rende
 import { classifyFailure } from '@/components/protein/runtime/errors';
 import { selectRenderer } from '@/components/protein/runtime/renderer';
 import { mountGenomeEngine } from './engine';
+import { getLocus } from '@/lib/genome';
 import { buildGenomeModel, buildLocusModel } from './model';
+
+function hbbExtent() {
+  const locus = getLocus('HBB');
+  if (locus === undefined) throw new Error('loci.json has no HBB locus');
+  const modelled = locus.cdsReference.codonCount;
+  const annotatedEnd = Math.max(...locus.exons.map((e) => e.codonEnd));
+  return { modelled, expectedTotal: Math.max(modelled, annotatedEnd) };
+}
 
 function host(): HTMLDivElement {
   const el = document.createElement('div');
@@ -28,32 +37,59 @@ describe('mountGenomeEngine — instancing driven by the real locus', () => {
       createRenderer: async () => createFakeRenderer(),
     });
 
-    // HBB: 31 codons of real sequence inside a locus annotated to codon 147.
-    expect(model.modelledCodonCount).toBe(31);
-    expect(model.totalCodonCount).toBe(147);
-    expect(engine.scene.codonInstances).toBe(147);
-    expect(engine.scene.rungInstances).toBe(31 * 3);
-    expect(engine.scene.unsequencedCodons).toBe(147 - 31);
+    const { modelled, expectedTotal } = hbbExtent();
+    expect(model.modelledCodonCount).toBe(modelled);
+    expect(model.totalCodonCount).toBe(expectedTotal);
+    expect(model.segments).toHaveLength(model.totalCodonCount);
+    expect(engine.scene.codonInstances).toBe(model.totalCodonCount);
+    expect(engine.scene.modelledCodons).toBe(model.modelledCodonCount);
+    expect(engine.scene.rungInstances).toBe(model.modelledCodonCount * 3);
+    expect(engine.scene.unsequencedCodons).toBe(
+      model.totalCodonCount - model.modelledCodonCount,
+    );
     expect(engine.scene.editedCodonIndices).toEqual([7]);
     engine.dispose();
   });
 
-  it('instances rather than allocating geometry per codon', async () => {
-    const created = vi.spyOn(BufferGeometry.prototype, 'setAttribute');
+  it('draws an unsequenced tail as codon beads with no rungs', async () => {
+    const model = buildGenomeModel({
+      ref: { bases: 'ATGGAGAAACCC', label: 'ref' },
+      alt: { bases: 'ATGGTGAAACCC', label: 'alt' },
+      totalCodonCount: 20,
+    });
     const engine = await mountGenomeEngine({
       container: host(),
-      model: buildLocusModel({ variantId: 'HBB_HbS' }),
+      model,
+      onContextLost: () => undefined,
+      createRenderer: async () => createFakeRenderer(),
+    });
+    expect(engine.scene.codonInstances).toBe(20);
+    expect(engine.scene.modelledCodons).toBe(4);
+    expect(engine.scene.rungInstances).toBe(4 * 3);
+    expect(engine.scene.unsequencedCodons).toBe(20 - 4);
+    expect(engine.focusCodon(20)).toBe(true);
+    expect(engine.focusCodon(21)).toBe(false);
+    engine.dispose();
+    expect(engine.trackedResourceCount()).toBe(0);
+  });
+
+  it('instances rather than allocating geometry per codon', async () => {
+    const created = vi.spyOn(BufferGeometry.prototype, 'setAttribute');
+    const model = buildLocusModel({ variantId: 'HBB_HbS' });
+    const engine = await mountGenomeEngine({
+      container: host(),
+      model,
       onContextLost: () => undefined,
       createRenderer: async () => createFakeRenderer(),
     });
 
-    // 147 codons and 93 rungs are drawn, but the scene holds only a handful
-    // of geometries/materials — which is what proves they are instanced and
-    // not one mesh (and one geometry) per codon.
-    expect(engine.scene.codonInstances).toBe(147);
-    expect(engine.scene.rungInstances).toBe(93);
+    // Every codon and rung is drawn, but the scene holds only a handful of
+    // geometries/materials — which is what proves they are instanced and not
+    // one mesh (and one geometry) per codon.
+    expect(engine.scene.codonInstances).toBe(model.totalCodonCount);
+    expect(engine.scene.rungInstances).toBe(model.modelledCodonCount * 3);
     expect(engine.trackedResourceCount()).toBeLessThan(20);
-    expect(created.mock.calls.length).toBeLessThan(147);
+    expect(created.mock.calls.length).toBeLessThan(model.totalCodonCount);
     engine.dispose();
   });
 
@@ -85,15 +121,15 @@ describe('mountGenomeEngine — focus and framing', () => {
       createRenderer: async () => createFakeRenderer(),
     });
     // The view lands on the edit site rather than on the whole locus: at
-    // true B-DNA proportions 147 codons is a ~150-unit hairline, so the
+    // true B-DNA proportions a full CDS is a ~150-unit hairline, so the
     // default framing has to be a readable stretch around the edit.
     expect(engine.scene.focusedCodon).toBe(7);
     engine.resetView();
     expect(engine.scene.focusedCodon).toBeNull();
     expect(engine.focusEdit()).toBe(true);
     expect(engine.scene.focusedCodon).toBe(7);
-    expect(engine.focusCodon(147)).toBe(true);
-    expect(engine.focusCodon(148)).toBe(false);
+    expect(engine.focusCodon(model.totalCodonCount)).toBe(true);
+    expect(engine.focusCodon(model.totalCodonCount + 1)).toBe(false);
     expect(engine.focusCodon(0)).toBe(false);
     engine.resetView();
     expect(engine.scene.focusedCodon).toBeNull();

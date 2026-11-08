@@ -7,22 +7,25 @@ import {
   RendererUnavailableError,
   StructureDataError,
 } from '@/components/protein/runtime/errors';
+import { getLocus } from '@/lib/genome';
 import { GenomeHelix3D } from './GenomeHelix3D';
 import { loadGenomeEngine } from './load-engine';
 import type { GenomeEngineHandle, GenomeEngineOptions } from './engine';
-import { buildGenomeModel } from './model';
+import { buildGenomeModel, buildLocusModel } from './model';
 
 vi.mock('./load-engine', () => ({ loadGenomeEngine: vi.fn() }));
 const loadEngine = vi.mocked(loadGenomeEngine);
+
+const hbb = buildLocusModel({ variantId: 'HBB_HbS' });
 
 function fakeHandle(): GenomeEngineHandle {
   return {
     renderer: { kind: 'webgl2', label: 'WebGL 2', fallbackReason: 'WebGPU not exposed by this browser' },
     scene: {
-      codonInstances: 147,
-      rungInstances: 93,
-      modelledCodons: 31,
-      unsequencedCodons: 116,
+      codonInstances: hbb.totalCodonCount,
+      rungInstances: hbb.modelledCodonCount * 3,
+      modelledCodons: hbb.modelledCodonCount,
+      unsequencedCodons: hbb.totalCodonCount - hbb.modelledCodonCount,
       editedCodonIndices: [7],
       focusedCodon: null,
       axisLength: 149.6,
@@ -74,9 +77,19 @@ describe('GenomeHelix3D — success path', () => {
 
     await waitFor(() => expect(container.querySelector('[data-renderer="webgl2"]')).not.toBeNull());
     expect(screen.getByRole('heading', { name: 'HBB coding region' })).toBeTruthy();
-    expect(screen.getByText('31')).toBeTruthy();
-    expect(screen.getByText('147')).toBeTruthy();
-    expect(mount.mock.calls[0]?.[0].model).toMatchObject({ gene: 'HBB', totalCodonCount: 147 });
+    const locus = getLocus('HBB');
+    expect(locus).toBeDefined();
+    if (locus === undefined) return;
+    const modelled = locus.cdsReference.codonCount;
+    const expectedTotal = Math.max(modelled, ...locus.exons.map((e) => e.codonEnd));
+
+    const counts = screen.getByText(/codons sequenced/);
+    expect(counts.textContent).toContain(`${modelled} of ${expectedTotal} codons sequenced`);
+    expect(mount.mock.calls[0]?.[0].model).toMatchObject({
+      gene: 'HBB',
+      modelledCodonCount: modelled,
+      totalCodonCount: expectedTotal,
+    });
   });
 
   it('disposes the engine handle on unmount', async () => {

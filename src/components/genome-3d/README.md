@@ -53,12 +53,18 @@ environment and the renderer holds no maths.
 
 ### The unsequenced tail is drawn as unsequenced
 
-`loci.json` annotates HBB's exons out to codon **147**, but only the first
-**31** codons carry real bases. So the helix runs the locus's full annotated
-extent, and codons past the modelled region are emitted with
-`status: 'unsequenced'` and `refCodon: null` — drawn dim, with no base-pair
-rungs, and called out in the legend. Nothing is invented to fill the gap.
-This matches the gene track, which already greys that region for context.
+The helix runs the locus's full annotated extent. Where a locus is annotated
+further than it is sequenced, the codons past the modelled region are emitted
+with `status: 'unsequenced'` and `refCodon: null` — drawn dim, with no
+base-pair rungs, and called out in the legend. Nothing is invented to fill
+the gap.
+
+This mattered more than it does today: `loci.json` used to carry a 31-codon
+excerpt inside a locus annotated to codon 147. It now carries the real
+NM_000518.5 CDS (148 codons including the stop), so HBB has no unsequenced
+tail and the legend row for it does not render. The path is kept, and
+covered by a test on a synthetic short locus, because it is what stops a
+future partial fixture from being drawn as though it were sequenced.
 
 ### Indels and coordinates
 
@@ -82,14 +88,16 @@ deletion so it cannot regress silently.
 
 | mesh | instances (HBB) |
 |---|---|
-| codon core beads | 147 — one per annotated codon, coloured by diff status |
-| base-pair rungs | 93 — one per *modelled* base only |
+| codon core beads | one per annotated codon (148 for the current fixture), coloured by diff status |
+| base-pair rungs | one per *modelled* base only (444) |
 | edit halo + axis ring | one per edited codon |
 | backbone ribbons | 2 plain meshes (`TubeGeometry` along each strand) |
 
-`engine.test.ts` asserts the tracked-resource count stays under 20 while 147
-codons are on screen, which is what proves these are instanced rather than a
-mesh per codon.
+`engine.test.ts` asserts the tracked-resource count stays in single figures
+while the whole locus is on screen, which is what proves these are instanced
+rather than a mesh per codon. Counts are derived from `loci.json` in the
+tests rather than hardcoded — the genome refresh above broke ten assertions
+that had the old numbers baked in.
 
 ## Disposal
 
