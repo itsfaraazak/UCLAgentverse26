@@ -52,6 +52,58 @@ jobs:
       - name: Build (includes typecheck)
         run: pnpm build
 
+  visual:
+    name: headless render harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # The mock adapter needs no GPU and no Dawn binary, so this is stable on a
+      # standard runner. Be clear about what it proves: vgpu/mock implements
+      # draw() as a no-op, so its frames are all zeros. This gates the encode and
+      # readback pipeline, NOT lighting or geometry. It is a smoke test.
+      - name: Visual harness (mock adapter — pipeline only, not pixels)
+        run: pnpm test:visual
+
+      # Real shaded pixels need vgpu's portable CPU software renderer, which is a
+      # separate install. It is allowed to fail: if it works we get genuine
+      # regression coverage in CI, and if it does not the PR is unaffected. Do not
+      # promote this to a required check until it has proven stable.
+      - name: Install software renderer (best effort)
+        id: swrender
+        continue-on-error: true
+        run: npx vgpu install-software-renderer
+
+      - name: Visual harness (software renderer — real pixels)
+        if: steps.swrender.outcome == 'success'
+        continue-on-error: true
+        run: VGPU_VISUAL_ADAPTER=software pnpm test:visual
+
+      - name: Upload render diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-output
+          path: tests/visual/output/
+          if-no-files-found: ignore
+          retention-days: 7
+
   safety-boundary:
     name: safety boundary unchanged
     runs-on: ubuntu-latest
