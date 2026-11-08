@@ -561,8 +561,8 @@ describe('property: robustness of the documented uppercase 5′→3′ contract'
   });
 
   it('rejects sequences that are not ACGT (SPEC §4.6 #13)', () => {
-    // Silent halt-at-unknown-codon dropped the trailing CCC of ATGNNNCCC.
-    // The decided policy is to throw, naming the character and offset.
+    // Halting silently at an unknown codon would drop the trailing CCC of
+    // ATGNNNCCC. The policy is to throw, naming the character and offset.
     expect(() => translate('ATGNNNCCC')).toThrow(InvalidBaseError);
     expect(() => diffSequences(seq('ATGNNN'), seq('ATGCCC'))).toThrow(InvalidBaseError);
     try {
@@ -578,10 +578,9 @@ describe('property: robustness of the documented uppercase 5′→3′ contract'
   });
 
   it('rejects a trailing partial codon in the diff (SPEC §4.6 #14)', () => {
-    // Rewritten from the skipped form, which asserted that reconstruct() should
-    // keep the leftover 1–2 nt. §4.6 decided the opposite: a non-multiple-of-3
-    // input is malformed. Unequal *codon counts* remain supported (indel tests
-    // above); it is unequal *remainders* that are refused.
+    // §4.6: a non-multiple-of-3 input is malformed rather than something to
+    // carry a leftover 1–2 nt through. Unequal *codon counts* remain supported
+    // (indel tests above); it is unequal *remainders* that are refused.
     expect(() => diffSequences(seq('ATGAA'), seq('ATGAA'))).toThrow(PartialCodonError);
     expect(() => diffSequences(seq('ATGAA'), seq('ATGAA'))).toThrow(/multiple of 3/);
     const indel = diffSequences(seq('ATGAAA'), seq('ATGAAACCC'));
@@ -589,9 +588,8 @@ describe('property: robustness of the documented uppercase 5′→3′ contract'
   });
 
   it('rejects a non-empty refCodon on insertion (SPEC §4.6 #15)', () => {
-    // Rewritten from the skipped form, which expected `/refCodon mismatch/`
-    // (i.e. a check against the host sequence). §4.6 decided insertions are
-    // *unvalidated* against the sequence, and a non-empty refCodon must throw
+    // §4.6: insertions are *unvalidated* against the sequence, so this is not
+    // a `refCodon mismatch` against the host. A non-empty refCodon must throw
     // so no caller believes a check happened that did not.
     try {
       applyVariant(

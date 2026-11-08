@@ -295,11 +295,11 @@ describe('mergeBase and three-way merge', () => {
     expect(repo.head()).toBe(oid);
   });
 
-  it('a dominated merge-base no longer produces a spurious both-sides conflict (SPEC §4.6 #17)', () => {
+  it('a dominated merge-base does not produce a spurious both-sides conflict (SPEC §4.6 #17)', () => {
     // W -- M -- A (HBB: AAA → CCC → GGG)
     //  \     \- B  parents [W, M], tree still CCC
-    // The old BFS-from-b returned W when walking B first (W is B's first
-    // parent). Three-way vs W saw CCC vs GGG as both changed from AAA →
+    // A BFS-from-b walk returns W, B's first parent, but W is dominated by M:
+    // three-way against W reads CCC vs GGG as both changed from AAA, i.e. a
     // conflict. The BCA is M, so B matches the base and A's edit is one-sided.
     const repo = new Repo();
     const w = repo.commit({

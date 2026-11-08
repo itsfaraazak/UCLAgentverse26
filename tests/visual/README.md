@@ -46,6 +46,6 @@ Those files are gitignored.
 
 ## CI
 
-GitHub `ubuntu-latest` has no GPU. The default mock path is what `pnpm test` / `pnpm test:visual` run there. For shaded snapshots in CI, install the software renderer in the image and set `VGPU_VISUAL_ADAPTER=software`. This repo's workflow was not modified.
+GitHub `ubuntu-latest` has no GPU. The default mock path is what `pnpm test` / `pnpm test:visual` run there. For shaded snapshots in CI, install the software renderer in the image and set `VGPU_VISUAL_ADAPTER=software`.
 
 Pixel-match defaults: `threshold` 0.1 (pixelmatch), `maxMismatchedPixels` 0. On darwin/arm64 Metal the example scene was byte-identical across processes, so the threshold is unused unless a future GPU introduces variance.
