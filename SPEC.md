@@ -221,6 +221,30 @@ Note on #2: this is a real limitation, not a shortcut. Reporting a single index 
 honest about the fact that one row cannot name a position in two diverged coordinate systems at
 once. Do not "fix" it by silently reusing the row number as a CDS coordinate.
 
+### 4.6 Ratified decisions — round two
+
+Seeded property testing escalated five genuine ambiguities rather than resolving them by
+invention. These are the decisions. All five require an implementation change.
+
+| # | Question | Decision |
+|---|---|---|
+| 13 | Sequences containing non-ACGT characters (`N`, RNA `U`, junk) | **Reject with a clear error.** Current behaviour uppercases and then silently *halts* translation at the first unknown codon, so `ATGNNNCCC` yields `"M"` and drops the rest. Silent truncation is the worst option for a tool whose pitch is auditability. Validate at the boundary and throw naming the offending character and offset. Lowercase input stays accepted and normalised — that is meaning-preserving. |
+| 14 | A trailing 1–2 nt partial codon in `diffSequences` | **Reject with a clear error.** This model diffs whole codons, and an indel in it is a whole number of codons. A non-multiple-of-3 input is malformed, not an edge case to paper over. Unequal *codon counts* remain fully supported (that is §4.1's indel requirement) — it is unequal *remainders* that are refused. |
+| 15 | Is `refCodon` validated for an insertion? | **It is ignored, and that must be explicit.** Substitutions and deletions verify `refCodon` against the sequence; an insertion has nothing to verify. Throw if a caller passes a non-empty `refCodon` with `kind: 'insertion'`, so nobody believes a check happened that did not. |
+| 16 | `merge(a, a)` | **No-op.** Return the existing oid; do not write a merge commit with `parents: [a, a]`. This matches Git and keeps history honest. §4.5 #4's metadata rules apply only to merges that actually combine two distinct commits. |
+| 17 | Is `mergeBase` a *best* common ancestor, and is it symmetric? | **It must be both.** The current BFS-from-`b`-return-first-hit returns the common ancestor nearest `b`, which is not necessarily non-dominated, and gives `mergeBase(a,b) ≠ mergeBase(b,a)`. Compute the common-ancestor set, discard any that is an ancestor of another common ancestor, and pick deterministically (lowest oid) among what remains. |
+
+**Why #17 is not cosmetic.** A dominated — too old — base makes the three-way merge see a gene
+as changed on *both* sides when only one side touched it, producing a **spurious conflict**. It
+also inflates the commit set `lib/merge-gate` walks when deciding which checks must be green.
+Both failures lean safe rather than permissive, which is why nothing broke in testing, but both
+are wrong.
+
+**Known limitation to keep, and to state in the UI rather than hide.** Criss-cross histories can
+have several equally-good common ancestors. Git resolves that with recursive merge; this
+prototype does not. Picking the lowest oid makes the choice deterministic and symmetric, not
+correct in the full sense. Document it; do not pretend it is resolved.
+
 ## 5. UI requirements (all three variants)
 
 - **macOS app feel in the browser.** No Electron. Traffic-light chrome, translucent sidebar,
