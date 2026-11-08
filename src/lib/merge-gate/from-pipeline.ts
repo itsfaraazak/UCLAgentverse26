@@ -18,10 +18,15 @@ function latestOfKind(
 function reasonsFromPipeline(result: PipelineResult): readonly string[] {
   const reasons: string[] = [];
   const screenDelta = latestOfKind(result, 'screen');
+  // Only when the screen itself blocked or escalated. A run can now be
+  // escalated by a downstream agent while the screen verdict is `allow`, and
+  // prepending the screen's reassuring allow-reason would make a held check
+  // read as approved.
   if (
     screenDelta !== undefined &&
     isScreenPayload(screenDelta.payload) &&
-    (result.blocked || result.escalated)
+    (result.blocked || result.escalated) &&
+    screenDelta.payload.verdict !== 'allow'
   ) {
     reasons.push(screenDelta.payload.reason);
   }
