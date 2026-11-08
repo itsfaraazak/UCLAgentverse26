@@ -79,7 +79,24 @@ pnpm lint
   re-derive every verdict by hand. It over-blocks on innocent phrasing and can be evaded by
   paraphrase. In any real setting it belongs *in front of* a human biosafety officer, never in
   place of one.
-- Fixtures in `src/data/loci.json` are labelled `public-reference` or
+- The ACMG classifier (`src/lib/acmg`) implements **8 of the ~28** ACMG/AMP 2015 criteria,
+  using the Tavtigian et al. 2018 point values (*Genet Med* 20:1054-1060). PS1, BS1 and PP1 are
+  approximated from a single input field each, not the orthogonal evidence lines the official
+  codes require. Omitting the case-control and functional-study criteria makes it deliberately
+  **conservative**: the *HBB* rs334 example scores *Likely Pathogenic* where ClinVar reports
+  *Pathogenic*. It is a demonstration of a checkable rule engine, not a certified clinical tool,
+  and the full caveat ships as `ACMG_SCOPE_LIMITATION` on every classification it emits.
+- Only four of the five bands are reachable from the scoped subset: the lowest total any input
+  can produce is −5, so *Likely Benign* is unreachable by points and *Benign* is reached only by
+  the BA1 stand-alone rule.
+- A variant's `priorClassification` **simulates** the call already on record. It is not a
+  ClinVar query, and a disagreement with it is not a real inter-lab discordance.
+- The therapy table (`src/data/therapy-table.json`) is a hand-curated illustrative lookup of
+  publicly documented, regulator-approved therapies — not a live clinical database and not a
+  substitute for a clinician or genetic counselor. It states what is approved; it does not
+  endorse any edit this repository models.
+- Fixtures in `src/data/loci.json`, `src/data/acmg-variants.json` and
+  `src/data/therapy-table.json` are labelled `public-reference` or
   `synthetic-illustrative`. No real patient data. No construct designs, guides, primers,
   vectors or protocols appear anywhere in this repository, by policy.
 - This is a hackathon prototype. It is not a clinical tool and not a biosafety control.
