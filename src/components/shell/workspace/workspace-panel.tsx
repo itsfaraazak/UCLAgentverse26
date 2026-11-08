@@ -4,12 +4,11 @@
  * The workspace: the tabbed right-hand column where every other surface
  * mounts.
  *
- * This file is the integration seam for the whole product. Three tabs render
- * components this thread owns (overview, diff, gene track, merge); two mount
- * components other threads own and that exist (`components/protein`,
- * `components/cell3d`); two declare mount points for components that do not
- * exist in this checkout yet (`components/genome-3d`,
- * `components/genome-upload`) and render a `MountSlot` stating the contract.
+ * This file is the integration seam for the whole product. Four tabs render
+ * components this thread owns (overview, diff, gene track, merge); the rest
+ * mount components other threads own — `components/protein`,
+ * `components/cell3d`, `components/genome-3d` and `components/genome-upload`
+ * — through a thin panel each that supplies the branch's real data.
  *
  * Tabs are a hand-rolled ARIA tablist rather than the shadcn `tabs`
  * primitive, because the panels are expensive (a WebGL renderer, a structure
@@ -17,6 +16,7 @@
  */
 
 import { useEffect, useState, useTransition } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Activity,
   Atom,
@@ -42,8 +42,28 @@ import { GeneTrack } from './gene-track';
 import { MergeView } from './merge-view';
 import { CellPanel } from './cell-panel';
 import { ProteinPanel } from './protein-panel';
-import { MountSlot } from './mount-slot';
+import { GenomePanel } from './genome-panel';
 import { StatusPill, toneForRun } from '../status';
+
+/**
+ * Lazy, and client-only. `GenomeUpload` screens in the browser, which bundles
+ * `lib/safety` — and with it a `node:crypto` polyfill for the request digest —
+ * into the client. Loading it statically put that in the shell's first-paint
+ * chunk for a tab most sessions never open.
+ */
+const UploadPanel = dynamic(
+  () => import('./upload-panel').then((m) => ({ default: m.UploadPanel })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="work__pad">
+        <p className="work__sub" aria-live="polite">
+          Loading the upload form…
+        </p>
+      </div>
+    ),
+  },
+);
 
 export type WorkspaceTab =
   | 'overview'
@@ -176,51 +196,9 @@ export function WorkspacePanel({
 
         {tab === 'cell' ? <CellPanel branch={branch} simulation={simulation} /> : null}
 
-        {/* ── Mount points for surfaces other threads own ───────────────── */}
-        {tab === 'genome3d' ? (
-          <div className="work__pad">
-            <MountSlot
-              title="Genome 3D"
-              path="src/components/genome-3d/"
-              purpose="A three-dimensional view of the locus under edit, sitting alongside the flat gene track."
-              expects={[
-                'locus: LocusView',
-                'edit: EditView | null',
-                'sequence: SequenceView  // the branch genotype',
-                'reference: SequenceView',
-              ]}
-            />
-          </div>
-        ) : null}
+        {tab === 'genome3d' ? <GenomePanel locus={locus} branch={branch} /> : null}
 
-        {tab === 'upload' ? (
-          <div className="work__pad">
-            <MountSlot
-              title="Genome upload"
-              path="src/components/genome-upload/"
-              purpose="Bring a user-supplied sequence in as a new branch, so the diff and the pipeline can run against something other than the bundled fixture."
-              expects={[
-                'reference: SequenceView',
-                'locus: LocusView',
-                'onAccepted: (sequence: { bases: string; label: string }) => void',
-              ]}
-            />
-            <p className="limitation">
-              <TriangleAlert
-                className="limitation__icon"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              <span>
-                When this lands, an uploaded sequence must still be screened by the gate
-                before any downstream agent runs, and must be validated at the{' '}
-                <span className="seq normal-case">Sequence</span> boundary — non-ACGT
-                input is rejected with an error rather than silently truncated (SPEC
-                §4.6 #13).
-              </span>
-            </p>
-          </div>
-        ) : null}
+        {tab === 'upload' ? <UploadPanel locus={locus} /> : null}
 
         {tab === 'merge' ? (
           <MergeView

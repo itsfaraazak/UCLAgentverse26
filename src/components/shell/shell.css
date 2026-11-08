@@ -1076,35 +1076,6 @@
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
 }
 
-/* ---------- Mount slot for components other threads own ---------- */
-
-.slot {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 1.25rem;
-  border: var(--rule) dashed color-mix(in oklab, var(--border) 140%, transparent);
-  border-radius: var(--radius-lg);
-  background: color-mix(in oklab, var(--foreground) 2.5%, transparent);
-  color: var(--muted-foreground);
-  font-size: 0.8125rem;
-  line-height: 1.55;
-}
-
-.slot__head {
-  display: flex;
-  align-items: center;
-  gap: 0.4375rem;
-  color: var(--foreground);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.slot__path {
-  font-size: 0.75rem;
-}
-
 /* ---------- Narrow window: one pane at a time ---------- */
 
 .switcher {
