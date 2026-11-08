@@ -39,6 +39,28 @@ async function run(text: string) {
   return { snap, events };
 }
 
+describe('workbench worst case: no model, no network', () => {
+  const offline = new WorkbenchService({
+    store: new WorkbenchStore({ file: null }),
+    evidence: () => createEvidenceService({ offline: true, cacheDir: null }),
+    gemini: () => null,
+    ai: () => ({ available: false, model: 'gemini-4-argon', reason: 'offline test' }),
+  });
+
+  it.each(['Assess rs334', 'Interpret BRCA1 c.5266dupC', 'Is CFTR p.Phe508del pathogenic?', 'TP53 p.Arg175His'])(
+    'completes "%s" from the shipped cache',
+    async (text) => {
+      await offline.preparePrompt({ branch: 'main', text, by })(() => {});
+      const snap = offline.snapshot();
+      const branch = snap.branches.at(-1);
+      const kinds = snap.deltas.filter((d) => d.branch === branch?.name).map((d) => d.kind);
+      expect(kinds).toEqual(expect.arrayContaining(['gate', 'evidence', 'interpretation', 'reference', 'message']));
+      const message = snap.deltas.filter((d) => d.kind === 'message').at(-1);
+      expect(message?.actor).toMatchObject({ name: 'Deterministic pipeline', model: null });
+    },
+  );
+});
+
 describe.skipIf(!process.env.GEMINI_API_KEY)('workbench live', () => {
   it('interprets BRCA1 c.5266dupC with gemini-4-argon', async () => {
     const { snap } = await run('Interpret BRCA1 c.5266dupC for a patient with family history of breast cancer');

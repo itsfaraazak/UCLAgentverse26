@@ -42,6 +42,33 @@ describe('HTTP cache', () => {
     expect(evidence.population.maxAf).toBeCloseTo(0.0127, 4);
   });
 
+  it('retries once on a 5xx but not on a 4xx', async () => {
+    const statuses = [503, 200];
+    let calls = 0;
+    const flaky = createHttpClient({
+      fetchImpl: () => {
+        const status = statuses[calls++] ?? 200;
+        return Promise.resolve(new Response(JSON.stringify({ ok: status }), { status }));
+      },
+      cacheDir: null,
+      snapshotDir: null,
+    });
+    expect((await flaky.getJson('https://example.test/flaky', OPTS)).body).toEqual({ ok: 200 });
+    expect(calls).toBe(2);
+
+    let badCalls = 0;
+    const bad = createHttpClient({
+      fetchImpl: () => {
+        badCalls += 1;
+        return Promise.resolve(new Response('{}', { status: 400 }));
+      },
+      cacheDir: null,
+      snapshotDir: null,
+    });
+    await expect(bad.getJson('https://example.test/bad', OPTS)).rejects.toThrow('Test answered HTTP 400');
+    expect(badCalls).toBe(1);
+  });
+
   it('serves a live answer uncached, then the local copy when the network later fails', async () => {
     const cacheDir = await tmp();
     const url = 'https://example.test/a?b=1';

@@ -37,6 +37,19 @@ interface CacheEntry {
   readonly body: unknown;
 }
 
+/** Only server errors (5xx) are retried; timeouts already cost the full budget once. */
+const MAX_ATTEMPTS = 2;
+const RETRY_DELAY_MS = 800;
+
+class UpstreamStatusError extends EvidenceSourceError {
+  constructor(
+    sourceName: string,
+    readonly status: number,
+  ) {
+    super(sourceName, `${sourceName} answered HTTP ${String(status)}`);
+  }
+}
+
 /** Cache files are keyed by the exact URL, so callers must build URLs with a stable parameter order. */
 export function cacheKey(url: string): string {
   return createHash('sha256').update(url).digest('hex');
@@ -71,7 +84,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
         headers: { Accept: 'application/json' },
       });
       if (res.status !== 404 && !res.ok) {
-        throw new EvidenceSourceError(sourceName, `${sourceName} answered HTTP ${String(res.status)} for ${url}`);
+        throw new UpstreamStatusError(sourceName, res.status);
       }
       const body: unknown = res.status === 404 ? null : await res.json();
       const entry: CacheEntry = { url, fetchedAt: now().toISOString(), status: res.status, body };
@@ -92,13 +105,15 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       if (hit) return hit;
 
       let failure: unknown = null;
-      if (!options.offline) {
+      for (let attempt = 0; !options.offline && attempt < MAX_ATTEMPTS; attempt += 1) {
         try {
           const result = await live(url, sourceName, timeoutMs);
           memo.set(url, result);
           return result;
         } catch (err) {
           failure = err;
+          if (!(err instanceof UpstreamStatusError && err.status >= 500)) break;
+          if (attempt + 1 < MAX_ATTEMPTS) await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         }
       }
 
