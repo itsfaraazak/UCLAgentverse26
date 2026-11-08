@@ -70,7 +70,7 @@ export function TripleDiff({ diff }: TripleDiffProps) {
 
       <div className="overflow-hidden rounded-xl border">
         <div className="max-h-[22rem] overflow-auto">
-          <table className="w-full border-collapse text-left font-mono text-[11.5px]">
+          <table className="w-full border-collapse text-left seq text-[11.5px]">
             <caption className="sr-only">
               Codon-by-codon diff of {diff.refLabel} against {diff.altLabel}, in three
               synchronised registers: DNA bases, codon index, and amino acid.

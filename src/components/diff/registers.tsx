@@ -39,7 +39,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
         </div>
 
         <div className="overflow-x-auto">
-          <table className="tnum border-collapse font-mono text-xs">
+          <table className="tnum border-collapse seq text-xs">
             <caption className="sr-only">
               {`Codon-by-codon diff between ${refLabel} and ${altLabel}, in three registers: DNA bases, codons and amino acids.`}
             </caption>

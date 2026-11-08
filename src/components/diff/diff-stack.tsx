@@ -177,7 +177,7 @@ export function DiffStack({
         <span className="pl-2">altered · DNA / codon / AA</span>
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto font-mono text-[12.5px]">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto seq text-[12.5px]">
         <table className="w-full border-collapse">
           <caption className="sr-only">
             Row-per-codon diff of {refLabel} against {altLabel}, in three synchronised registers:

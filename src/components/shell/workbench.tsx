@@ -112,12 +112,12 @@ export function Workbench({ workspace }: WorkbenchProps) {
   }, []);
 
   const runPipeline = useCallback(
-    (requestText?: string) => {
+    () => {
       setBusy(true);
       setError(null);
       void (async () => {
         try {
-          const result = await runPipelineAction(branch.name, requestText);
+          const result = await runPipelineAction(branch.name);
           setRuns((prev: Readonly<Record<string, RunView>>) => ({
             ...prev,
             [branch.name]: result.run,
@@ -548,10 +548,7 @@ export function Workbench({ workspace }: WorkbenchProps) {
                 )}
 
                 {panelTab === 'redteam' && (
-                  <RedTeamConsole
-                    onRunPipeline={(requestText: string) => runPipeline(requestText)}
-                    pipelineBusy={busy}
-                  />
+                  <RedTeamConsole />
                 )}
 
                 {panelTab === 'trail' && <DeltaTrail run={run} />}

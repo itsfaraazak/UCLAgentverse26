@@ -119,7 +119,7 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
                   <span className="tnum font-mono opacity-70">{frame.shortOid}</span>
                 </span>
 
-                <span className="tnum flex items-center gap-2 rounded-md bg-background/70 px-2 py-1.5 font-mono text-xs">
+                <span className="tnum flex items-center gap-2 rounded-md bg-background/70 px-2 py-1.5 seq text-xs">
                   {edited === null || change === null ? (
                     <span className="text-muted-foreground">
                       {frame.role === 'reference'

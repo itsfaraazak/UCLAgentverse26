@@ -221,7 +221,7 @@ export function GeneTrack({ locus, edit, changedCodons }: GeneTrackProps) {
                     x={x + codonWidth / 2}
                     y={AXIS_Y - 9}
                     textAnchor="middle"
-                    className="fill-foreground font-mono text-[8.5px]"
+                    className="fill-foreground seq text-[8.5px]"
                   >
                     {codonBases}
                   </text>

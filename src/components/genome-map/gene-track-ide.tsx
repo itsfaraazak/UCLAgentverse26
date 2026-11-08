@@ -206,8 +206,8 @@ export function GeneTrack({
               x={left + w / 2}
               y={axisY + exonH + 22}
               textAnchor="middle"
-              className="text-[12px] font-semibold"
-              style={{ fill: colour, fontFamily: 'var(--font-mono)' }}
+              className="seq text-[12px] font-semibold"
+              style={{ fill: colour }}
             >
               {tick.altAa ?? '–'}
             </text>

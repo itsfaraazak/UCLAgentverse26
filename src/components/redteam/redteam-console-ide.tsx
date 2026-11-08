@@ -19,11 +19,9 @@
  */
 
 import {
-  ArrowRight,
   Ban,
   Eraser,
   Loader2,
-  PlayCircle,
   ShieldAlert,
   ShieldCheck,
   Swords,
@@ -34,15 +32,13 @@ import { useId, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { VERDICT_HEADLINE, VERDICT_STYLE } from '@/components/shell/status-ide';
+import { CHECK_STATUS_STYLE, VERDICT_HEADLINE, VERDICT_STYLE } from '@/components/shell/status-ide';
 import { screenRequestAction } from '@/app/ide/actions';
 import type { RunView, ScreenView } from '@/lib/run-view';
 
-export interface RedTeamConsoleProps {
-  /** Push the last screened request through all seven checks. */
-  readonly onRunPipeline: (requestText: string) => void;
-  readonly pipelineBusy: boolean;
-}
+// The console takes no props: it screens text, shows what the pipeline did
+// with it, and cannot reach the branch's gating check.
+export type RedTeamConsoleProps = Record<string, never>;
 
 interface TrailEntry extends ScreenView {
   readonly at: number;
@@ -77,11 +73,10 @@ const PROBES: readonly { readonly label: string; readonly text: string }[] = [
   },
 ];
 
-export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsoleProps) {
+export function RedTeamConsole() {
   const [text, setText] = useState('');
   const [run, setRun] = useState<RunView | null>(null);
   const [trail, setTrail] = useState<readonly TrailEntry[]>([]);
-  const [lastReplayable, setLastReplayable] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const inputId = useId();
 
@@ -95,9 +90,7 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
       // kept for replay, and the input is cleared.
       if (screen.redacted) {
         setText('');
-        setLastReplayable(null);
       } else {
-        setLastReplayable(request);
       }
       setRun(view);
       setTrail((prev) =>
@@ -151,7 +144,6 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
                 setText('');
                 setTrail([]);
                 setRun(null);
-                setLastReplayable(null);
               }}
               disabled={pending}
             >
@@ -183,15 +175,7 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
 
       {/* The verdict, rendered as the gate's action. */}
       {latest !== undefined && run !== null && (
-        <VerdictCard
-          outcome={latest}
-          run={run}
-          canRunPipeline={lastReplayable !== null && latest.verdict !== 'block'}
-          pipelineBusy={pipelineBusy}
-          onRunPipeline={() => {
-            if (lastReplayable !== null) onRunPipeline(lastReplayable);
-          }}
-        />
+        <VerdictCard outcome={latest} run={run} />
       )}
 
       {/* The trail. Categories and digests only. */}
@@ -237,15 +221,9 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
 function VerdictCard({
   outcome,
   run,
-  canRunPipeline,
-  pipelineBusy,
-  onRunPipeline,
 }: {
   readonly outcome: ScreenView;
   readonly run: RunView;
-  readonly canRunPipeline: boolean;
-  readonly pipelineBusy: boolean;
-  readonly onRunPipeline: () => void;
 }) {
   const style = VERDICT_STYLE[outcome.verdict];
   const Icon = outcome.verdict === 'block' ? Ban : outcome.verdict === 'escalate' ? ShieldAlert : ShieldCheck;
@@ -317,19 +295,34 @@ function VerdictCard({
         </p>
       )}
 
-      {canRunPipeline && (
-        <Button
-          size="xs"
-          variant="outline"
-          className="mt-2"
-          onClick={onRunPipeline}
-          disabled={pipelineBusy}
-        >
-          {pipelineBusy ? <Loader2 className="animate-spin" aria-hidden /> : <PlayCircle aria-hidden />}
-          Run this request through all seven checks
-          <ArrowRight aria-hidden />
-        </Button>
-      )}
+      {/*
+        The seven checks for this request, resolved here in the console.
+        This run deliberately gates nothing: a check gates a commit and must be
+        derived from that commit's content, so a console run is read-only
+        evidence of what the pipeline did with this text (SPEC §9.4, §9.5).
+      */}
+      <ol className="mt-2 flex flex-col gap-0.5" aria-label="Pipeline checks for this request">
+        {run.steps.map((step) => {
+          const style = CHECK_STATUS_STYLE[step.status];
+          const Icon = style.icon;
+          return (
+            <li key={step.step} className="flex items-baseline gap-1.5 text-[10.5px]">
+              <Icon className={`mt-[2px] size-3 shrink-0 ${style.fg}`} aria-hidden />
+              <span className="w-4 shrink-0 text-right font-mono text-muted-foreground">
+                {step.step}
+              </span>
+              <span className="shrink-0 font-medium">{step.agent}</span>
+              <span className={`shrink-0 text-[9.5px] uppercase ${style.fg}`}>{style.label}</span>
+              <span className="truncate text-muted-foreground">{step.summary}</span>
+            </li>
+          );
+        })}
+      </ol>
+
+      <p className="mt-1.5 text-[10px] leading-snug text-muted-foreground">
+        A console run is evidence only — it cannot satisfy a branch&rsquo;s merge check. That
+        check is computed from the branch&rsquo;s own proposed edit.
+      </p>
     </div>
   );
 }

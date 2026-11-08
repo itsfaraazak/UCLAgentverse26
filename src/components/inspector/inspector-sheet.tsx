@@ -287,7 +287,7 @@ function GenotypeDetail({
         <dt className="text-muted-foreground">Tendency</dt>
         <dd className="font-mono tnum">{commit.genotype.polymerizationTendency.toFixed(2)}</dd>
         <dt className="text-muted-foreground">Protein</dt>
-        <dd className="font-mono break-all">
+        <dd className="seq break-all">
           {protein.split('').map((aa, index) => (
             <span
               key={index}
