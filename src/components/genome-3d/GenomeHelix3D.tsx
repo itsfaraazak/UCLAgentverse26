@@ -19,6 +19,7 @@ import {
   RotateCcw,
   RotateCw,
   Scan,
+  TriangleAlert,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
@@ -247,11 +248,11 @@ export function GenomeHelix3D({
     <section
       aria-labelledby={ids.title}
       data-slot="genome-helix-3d"
-      className={cn('flex w-full min-w-0 flex-col text-card-foreground', className)}
+      className={cn('@container flex w-full min-w-0 flex-col text-card-foreground', className)}
     >
       <header className="flex min-w-0 items-start justify-between gap-3 pb-3">
         <div className="min-w-0">
-          <p className="flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          <p className="flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.04em] text-muted-foreground">
             <Dna aria-hidden="true" className="size-3" />
             Locus · 3D
           </p>
@@ -318,93 +319,95 @@ export function GenomeHelix3D({
       <div
         role="toolbar"
         aria-label="Genome view controls"
-        className="mt-3 flex flex-wrap items-center gap-1"
+        className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1"
       >
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          disabled={!ready}
-          aria-label="Rotate left"
-          title="Rotate left (←)"
-          onClick={() => handleRef.current?.orbit(-ORBIT_STEP, 0)}
-        >
-          <RotateCcw aria-hidden="true" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          disabled={!ready}
-          aria-label="Rotate right"
-          title="Rotate right (→)"
-          onClick={() => handleRef.current?.orbit(ORBIT_STEP, 0)}
-        >
-          <RotateCw aria-hidden="true" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          disabled={!ready}
-          aria-label="Zoom in"
-          title="Zoom in (+)"
-          onClick={() => handleRef.current?.zoom(ZOOM_STEP)}
-        >
-          <ZoomIn aria-hidden="true" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          disabled={!ready}
-          aria-label="Zoom out"
-          title="Zoom out (−)"
-          onClick={() => handleRef.current?.zoom(1 / ZOOM_STEP)}
-        >
-          <ZoomOut aria-hidden="true" />
-        </Button>
-
-        <span aria-hidden="true" className="mx-1 h-4 w-px bg-border" />
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={!ready || !hasEdit}
-          title="Jump to the edited codon (F)"
-          onClick={() => handleRef.current?.focusEdit()}
-          className="h-7 gap-1.5 px-2 text-xs"
-        >
-          <Crosshair aria-hidden="true" className="size-3.5" />
-          Edit site
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={!ready}
-          title="Frame the whole locus (0)"
-          onClick={() => handleRef.current?.resetView()}
-          className="h-7 gap-1.5 px-2 text-xs"
-        >
-          <Scan aria-hidden="true" className="size-3.5" />
-          Fit
-        </Button>
-        {!reducedMotion && (
+        <div className="flex items-center gap-0.5">
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
             disabled={!ready}
-            aria-label={spinning ? 'Stop rotating' : 'Rotate automatically'}
-            aria-pressed={spinning}
-            title={spinning ? 'Stop rotating' : 'Rotate automatically'}
-            onClick={() => setSpinRequested((on) => !on)}
+            aria-label="Rotate left"
+            title="Rotate left (←)"
+            onClick={() => handleRef.current?.orbit(-ORBIT_STEP, 0)}
           >
-            {spinning ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+            <RotateCcw aria-hidden="true" />
           </Button>
-        )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={!ready}
+            aria-label="Rotate right"
+            title="Rotate right (→)"
+            onClick={() => handleRef.current?.orbit(ORBIT_STEP, 0)}
+          >
+            <RotateCw aria-hidden="true" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={!ready}
+            aria-label="Zoom in"
+            title="Zoom in (+)"
+            onClick={() => handleRef.current?.zoom(ZOOM_STEP)}
+          >
+            <ZoomIn aria-hidden="true" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={!ready}
+            aria-label="Zoom out"
+            title="Zoom out (−)"
+            onClick={() => handleRef.current?.zoom(1 / ZOOM_STEP)}
+          >
+            <ZoomOut aria-hidden="true" />
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-0.5">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={!ready || !hasEdit}
+            title="Jump to the edited codon (F)"
+            onClick={() => handleRef.current?.focusEdit()}
+            className="h-7 gap-1.5 px-2 text-xs"
+          >
+            <Crosshair aria-hidden="true" className="size-3.5" />
+            Edit site
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={!ready}
+            title="Frame the whole locus (0)"
+            onClick={() => handleRef.current?.resetView()}
+            className="h-7 gap-1.5 px-2 text-xs"
+          >
+            <Scan aria-hidden="true" className="size-3.5" />
+            Fit
+          </Button>
+          {!reducedMotion && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              disabled={!ready}
+              aria-label={spinning ? 'Stop rotating' : 'Rotate automatically'}
+              aria-pressed={spinning}
+              title={spinning ? 'Stop rotating' : 'Rotate automatically'}
+              onClick={() => setSpinRequested((on) => !on)}
+            >
+              {spinning ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+            </Button>
+          )}
+        </div>
       </div>
 
       {model !== null && (
@@ -439,7 +442,7 @@ function Legend({
   return (
     <ul
       aria-label="Legend"
-      className="mt-3 grid gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground hairline"
+      className="mt-3 grid gap-1.5 border-t-[0.5px] border-border/85 pt-3 text-xs text-muted-foreground"
     >
       {model.primaryEditedCodon !== null && (
         <li className="flex gap-2">
@@ -481,7 +484,7 @@ function Row({
 }) {
   return (
     <>
-      <dt className="text-[0.6875rem] uppercase tracking-[0.06em] text-muted-foreground">
+      <dt className="mt-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.04em] text-muted-foreground first:mt-0 @sm:mt-0">
         {label}
       </dt>
       <dd className="min-w-0 break-words">{children}</dd>
@@ -506,13 +509,13 @@ function TextAlternative({
   return (
     <div
       id={id}
-      className="mt-3 grid gap-2 border-t border-border pt-3 text-xs leading-relaxed hairline"
+      className="mt-3 grid gap-3 border-t-[0.5px] border-border/85 pt-3 text-xs leading-relaxed"
     >
       <p>
         <span className="font-medium">Codon change: </span>
         {describeEdit(model)}.
       </p>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+      <dl className="grid grid-cols-1 items-baseline @sm:grid-cols-[max-content_minmax(0,1fr)] @sm:gap-x-4 @sm:gap-y-1.5">
         {edited !== undefined && edited.refCodon !== null && edited.altCodon !== null && (
           <Row label={positionWord}>
             <span className="seq">{edited.refCodon}</span> →{' '}
@@ -571,14 +574,21 @@ function TextAlternative({
       {model.coordinatesDiverge && (
         <p
           role="status"
-          className="rounded-md px-2 py-1.5 text-[0.6875rem]"
+          className="flex gap-2 rounded-md px-2.5 py-2 text-[0.6875rem]"
           style={{
-            background: 'color-mix(in oklab, var(--verdict-escalate) 12%, transparent)',
+            background: 'color-mix(in oklab, var(--verdict-escalate) 10%, transparent)',
           }}
         >
-          This diff contains an inserted or deleted codon, so positions after it are
-          alignment rows rather than CDS codon numbers. The two sequences no longer share
-          one coordinate system (SPEC §4.5 #2).
+          <TriangleAlert
+            aria-hidden="true"
+            className="mt-0.5 size-3.5 shrink-0"
+            style={{ color: 'var(--verdict-escalate)' }}
+          />
+          <span>
+            This diff contains an inserted or deleted codon, so positions after it are
+            alignment rows rather than CDS codon numbers. The two sequences no longer share
+            one coordinate system (SPEC §4.5 #2).
+          </span>
         </p>
       )}
 

@@ -298,7 +298,7 @@ export function GenomeUpload({
     >
       <header className="flex min-w-0 items-start justify-between gap-3 pb-3">
         <div className="min-w-0">
-          <p className="flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          <p className="flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.04em] text-muted-foreground">
             <Upload aria-hidden="true" className="size-3" />
             Genome source
           </p>
@@ -322,10 +322,10 @@ export function GenomeUpload({
         {live && (
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={reset}
-            className="h-7 shrink-0 gap-1.5 px-2 text-xs"
+            className="-mr-2 h-7 shrink-0 gap-1.5 px-2 text-xs"
           >
             <RotateCcw aria-hidden="true" className="size-3.5" />
             Reset to demo
@@ -342,8 +342,8 @@ export function GenomeUpload({
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={cn(
-          'rounded-md border border-dashed px-3 py-4 text-center transition-colors hairline',
-          dragging ? 'border-ring' : 'border-border',
+          'flex items-center gap-2 rounded-md border-[0.5px] border-dashed px-3 py-2 transition-colors',
+          dragging ? 'border-ring' : 'border-input',
         )}
         style={
           dragging
@@ -351,8 +351,8 @@ export function GenomeUpload({
             : undefined
         }
       >
-        <FileUp aria-hidden="true" className="mx-auto size-4 text-muted-foreground" />
-        <p className="mt-1.5 text-xs text-muted-foreground">
+        <FileUp aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+        <p className="text-xs text-muted-foreground">
           Drop a FASTA file, or{' '}
           <button
             type="button"
@@ -376,7 +376,7 @@ export function GenomeUpload({
       <div className="mt-3">
         <label
           htmlFor={ids.paste}
-          className="text-[0.6875rem] font-medium uppercase tracking-[0.06em] text-muted-foreground"
+          className="text-[0.6875rem] font-medium uppercase tracking-[0.04em] text-muted-foreground"
         >
           Or paste a coding sequence
         </label>
@@ -389,7 +389,7 @@ export function GenomeUpload({
           autoComplete="off"
           placeholder="ATGGTGCATCTGACTCCTGAGGAG…  or  >HBB  (newline)  ATGGTG…"
           aria-describedby={ids.note}
-          className="seq mt-1.5 w-full resize-y rounded-md border border-border bg-transparent px-2.5 py-2 text-xs leading-relaxed outline-none placeholder:normal-case placeholder:tracking-normal placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring hairline"
+          className="seq mt-1.5 w-full resize-y rounded-md border-[0.5px] border-input bg-transparent px-2.5 py-2 text-xs leading-relaxed outline-none placeholder:normal-case placeholder:tracking-normal placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring"
         />
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Button
@@ -474,7 +474,7 @@ export function GenomeUpload({
         )}
       </div>
 
-      <p className="mt-3 flex gap-2 border-t border-border pt-3 text-[0.6875rem] leading-relaxed text-muted-foreground hairline">
+      <p className="mt-3 flex gap-2 border-t-[0.5px] border-border/85 pt-3 text-[0.6875rem] leading-relaxed text-muted-foreground">
         <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
         <span>
           Session only. An uploaded sequence stays in this tab&rsquo;s memory, is never
@@ -561,11 +561,8 @@ function Notice({
   const { token, label } = TONE[tone];
   return (
     <div
-      className="rounded-md px-2.5 py-2 text-xs leading-relaxed"
-      style={{
-        background: `color-mix(in oklab, ${token} 10%, transparent)`,
-        boxShadow: `inset 0 0 0 0.5px color-mix(in oklab, ${token} 35%, transparent)`,
-      }}
+      className="rounded-md px-3 py-2.5 text-xs leading-relaxed"
+      style={{ background: `color-mix(in oklab, ${token} 10%, transparent)` }}
     >
       <p className="flex items-center gap-1.5 font-medium" style={{ color: token }}>
         {icon}
