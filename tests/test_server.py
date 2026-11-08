@@ -126,7 +126,7 @@ class HTTPTests(unittest.TestCase):
         connection.request("GET", "/")
         response = connection.getresponse()
         self.assertEqual(response.status, 200)
-        self.assertIn(b"EditVerse", response.read())
+        self.assertIn(b"sigmafold", response.read())
         connection.close()
         self.assertEqual(self.request("GET", "/api/state")[0], 200)
         status, state = self.request("PUT", "/api/draft", json.dumps({"text": TEXT, "draft_revision": 0}), headers)
