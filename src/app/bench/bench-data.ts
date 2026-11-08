@@ -38,7 +38,7 @@ import {
   checkRunFromPipeline,
   evaluateMerge,
   introducedCommits,
-  recordSignoff,
+  resolveSignoff,
   type CheckRun,
 } from '@/lib/merge-gate';
 import {
@@ -62,7 +62,19 @@ import type {
 
 const GENE = 'HBB';
 const AUTHOR = 'bench-operator';
-const SIGNOFF_ACTOR = 'bench-operator (recorded in session)';
+/**
+ * A sign-off is only ever as good as the name attached to it, so the name is
+ * required and shape-checked here rather than defaulted. Previously this file
+ * held a constant actor and stamped it whenever the client sent a boolean,
+ * which is auto-approval wearing a human's clothes (SPEC §7.5).
+ */
+const APPROVER_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}'’. -]{1,119}$/u;
+
+function approverOrNull(raw: string | null): string | null {
+  if (raw === null) return null;
+  const name = raw.trim().slice(0, 120);
+  return APPROVER_PATTERN.test(name) ? name : null;
+}
 
 /** Content-addressed oids are shown twelve characters wide in the UI. */
 function short(oid: Oid): string {
@@ -513,7 +525,7 @@ function conflictView(c: MergeConflict) {
 export function attemptMergeFor(
   frameId: string,
   pO2: number,
-  signedOff: boolean,
+  approver: string | null,
 ): MergeAttemptView {
   const locus = locusOrThrow();
   const spec = specOrThrow(frameId);
@@ -558,7 +570,15 @@ export function attemptMergeFor(
     if (result.requiresSignoff) {
       requiresSignoff = true;
       signoffRole = result.signoffRole ?? null;
-      if (signedOff) check = recordSignoff(check, SIGNOFF_ACTOR);
+      // `resolveSignoff` is the single authority: it derives the role from the
+      // policy's own verdict, refuses a run that is not escalated, and refuses
+      // an unnamed actor. The client sends a name and nothing else — it cannot
+      // assert that a sign-off happened (SPEC §7.5).
+      const named = approverOrNull(approver);
+      if (named !== null) {
+        const resolved = resolveSignoff(check, named);
+        if (resolved.ok) check = resolved.check;
+      }
     }
     // The gate looks a check up by `commit.checkRunId` or, failing that, by
     // the commit oid. These commits carry no checkRunId, so key by oid.

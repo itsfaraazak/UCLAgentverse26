@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import {
   BadgeCheck,
@@ -28,6 +30,7 @@ import {
   Signature,
   Target,
 } from 'lucide-react';
+import { useId } from 'react';
 import type { ComponentType } from 'react';
 import { cn } from 'cn';
 import type { CheckRunView, MergeAttemptView, StepStatus } from '@/app/bench/bench-types';
@@ -39,6 +42,9 @@ export interface CheckPanelProps {
   onMerge: () => void;
   merge: MergeAttemptView | null;
   mergePending: boolean;
+  /** The name entered for an escalation sign-off, or '' if none yet. */
+  approver: string;
+  onApproverChange: (value: string) => void;
   signedOff: boolean;
   onSignOff: () => void;
   frameLabel: string;
@@ -88,11 +94,14 @@ export function CheckPanel({
   onMerge,
   merge,
   mergePending,
+  approver,
+  onApproverChange,
   signedOff,
   onSignOff,
   frameLabel,
   branch,
 }: CheckPanelProps) {
+  const signoffId = useId();
   const verdictTone =
     run === null
       ? 'text-muted-foreground'
@@ -312,21 +321,42 @@ export function CheckPanel({
         </div>
 
         {run !== null && run.requiresSignoff ? (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-signal-warn/40 bg-signal-warn/10 p-2">
+          <div className="flex flex-col gap-2 rounded-md border border-signal-warn/40 bg-signal-warn/10 p-2">
             <span className="text-xs">
               Escalated. Named human sign-off required
               {run.signoffRole !== null ? `: ${run.signoffRole}` : ''}.
             </span>
-            <Button
-              type="button"
-              size="xs"
-              variant="outline"
-              onClick={onSignOff}
-              disabled={signedOff}
-            >
-              <Signature className="size-3" aria-hidden="true" />
-              {signedOff ? 'Sign-off recorded' : 'Record sign-off'}
-            </Button>
+            {/*
+              The name is the sign-off. It is sent to the server and the gate
+              re-derives the role from the policy, so nothing recorded here can
+              widen what the policy allows — and an empty name records nothing
+              at all (SPEC §7.5).
+            */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Label htmlFor={signoffId} className="sr-only">
+                Name of the person accepting this escalation
+              </Label>
+              <Input
+                id={signoffId}
+                value={approver}
+                onChange={(event) => onApproverChange(event.currentTarget.value)}
+                placeholder="Name of the accepting reviewer"
+                autoComplete="off"
+                spellCheck={false}
+                disabled={signedOff}
+                className="h-7 flex-1 min-w-[12rem] text-xs"
+              />
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                onClick={onSignOff}
+                disabled={signedOff || approver.trim().length < 2}
+              >
+                <Signature className="size-3" aria-hidden="true" />
+                {signedOff ? 'Sign-off recorded' : 'Record sign-off'}
+              </Button>
+            </div>
           </div>
         ) : null}
 

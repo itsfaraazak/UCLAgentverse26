@@ -35,6 +35,9 @@ export function BenchApp({ data }: { data: BenchData }) {
   const [runs, setRuns] = useState<Record<string, CheckRunView>>({});
   const [merges, setMerges] = useState<Record<string, MergeAttemptView>>({});
   const [signedOff, setSignedOff] = useState<Record<string, boolean>>({});
+  // The name accepting an escalation, per frame. The server validates it and
+  // records nothing when it is empty or malformed.
+  const [approver, setApprover] = useState<Record<string, string>>({});
   const [checksPending, startChecks] = useTransition();
   const [mergePending, startMerge] = useTransition();
 
@@ -89,11 +92,11 @@ export function BenchApp({ data }: { data: BenchData }) {
       const result = await attemptMergeAction(
         frame.id,
         Math.round(pO2),
-        signedOff[frame.id] === true,
+        signedOff[frame.id] === true ? (approver[frame.id] ?? null) : null,
       );
       setMerges((prev) => ({ ...prev, [frame.id]: result }));
     });
-  }, [frame.id, pO2, signedOff]);
+  }, [frame.id, pO2, signedOff, approver]);
 
   const flowRatio = baselineMeanFlow > 0 ? metrics.meanFlow / baselineMeanFlow : 0;
   const run = runs[frame.id] ?? null;
@@ -265,6 +268,10 @@ export function BenchApp({ data }: { data: BenchData }) {
             onMerge={onMerge}
             merge={merges[frame.id] ?? null}
             mergePending={mergePending}
+            approver={approver[frame.id] ?? ''}
+            onApproverChange={(value) =>
+              setApprover((prev) => ({ ...prev, [frame.id]: value }))
+            }
             signedOff={signedOff[frame.id] === true}
             onSignOff={() => setSignedOff((prev) => ({ ...prev, [frame.id]: true }))}
             frameLabel={frame.label}
