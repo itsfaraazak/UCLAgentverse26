@@ -156,19 +156,19 @@ export function DiffStack({
           <span className="text-muted-foreground">ref</span>
           <span className="text-foreground">{refLabel}</span>
         </span>
-        <ArrowRight className="size-3 shrink-0" aria-hidden />
+        <ArrowRight className="size-3.5 shrink-0" aria-hidden />
         <span className="inline-flex items-center gap-1.5 font-mono">
           <span className="text-muted-foreground">alt</span>
           <span className="text-foreground">{altLabel}</span>
         </span>
-        <span className="ml-auto nums font-mono">
+        <span className="ml-auto nums">
           {rows.length} codons · {changed.length} changed · {silent.length} silent
         </span>
       </div>
 
       {/* Column labels, pinned. */}
       <div
-        className="grid shrink-0 items-center gap-0 border-b border-border bg-card/60 px-0 py-1 font-mono text-[10px] tracking-wide text-muted-foreground uppercase"
+        className="grid shrink-0 items-center gap-0 border-b border-border bg-card px-0 py-1 text-[10px] tracking-wide text-muted-foreground uppercase"
         style={{ gridTemplateColumns: '3.25rem 1.5rem 1fr 1fr' }}
       >
         <span className="pr-2 text-right">codon</span>
@@ -177,7 +177,7 @@ export function DiffStack({
         <span className="pl-2">altered · DNA / codon / AA</span>
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto font-mono text-[12.5px]">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto text-[12.5px]">
         <table className="w-full border-collapse">
           <caption className="sr-only">
             Row-per-codon diff of {refLabel} against {altLabel}, in three synchronised registers:
@@ -221,12 +221,12 @@ export function DiffStack({
 
                   {/* Change gutter: glyph + character, not colour alone. */}
                   <td className={`w-6 px-0 py-[3px] text-center align-top ${s.fg}`}>
-                    <Glyph className="mx-auto size-3" aria-hidden />
+                    <Glyph className="mx-auto size-3.5" aria-hidden />
                     <span className="sr-only">{s.srLabel}</span>
                   </td>
 
                   {/* Reference register. */}
-                  <td className="px-2 py-[3px] align-top">
+                  <td className="seq px-2 py-[3px] align-top">
                     <div className="flex items-baseline gap-3">
                       <BaseRegister codon={row.refCodon} other={row.altCodon} tone={s.fg} />
                       <span className="text-[10px] text-muted-foreground">
@@ -239,7 +239,7 @@ export function DiffStack({
                   </td>
 
                   {/* Altered register. */}
-                  <td className="border-l border-border/60 px-2 py-[3px] align-top">
+                  <td className="seq border-l border-border/60 px-2 py-[3px] align-top">
                     <div className="flex items-baseline gap-3">
                       <BaseRegister codon={row.altCodon} other={row.refCodon} tone={s.fg} />
                       <span className="text-[10px] text-muted-foreground">
@@ -257,7 +257,7 @@ export function DiffStack({
         </table>
 
         {changed.length === 0 && (
-          <p className="px-3 py-3 font-sans text-xs text-muted-foreground">
+          <p className="px-3 py-3 text-xs text-muted-foreground">
             No codon differs between {refLabel} and {altLabel} — this branch introduces no edit
             against its base.
           </p>
@@ -267,21 +267,21 @@ export function DiffStack({
       {/* Legend. Silent vs amino-acid-changing is the distinction that matters. */}
       <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 border-t border-border bg-gutter px-3 py-1.5 text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
-          <MoveRight className="size-3 text-diff-changed" aria-hidden />
+          <MoveRight className="size-3.5 text-diff-changed" aria-hidden />
           <span className="text-diff-changed">~</span> amino-acid change
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <CircleDot className="size-3 text-diff-silent" aria-hidden />
+          <CircleDot className="size-3.5 text-diff-silent" aria-hidden />
           <span className="text-diff-silent">≡</span> silent (synonymous)
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Plus className="size-3 text-diff-added" aria-hidden /> added
+          <Plus className="size-3.5 text-diff-added" aria-hidden /> added
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Minus className="size-3 text-diff-removed" aria-hidden /> removed
+          <Minus className="size-3.5 text-diff-removed" aria-hidden /> removed
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Equal className="size-3" aria-hidden /> unchanged
+          <Equal className="size-3.5" aria-hidden /> unchanged
         </span>
       </div>
     </div>

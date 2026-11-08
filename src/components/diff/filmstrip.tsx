@@ -59,14 +59,14 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
       </div>
 
       {/* The strip itself, with sprocket perforations. */}
-      <div className="recess-surface rounded-xl border border-bezel-edge/60 p-2">
+      <div className="recess-surface rounded-lg p-2">
         <div
           aria-hidden="true"
           className="mx-1 mb-2 flex justify-between opacity-55"
           style={{ height: 6 }}
         >
           {Array.from({ length: 28 }, (_, i) => (
-            <span key={i} className="h-1.5 w-2.5 rounded-[1px] bg-foreground/25" />
+            <span key={i} className="h-1.5 w-2.5 rounded-sm bg-foreground/25" />
           ))}
         </div>
 
@@ -100,8 +100,8 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
                 className={cn(
                   'h-auto w-full flex-col items-stretch gap-2 rounded-lg border p-3 text-left',
                   active
-                    ? 'border-signal bg-signal/10 ring-2 ring-signal/50'
-                    : 'border-bezel-edge/70 bg-card hover:bg-muted/60',
+                    ? 'border-signal bg-signal/10'
+                    : 'border-border bg-card hover:bg-muted/60',
                 )}
               >
                 <span className="flex items-center justify-between gap-2">
@@ -114,7 +114,7 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
                 <span className="text-sm font-semibold">{frame.label}</span>
 
                 <span className="flex items-center gap-1.5 text-[0.625rem] text-muted-foreground">
-                  <GitBranch className="size-3" aria-hidden="true" />
+                  <GitBranch className="size-3.5" aria-hidden="true" />
                   <span className="tnum font-mono">{frame.branch}</span>
                   <span className="tnum font-mono opacity-70">{frame.shortOid}</span>
                 </span>
@@ -129,12 +129,12 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
                   ) : (
                     <>
                       <span className="text-muted-foreground">c.{edited.codonIndex}</span>
-                      <span>{edited.refCodon}</span>
-                      <ArrowRight className="size-3" aria-hidden="true" />
-                      <span className="font-semibold text-signal-alarm">{edited.altCodon}</span>
-                      <span className="ml-auto">
+                      <span className="seq">{edited.refCodon}</span>
+                      <ArrowRight className="size-3.5" aria-hidden="true" />
+                      <span className="seq font-semibold text-signal-alarm">{edited.altCodon}</span>
+                      <span className="seq ml-auto inline-flex items-center">
                         {change.refAa}
-                        <ArrowRight className="mx-0.5 inline size-3" aria-hidden="true" />
+                        <ArrowRight className="mx-0.5 size-3.5" aria-hidden="true" />
                         {change.altAa}
                       </span>
                     </>
@@ -172,7 +172,7 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
           style={{ height: 6 }}
         >
           {Array.from({ length: 28 }, (_, i) => (
-            <span key={i} className="h-1.5 w-2.5 rounded-[1px] bg-foreground/25" />
+            <span key={i} className="h-1.5 w-2.5 rounded-sm bg-foreground/25" />
           ))}
         </div>
       </div>
@@ -207,7 +207,7 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
           </div>
           <p className="mt-2 text-xs">
             <span className="font-semibold">{selected.structural.refAaName}</span>
-            <ArrowRight className="mx-1 inline size-3" aria-hidden="true" />
+            <ArrowRight className="mx-1 inline size-3.5" aria-hidden="true" />
             <span className="font-semibold">{selected.structural.altAaName}</span> —{' '}
             {selected.structural.summary}
           </p>

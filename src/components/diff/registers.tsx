@@ -25,9 +25,9 @@ function baseTone(refCodon: string | null, altCodon: string | null, i: number): 
 
 export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersProps) {
   return (
-    <div className="recess-surface rounded-lg border border-bezel-edge/60">
+    <div className="recess-surface rounded-lg border border-border">
       <div className="grid grid-cols-[7.5rem_1fr]">
-        <div className="flex flex-col justify-around border-r border-bezel-edge/60 px-3 py-2 text-[0.625rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+        <div className="flex flex-col justify-around border-r border-border px-3 py-2 text-[0.625rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
           <span className="py-1">Codon</span>
           <span className="truncate py-1" title={refLabel}>
             {refLabel}
@@ -39,7 +39,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
         </div>
 
         <div className="overflow-x-auto">
-          <table className="tnum border-collapse font-mono text-xs">
+          <table className="seq border-collapse text-xs">
             <caption className="sr-only">
               {`Codon-by-codon diff between ${refLabel} and ${altLabel}, in three registers: DNA bases, codons and amino acids.`}
             </caption>
@@ -120,7 +120,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
                     ) : (
                       <span className="inline-flex items-center gap-0.5 font-semibold text-signal-alarm">
                         {r.refAa ?? '—'}
-                        <ArrowRight className="size-2.5" aria-hidden="true" />
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
                         {r.altAa ?? '—'}
                       </span>
                     )}
@@ -132,7 +132,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-bezel-edge/60 px-3 py-1.5 text-[0.625rem] text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border px-3 py-1.5 text-[0.625rem] text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span aria-hidden="true" className="size-2.5 rounded-sm bg-signal-alarm/40" />
           amino-acid change

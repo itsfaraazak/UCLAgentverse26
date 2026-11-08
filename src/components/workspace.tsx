@@ -198,7 +198,7 @@ function RefusalStrip({
         {refusals.map((entry, index) => (
           <li
             key={`${entry.id}-${index}`}
-            className="rounded-full border border-block/30 bg-card/70 px-2 py-px font-mono text-[10px] text-block"
+            className="rounded-full bg-card px-2 py-px font-mono text-[10px] text-block"
           >
             {entry.run.policy.category}
             <span className="ml-1.5 text-foreground/50 tnum">{entry.run.policy.requestDigest}</span>
@@ -208,7 +208,7 @@ function RefusalStrip({
       <button
         type="button"
         onClick={onClear}
-        className="ml-auto rounded px-1.5 py-0.5 text-[11px] text-block underline-offset-2 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        className="ml-auto rounded-sm px-1.5 py-0.5 text-[11px] text-block underline-offset-2 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       >
         Dismiss
       </button>
@@ -239,7 +239,7 @@ function LocusCard({ scenario }: { readonly scenario: ScenarioView }) {
         <dd className="font-mono">{locus.provenance}</dd>
       </dl>
       <p className="flex items-start gap-1.5 rounded-lg border border-dashed px-2.5 py-2 text-[10.5px] leading-relaxed text-muted-foreground">
-        <Info className="mt-px size-3 shrink-0" aria-hidden="true" />
+        <Info className="mt-px size-3.5 shrink-0" aria-hidden="true" />
         <span>
           Illustrative prototype. The simulation is not validated haemorheology and the
           structural annotations are textbook teaching summaries, not predictions. No construct

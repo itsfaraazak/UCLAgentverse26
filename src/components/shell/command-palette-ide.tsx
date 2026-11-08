@@ -146,7 +146,7 @@ export function CommandPalette({
                   {branch.genotypeLabel}
                 </span>
                 {branch.name === activeBranch && (
-                  <CornerDownLeft className="ml-auto size-3 opacity-60" aria-label="current branch" />
+                  <CornerDownLeft className="ml-auto size-3.5 text-muted-foreground" aria-label="current branch" />
                 )}
               </CommandItem>
             ))}
@@ -173,7 +173,7 @@ export function CommandPalette({
         </CommandList>
 
         <div className="flex items-center gap-2 border-t border-border px-2.5 py-1.5 text-[10px] text-muted-foreground">
-          <CommandIcon className="size-3" aria-hidden />
+          <CommandIcon className="size-3.5 shrink-0" aria-hidden />
           <span>
             Every command here is also a keyboard shortcut. The palette never bypasses the
             biosafety gate — running the pipeline from here screens the request first, exactly as

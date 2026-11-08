@@ -166,7 +166,7 @@ export function CommitGraph({
   return (
     <section className="relative flex min-h-0 flex-1 flex-col" aria-label="Commit history graph">
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
-      <div className="vibrancy flex h-11 shrink-0 items-center gap-2 border-b px-4">
+      <div className="flex h-11 shrink-0 items-center gap-2 border-b bg-card px-4">
         <h2 className="text-[13px] font-semibold tracking-tight">History</h2>
         <span className="text-[12px] text-muted-foreground tnum">
           {graph.rowCount} commits · {graph.laneCount} lanes
@@ -274,7 +274,7 @@ export function CommitGraph({
       </div>
 
       {/* ── Text alternative: the same ancestry, readable without the SVG ─ */}
-      <details className="vibrancy shrink-0 border-t text-[12px]">
+      <details className="shrink-0 border-t bg-card text-[12px]">
         <summary className="cursor-pointer px-4 py-2 font-medium focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
           Text description of the graph
         </summary>
@@ -439,8 +439,8 @@ function CommitRow({
         onDoubleClick={() => onOpen(commit.oid)}
         className={`absolute flex max-w-[400px] flex-col gap-1 rounded-lg border px-3 py-1.5 text-left transition-colors ${
           isSelected
-            ? 'border-ring/60 bg-card shadow-sm'
-            : 'border-transparent hover:border-border hover:bg-card/70'
+            ? 'border-ring/60 bg-card'
+            : 'border-transparent hover:border-border hover:bg-accent/50'
         }`}
         style={{ left: laneSpan + 14, top: 0 }}
       >
@@ -449,11 +449,11 @@ function CommitRow({
             {commit.short}
           </code>
           {commit.isMerge && (
-            <GitMerge className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <GitMerge className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           )}
           {commit.isRoot && (
             <GitCommitHorizontal
-              className="size-3 shrink-0 text-muted-foreground"
+              className="size-3.5 shrink-0 text-muted-foreground"
               aria-hidden="true"
             />
           )}
@@ -463,7 +463,7 @@ function CommitRow({
           <span
             className={`inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold tracking-wide uppercase ${look.pill}`}
           >
-            <look.Icon className="size-2.5" aria-hidden="true" />
+            <look.Icon className="size-3" aria-hidden="true" />
             {look.short}
           </span>
           {commit.branches.map((name) => (
@@ -472,14 +472,16 @@ function CommitRow({
               className="inline-flex max-w-[180px] items-center gap-1 rounded-full border px-1.5 py-px font-mono text-[10px]"
               style={{ borderColor: laneColor(lane), color: laneColor(lane) }}
             >
-              <Tag className="size-2.5 shrink-0" aria-hidden="true" />
+              <Tag className="size-3 shrink-0" aria-hidden="true" />
               <span className="truncate">{name}</span>
             </span>
           ))}
           {commit.edit !== null && (
             <span className="truncate font-mono text-[10px] text-muted-foreground">
-              {commit.edit.gene} codon {commit.edit.codonIndex} {commit.edit.refCodon}→
-              {commit.edit.altCodon}
+              {commit.edit.gene} codon {commit.edit.codonIndex}{' '}
+              <span className="seq">
+                {commit.edit.refCodon}→{commit.edit.altCodon}
+              </span>
             </span>
           )}
         </span>

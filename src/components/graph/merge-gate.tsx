@@ -42,11 +42,11 @@ export function MergeGate({
   return (
     <section
       aria-labelledby={headingId}
-      className="vibrancy-strong shrink-0 border-t px-4 py-3"
+      className="shrink-0 border-t bg-card px-4 py-3"
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h2 id={headingId} className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <GitMerge className="size-4 text-primary" aria-hidden="true" />
+          <GitMerge className="size-4 text-muted-foreground" aria-hidden="true" />
           Merge gate
         </h2>
         <Separator orientation="vertical" className="h-5" />
@@ -59,9 +59,9 @@ export function MergeGate({
             </span>
           ) : (
             <>
-              <span className="truncate rounded border bg-card px-1.5 py-0.5">{from.name}</span>
+              <span className="hairline truncate rounded-sm border px-1.5 py-0.5">{from.name}</span>
               <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="truncate rounded border bg-card px-1.5 py-0.5">{into.name}</span>
+              <span className="hairline truncate rounded-sm border px-1.5 py-0.5">{into.name}</span>
             </>
           )}
         </div>
@@ -112,10 +112,10 @@ export function MergeGate({
 type Tone = 'pass' | 'block' | 'escalate' | 'conflict';
 
 const TONE_CLASS: Readonly<Record<Tone, string>> = {
-  pass: 'border-pass/40 bg-pass-soft/60 text-pass',
-  block: 'border-block/40 bg-block-soft/60 text-block',
-  escalate: 'border-escalate/40 bg-escalate-soft/60 text-escalate',
-  conflict: 'border-conflict/40 bg-conflict-soft/60 text-conflict',
+  pass: 'bg-pass-soft/60 text-pass',
+  block: 'bg-block-soft/60 text-block',
+  escalate: 'bg-escalate-soft/60 text-escalate',
+  conflict: 'bg-conflict-soft/60 text-conflict',
 };
 
 function GateNotice({
@@ -140,7 +140,7 @@ function GateNotice({
   return (
     <div
       role="status"
-      className={`mt-3 flex items-start gap-2.5 rounded-lg border px-3 py-2.5 ${TONE_CLASS[tone]}`}
+      className={`mt-3 flex items-start gap-2.5 rounded-md px-3 py-2.5 ${TONE_CLASS[tone]}`}
     >
       <Icon className="mt-px size-4 shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
@@ -212,11 +212,11 @@ function Outcome({
           'merge will not auto-resolve it. Nothing was committed.'
         }
       >
-        <ul className="mt-2 flex flex-col gap-1.5">
+        <ul className="mt-2 flex flex-col divide-y divide-conflict/20 border-t border-conflict/20">
           {outcome.conflicts.map((conflict) => (
             <li
               key={conflict.gene}
-              className="rounded-md border border-conflict/30 bg-card/70 px-2.5 py-2 text-foreground"
+              className="py-2 text-foreground"
             >
               <p className="font-mono text-[11.5px] font-semibold">{conflict.gene}</p>
               <dl className="mt-1 grid grid-cols-[4.5rem_1fr] gap-x-2 gap-y-0.5 text-[11px]">
@@ -265,7 +265,7 @@ function Outcome({
       }
     >
       <p className="mt-1.5 flex items-center gap-1.5 font-mono text-[11.5px] text-foreground/80">
-        <Copy className="size-3" aria-hidden="true" />
+        <Copy className="size-3.5" aria-hidden="true" />
         {outcome.short}
       </p>
       <Button variant="ghost" size="xs" className="mt-2" onClick={onDismiss}>

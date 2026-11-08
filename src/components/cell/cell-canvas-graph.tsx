@@ -60,7 +60,7 @@ export function CellCanvas({
     <section className="flex flex-col gap-3" aria-label="Live cell simulation">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <Waves className="size-4 text-primary" aria-hidden="true" />
+          <Waves className="size-4 text-muted-foreground" aria-hidden="true" />
           Capillary flow
         </h3>
         <p className="truncate text-[11.5px] text-muted-foreground">
@@ -130,7 +130,7 @@ export function CellCanvas({
       </div>
 
       <p className="flex items-start gap-1.5 rounded-lg border border-dashed px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        <Activity className="mt-px size-3 shrink-0" aria-hidden="true" />
+        <Activity className="mt-px size-3.5 shrink-0" aria-hidden="true" />
         <span>
           <strong className="font-semibold text-foreground">Illustrative model.</strong>{' '}
           {simulation.note} Seed {simulation.seed}, {simulation.cellCount} cells.{' '}
@@ -283,7 +283,7 @@ function SimRunner({
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border bg-card/60">
+      <div className="hairline overflow-hidden rounded-lg border">
         <canvas
           ref={canvasRef}
           style={{ width: '100%', height: 'auto', aspectRatio: `${CANVAS_W} / ${CANVAS_H}` }}
@@ -328,11 +328,11 @@ function Metric({
   const color =
     tone === 'bad' ? 'text-status-fail' : tone === 'ok' ? 'text-status-pass' : 'text-foreground';
   return (
-    <div className="rounded-lg border bg-card/60 px-2.5 py-2">
+    <div className="hairline rounded-md border px-2.5 py-2">
       <dt className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
         {label}
       </dt>
-      <dd className={`mt-0.5 font-mono text-[15px] font-semibold tnum ${color}`}>{value}</dd>
+      <dd className={`mt-0.5 text-[15px] font-semibold tnum ${color}`}>{value}</dd>
     </div>
   );
 }

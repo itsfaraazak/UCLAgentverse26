@@ -118,7 +118,7 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
         className="shrink-0"
       >
         <Label htmlFor={inputId} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <Swords className="size-3" aria-hidden />
+          <Swords className="size-3.5 shrink-0" aria-hidden />
           Adversarial request — screened by <span className="font-mono">lib/safety</span> before
           anything else happens
         </Label>
@@ -136,7 +136,7 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
             rows={2}
             spellCheck={false}
             placeholder="Type a request to screen, then press ⌘↵"
-            className="min-h-[3.5rem] flex-1 resize-none font-mono text-[12px]"
+            className="min-h-14 flex-1 resize-none font-mono text-[12px]"
           />
           <div className="flex shrink-0 flex-col gap-1">
             <Button type="submit" size="xs" disabled={pending || text.trim() === ''}>
@@ -197,10 +197,10 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
       {/* The trail. Categories and digests only. */}
       {trail.length > 1 && (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <h4 className="sticky top-0 bg-card/90 py-1 text-[10px] tracking-wide text-muted-foreground uppercase backdrop-blur">
+          <h4 className="sticky top-0 bg-card py-1 text-[10px] tracking-wide text-muted-foreground uppercase">
             Screening trail — categories and digests only
           </h4>
-          <ul className="font-mono text-[11px]">
+          <ul className="text-[11px]">
             {trail.slice(1).map((entry) => {
               const style = VERDICT_STYLE[entry.verdict];
               const Icon = style.icon;
@@ -209,7 +209,7 @@ export function RedTeamConsole({ onRunPipeline, pipelineBusy }: RedTeamConsolePr
                   key={`${entry.requestDigest}-${entry.at}`}
                   className="flex items-center gap-2 border-b border-border/40 py-1"
                 >
-                  <Icon className={`size-3 shrink-0 ${style.fg}`} aria-hidden />
+                  <Icon className={`size-3.5 shrink-0 ${style.fg}`} aria-hidden />
                   <span className={`w-[4.5rem] shrink-0 text-[10px] uppercase ${style.fg}`}>
                     {style.label}
                   </span>
@@ -252,14 +252,14 @@ function VerdictCard({
 
   const frame =
     outcome.verdict === 'block'
-      ? 'border-status-blocked/45 bg-status-blocked/10'
+      ? 'bg-status-blocked/10'
       : outcome.verdict === 'escalate'
-        ? 'border-status-escalated/45 bg-status-escalated/10'
-        : 'border-status-pass/40 bg-status-pass/10';
+        ? 'bg-status-escalated/10'
+        : 'bg-status-pass/10';
 
   return (
     <div
-      className={`shrink-0 rounded-md border px-2.5 py-2 ${frame}`}
+      className={`shrink-0 rounded-md px-2.5 py-2 ${frame}`}
       role="status"
       aria-live="polite"
     >
@@ -269,7 +269,7 @@ function VerdictCard({
           {VERDICT_HEADLINE[outcome.verdict]}
         </span>
         <span
-          className={`ml-auto shrink-0 rounded-sm border px-1 font-mono text-[9.5px] tracking-wide uppercase ${style.chip}`}
+          className={`ml-auto shrink-0 rounded-sm px-1 text-[9.5px] font-medium tracking-wide uppercase ${style.chip}`}
         >
           {outcome.verdict}
         </span>
@@ -299,8 +299,8 @@ function VerdictCard({
       </p>
 
       {outcome.redacted && (
-        <p className="mt-1.5 flex items-start gap-1.5 rounded-md border border-status-blocked/30 bg-status-blocked/12 px-2 py-1 text-[10.5px] leading-snug text-status-blocked">
-          <Ban className="mt-[1px] size-3 shrink-0" aria-hidden />
+        <p className="mt-1.5 flex items-start gap-1.5 text-[10.5px] leading-snug text-status-blocked">
+          <Ban className="size-3.5 shrink-0" aria-hidden />
           <span>
             Request not retained. The text was discarded on receipt, is not echoed here, is not
             written to the delta trail, and the input field has been cleared. Only the category
