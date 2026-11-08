@@ -25,7 +25,15 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --radius: 0.625rem;
+  /* One radius scale: 0.25 / 0.375 / 0.5 / 0.75rem for sm / md / lg / xl —
+     the same four steps as sprout-careers-better. Rows and chips use md,
+     panels lg, overlays xl. Nothing larger; full-round is for dots and pills
+     only. */
+  --radius: 0.5rem;
+
+  /* A true hairline where the display can draw one (see the media query
+     below). Every rule and outline in the app is this width. */
+  --hairline: 1px;
 
   --background: oklch(0.985 0.002 250);
   --foreground: oklch(0.21 0.012 255);
@@ -275,7 +283,21 @@
   }
 }
 
+@media (min-resolution: 2dppx) {
+  :root {
+    --hairline: 0.5px;
+  }
+}
+
 @theme inline {
+  /* Almost no shadows. The resting primitives (buttons, inputs, cards) are
+     separated by hairlines, not elevation; only floating surfaces — popovers,
+     menus, dialogs — keep a real shadow, because they genuinely sit above the
+     page. */
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -369,6 +391,20 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* JetBrains Mono is the only monospace face, and its coding ligatures fuse
+     adjacent characters (`->`, `==`, `0x`, `www`). Sequence text must use
+     `.seq`; this is the safety net for every other monospace run — oids,
+     digests, paths, kbd hints — so no glyph is ever merged with its
+     neighbour. `font-variant-ligatures: none` also covers contextual
+     alternates, and survives a later `font-feature-settings` override. */
+  code,
+  kbd,
+  samp,
+  pre,
+  .font-mono {
+    font-variant-ligatures: none;
+  }
+
   /* Visible focus is a hard requirement (SPEC §5), and the default outline
      disappears against dark surfaces. */
   :focus-visible {
@@ -401,7 +437,7 @@
      app shell from reading as a grid of boxes. */
   .hairline {
     border-color: color-mix(in oklab, var(--border) 85%, transparent);
-    border-width: 0.5px;
+    border-width: var(--hairline);
   }
 
   /*
@@ -428,7 +464,6 @@
      `body` already sets these; this is for elements that opt out locally. */
   .nums {
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
   }
 
   /* Translucent chrome, for the sidebar and titlebar surfaces that give the
@@ -458,16 +493,18 @@
   --bezel: oklch(0.9 0.004 264);
   --bezel-edge: oklch(0.82 0.006 264);
   --recess: oklch(0.915 0.004 264);
-  --grid-line: oklch(0.21 0.012 264 / 0.07);
+  --grid-line: oklch(0.21 0.012 264 / 0.04);
 
   /* Instrument accents — lamps, traces, gauge arcs. Derived from the shared
      verdict tokens where they mean the same thing, so a passing check is the
      same green on a gauge as in the IDE's check list. */
-  --signal: oklch(0.56 0.14 215);
+  /* One accent hue for the whole product: the instrument's "live" signal and
+     its traces are the primary blue, not a second cyan. */
+  --signal: var(--primary);
   --signal-warn: var(--verdict-escalate);
   --signal-alarm: var(--verdict-block);
   --signal-ok: var(--verdict-pass);
-  --trace: oklch(0.45 0.12 235);
+  --trace: var(--primary);
   --cell-discoid: oklch(0.55 0.19 20);
   --cell-sickled: oklch(0.42 0.17 300);
   --lumen: oklch(0.88 0.02 240);
@@ -477,10 +514,10 @@
   --bezel: oklch(0.225 0.011 264);
   --bezel-edge: oklch(0.33 0.013 264);
   --recess: oklch(0.13 0.008 264);
-  --grid-line: oklch(0.955 0.004 264 / 0.08);
+  --grid-line: oklch(0.955 0.004 264 / 0.045);
 
-  --signal: oklch(0.82 0.14 200);
-  --trace: oklch(0.82 0.13 200);
+  --signal: var(--primary);
+  --trace: var(--primary);
   --cell-discoid: oklch(0.68 0.19 22);
   --cell-sickled: oklch(0.7 0.17 305);
   --lumen: oklch(0.26 0.02 240);
@@ -491,9 +528,9 @@
     --bezel: oklch(0.225 0.011 264);
     --bezel-edge: oklch(0.33 0.013 264);
     --recess: oklch(0.13 0.008 264);
-    --grid-line: oklch(0.955 0.004 264 / 0.08);
-    --signal: oklch(0.82 0.14 200);
-    --trace: oklch(0.82 0.13 200);
+    --grid-line: oklch(0.955 0.004 264 / 0.045);
+    --signal: var(--primary);
+    --trace: var(--primary);
     --cell-discoid: oklch(0.68 0.19 22);
     --cell-sickled: oklch(0.7 0.17 305);
     --lumen: oklch(0.26 0.02 240);
@@ -526,28 +563,20 @@
    these; this utility is for elements that opt out of it locally. */
 @utility tnum {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
 }
 
-/* A milled-aluminium bezel: top highlight, bottom shadow, hairline edge. */
+/* The bench's instrument panels. These were a milled-aluminium gradient with
+   a drop shadow and a deep inset well; together with a border on every panel
+   that was three treatments at once. A panel is now a flat surface and its
+   border is the only edge — the bench keeps its instrument layout, not the
+   skeuomorphic lighting. */
 @utility bezel-surface {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in oklab, var(--bezel) 92%, white 8%),
-    var(--bezel)
-  );
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 30%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, black 10%, transparent),
-    0 1px 2px color-mix(in oklab, black 12%, transparent);
+  background: var(--card);
 }
 
-/* A recessed well for control inputs — the opposite lighting of a bezel. */
+/* A control well: one step quieter than a panel, still flat. */
 @utility recess-surface {
-  background: var(--recess);
-  box-shadow:
-    inset 0 2px 5px color-mix(in oklab, black 22%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, white 14%, transparent);
+  background: color-mix(in oklab, var(--muted) 55%, var(--card));
 }
 
 /* The bench's translucent chrome. Shares the shared `.vibrancy` recipe so
@@ -611,8 +640,8 @@
   align-items: center;
   gap: 1px;
   padding: 2px;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) - 3px);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-md);
   background: color-mix(in oklab, var(--muted) 60%, transparent);
 }
 
@@ -621,7 +650,7 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.1875rem 0.4375rem;
-  border-radius: calc(var(--radius) - 5px);
+  border-radius: var(--radius-sm);
   color: var(--muted-foreground);
   font-size: 0.6875rem;
   line-height: 1;
@@ -638,7 +667,7 @@
 .vswitch__item[aria-current='page'] {
   background: var(--card);
   color: var(--foreground);
-  box-shadow: 0 1px 2px color-mix(in oklab, black 10%, transparent);
+  box-shadow: inset 0 0 0 var(--hairline) var(--border);
 }
 
 .vswitch__item:focus-visible {
