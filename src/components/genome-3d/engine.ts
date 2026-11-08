@@ -28,6 +28,7 @@ import {
 } from '@/components/protein/runtime/renderer';
 import { ResourceTracker } from '@/components/protein/runtime/resources';
 import { attachViewport } from '@/components/protein/runtime/viewport';
+import { GENOME_PALETTE } from './palette';
 import { codonSpan, helixLayout, type BaseNode, type HelixLayout, type Vec3 } from './layout';
 import type { CodonSegment, GenomeModel } from './model';
 
@@ -51,24 +52,6 @@ import type { CodonSegment, GenomeModel } from './model';
  * next to the canvas, and `loci.json`'s own `limitation` travels with it.
  */
 
-/**
- * Scene palette. Hex because WebGL needs numbers, but chosen to sit beside
- * the theme tokens in `globals.css` rather than inventing a second palette:
- * `edited` tracks `--verdict-escalate` (an edit is a thing to review, not a
- * pass or a failure), `silent` tracks `--chart-5`, `same` the muted greys.
- * Exported so the React legend labels the exact colours drawn — one source
- * of truth, and the legend cannot drift from the scene.
- */
-export const GENOME_PALETTE = {
-  strandA: 0x6b7a90,
-  strandB: 0x4a5668,
-  rung: 0x8c99ab,
-  codonSame: 0x7c8899,
-  codonSilent: 0xa07bc8,
-  codonEdited: 0xe0a33a,
-  codonUnsequenced: 0x3d4654,
-  highlight: 0xf0b542,
-} as const;
 
 /** Geometry proportions, kept here so the engine owns its own look. */
 const GEOMETRY = {
@@ -80,6 +63,16 @@ const GEOMETRY = {
   ribbonRadius: 0.17,
   /** Radius of the marker ring drawn around the edited codon. */
   ringRadius: 2.1,
+  /**
+   * How many codons the focused view frames.
+   *
+   * B-DNA really is long and thin: 147 codons at a ≈3.4 Å rise is ~150 world
+   * units against a radius of 1, so framing the whole locus draws a hairline
+   * with the edit marker sub-pixel. That view is honest but useless, so it
+   * stays available as "Fit" while the default lands on a readable stretch
+   * of helix around the edit.
+   */
+  codonsInFocus: 17,
 } as const;
 
 export interface RendererInfo {
@@ -220,7 +213,6 @@ export async function mountGenomeEngine(
   const matrix = new Matrix4();
   const quat = new Quaternion();
   const scale = new Vector3();
-  const position = new Vector3();
   const tmpColor = new Color();
 
   // Base-pair rungs — one instance per modelled base.
@@ -385,6 +377,12 @@ export async function mountGenomeEngine(
   const wholeView = new Vector3(0.82, 0.22, 0.52).normalize();
   const closeView = new Vector3(1, 0.12, 0.35).normalize();
 
+  /** Distance that frames `codonsInFocus` codons plus the marker ring. */
+  const focusDistance = (): number =>
+    fitDistance(
+      Math.max((GEOMETRY.codonsInFocus * 3 * layout.params.rise) / 2, GEOMETRY.ringRadius * 1.3),
+    );
+
   const resetView = (): void => {
     focusedCodon = null;
     place(wholeView, fitDistance(boundingRadius), new Vector3());
@@ -396,7 +394,7 @@ export async function mountGenomeEngine(
     // Model-space → world, mirroring the group's centring offset.
     const target = v3(span.center).add(model3d.position);
     focusedCodon = codonIndex;
-    place(closeView, Math.max(GEOMETRY.ringRadius * 2.4, 5), target);
+    place(closeView, focusDistance(), target);
     return true;
   };
 
@@ -419,7 +417,10 @@ export async function mountGenomeEngine(
       if (!disposed) onContextLost(err);
     },
   });
+  // Land on the edit site by default; `resetView` ("Fit") still shows the
+  // whole locus for anyone who wants its true extent.
   resetView();
+  if (model.primaryEditedCodon !== null) focusCodon(model.primaryEditedCodon);
   if (spinning) requestRender();
 
   const spherical = new Spherical();

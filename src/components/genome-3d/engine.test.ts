@@ -84,6 +84,11 @@ describe('mountGenomeEngine — focus and framing', () => {
       onContextLost: () => undefined,
       createRenderer: async () => createFakeRenderer(),
     });
+    // The view lands on the edit site rather than on the whole locus: at
+    // true B-DNA proportions 147 codons is a ~150-unit hairline, so the
+    // default framing has to be a readable stretch around the edit.
+    expect(engine.scene.focusedCodon).toBe(7);
+    engine.resetView();
     expect(engine.scene.focusedCodon).toBeNull();
     expect(engine.focusEdit()).toBe(true);
     expect(engine.scene.focusedCodon).toBe(7);
