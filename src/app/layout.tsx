@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 /**
  * Three faces, each doing one job.
  *
- * Deliberately not Inter and not Helvetica: both are correct and both read as
- * a default rather than a decision.
+ * Plus Jakarta Sans for UI and Poppins for the wordmark, carried over from
+ * this project's existing design language so the two products feel related.
+ * Deliberately not Inter and not Helvetica.
  *
  * JetBrains Mono carries the most weight here. The codon and amino-acid diff
  * is the centrepiece of the product, so the monospace face *is* the hero
@@ -15,7 +16,7 @@ import "./globals.css";
  * slashed zero and separated l/1/I matter when a reader is comparing sequences
  * character by character.
  */
-const sans = Geist({
+const sans = Plus_Jakarta_Sans({
   variable: "--font-sans-src",
   subsets: ["latin"],
   display: "swap",
@@ -28,18 +29,14 @@ const mono = JetBrains_Mono({
 });
 
 /**
- * Editorial counterweight for the wordmark, section headings and large
- * figures. A high-contrast serif against a technical mono is what stops the
- * app reading as another dark dashboard template.
- *
- * Regular only — Instrument Serif ships a single weight, so do not reach for
- * `font-bold` on it; size and colour carry the hierarchy instead.
+ * Wordmark and headings. Poppins at medium weight, matching the type system
+ * already used across this project's other product. Weight 500 is the default
+ * for the wordmark; 600 is available for headings that need more presence.
  */
-const display = Instrument_Serif({
+const display = Poppins({
   variable: "--font-display-src",
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  weight: ["500", "600"],
   display: "swap",
 });
 
