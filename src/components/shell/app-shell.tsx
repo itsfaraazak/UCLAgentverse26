@@ -361,7 +361,7 @@ export function AppShell({
                 <strong className="font-medium">{branch.name}</strong> holds the
                 imported reference and introduces no edit, so there is nothing for the
                 pipeline to screen. Switch to a genotype line, or type a request below
-                to run the seven agents against it.
+                to run the agent checks against it.
               </p>
             </div>
           ) : (

@@ -14,6 +14,16 @@ export interface CheckRun {
   readonly signoffRole?: string;
   readonly signedOffBy?: string;
   readonly reasons: readonly string[];
+  /**
+   * True only when the biosafety gate refused this edit. A verifier failure
+   * is also `status: 'failed'`, so without this the two are indistinguishable
+   * and the UI announced a verifier failure as a gate refusal — the one place
+   * the app stated something false about the safety boundary.
+   *
+   * It narrows wording only. `resolveSignoff` refuses a `failed` check either
+   * way, so an absent or false value cannot make anything signable.
+   */
+  readonly blockedAtGate?: boolean;
 }
 
 export type MergeDecision =

@@ -296,7 +296,7 @@ function VerdictCard({
       )}
 
       {/*
-        The seven checks for this request, resolved here in the console.
+        The agent checks for this request, resolved here in the console.
         This run deliberately gates nothing: a check gates a commit and must be
         derived from that commit's content, so a console run is read-only
         evidence of what the pipeline did with this text (SPEC §9.4, §9.5).

@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { CheckList } from '@/components/agents/check-list';
 import { runProposal } from '@/app/graph/actions';
+import { SCREEN_LEXICAL_DISCLOSURE } from '@/lib/disclosures';
 import type { ConsoleRunView } from '@/lib/demo/view';
 
 /** Prompts a reviewer can try without having to think of one. */
@@ -145,8 +146,8 @@ export function RedteamConsole({ onRefusal }: RedteamConsoleProps) {
           aria-describedby="redteam-help"
         />
         <p id="redteam-help" className="text-[10.5px] leading-relaxed text-muted-foreground">
-          Runs the seven agents on the server, gate first. Your text is not stored, logged or
-          echoed back — a refusal is identified by digest only.
+          Runs the agent checks on the server, gate first. Your text is not stored, logged or
+          echoed back — a refusal is identified by digest only. {SCREEN_LEXICAL_DISCLOSURE}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
           {SUGGESTIONS.map((suggestion) => (
@@ -270,7 +271,7 @@ function ConsoleEntry({ entry }: { readonly entry: ConsoleRunView }) {
         <p className="mt-1.5 flex items-start gap-1.5 text-[10.5px] leading-relaxed">
           <EyeOff className="mt-px size-3.5 shrink-0" aria-hidden="true" />
           Redacted. The request text was not retained — this entry shows the policy category
-          and reason only. The pipeline stopped at the gate, so steps 3–7 never ran.
+          and reason only. The pipeline stopped at the gate, so no downstream agent ran.
         </p>
       )}
       {policy.verdict === 'escalate' && (
@@ -282,9 +283,9 @@ function ConsoleEntry({ entry }: { readonly entry: ConsoleRunView }) {
       <Collapsible>
         <CollapsibleTrigger
           className="mt-2 w-full rounded-md border border-current/25 px-2 py-1 text-[10.5px] font-semibold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-          aria-label={`Show all seven agent checks for run ${policy.requestDigest}`}
+          aria-label={`Show all agent checks for run ${policy.requestDigest}`}
         >
-          Show the seven checks
+          Show the agent checks
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="mt-2 rounded-md bg-card p-2.5 text-foreground">

@@ -309,11 +309,12 @@ export function CiPanel({
                       ? 'Escalated — awaiting named human sign-off'
                       : run.conclusion === 'failed'
                         ? 'Checks failed'
-                        : 'All seven checks passed'}
+                        : 'All checks passed'}
                 </span>
               </p>
               <p className="nums mt-1 font-mono text-[10px] text-muted-foreground">
-                {run.id} · {branch} · {run.agentsRun}/7 agents · {run.deltas.length} deltas · gate{' '}
+                {run.id} · {branch} · {run.agentsRun}/{run.steps.length} agents · {run.deltas.length} deltas ·
+                gate{' '}
                 {run.screen.category}
               </p>
             </div>

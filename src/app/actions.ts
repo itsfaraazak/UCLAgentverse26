@@ -106,7 +106,30 @@ export async function createBranchAction(input: {
   const overlay = validateOverlay([...input.overlay, spec]);
   // buildWorkspace throws if `from` is unknown or the variant is not in the
   // fixture, so a bad request fails here rather than rendering a broken line.
-  return { workspace: buildWorkspace(overlay), overlay };
+  try {
+    return { workspace: buildWorkspace(overlay), overlay };
+  } catch (cause) {
+    // The form offers every source crossed with every curated edit, and 5 of
+    // those 12 pairs are biologically incoherent — an edit whose reference
+    // codon is not what the source line carries. The most natural click on
+    // this surface is one of them: branch from `main`, apply Repair, which is
+    // a repair of a mutation `main` does not have. `applyVariant` refuses it
+    // with `refCodon mismatch at 7: expected GTG, found GAG`, which is
+    // correct and unreadable.
+    //
+    // Translate it. The guard stays in `lib/genome` where it belongs; this
+    // only explains the refusal, and anything it cannot explain is rethrown.
+    const message = cause instanceof Error ? cause.message : '';
+    const mismatch = /^refCodon mismatch at (\d+): expected (\w+), found (\w+)$/.exec(message);
+    if (mismatch === null) throw cause;
+    const [, codon, expected, found] = mismatch;
+    throw new Error(
+      `That edit does not apply to \`${input.from}\`: it rewrites codon ${codon} from ` +
+        `${expected}, but \`${input.from}\` carries ${found} there. Branch from a line that ` +
+        `already has the ${expected} codon — a repair applies to a line carrying the ` +
+        `substitution, not to the reference.`,
+    );
+  }
 }
 
 /**

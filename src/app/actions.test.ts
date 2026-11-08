@@ -71,3 +71,45 @@ describe('overlay validation is applied on every action that accepts one', () =>
     expect(result.workspace.branches.some((b) => b.name === valid.name)).toBe(true);
   });
 });
+
+describe('createBranchAction explains an incoherent source-and-edit pair', () => {
+  // The form offers every source crossed with every curated edit, and the most
+  // natural click — branch from the reference, apply Repair — is one of the
+  // pairs that cannot work. `applyVariant` is right to refuse it; the judge
+  // should not meet that refusal as `refCodon mismatch at 7`.
+  it('names the codon, both sides, and what to branch from instead', async () => {
+    await expect(
+      createBranchAction({
+        name: 'line/repair-from-main',
+        from: 'main',
+        variantId: 'HBB_repair',
+        overlay: [],
+      }),
+    ).rejects.toThrow(
+      /does not apply to `main`[\s\S]*codon 7[\s\S]*carries GAG there[\s\S]*repair applies/,
+    );
+  });
+
+  it('still creates the coherent pair it was offered alongside', async () => {
+    const { workspace } = await createBranchAction({
+      name: 'line/sickle-from-main',
+      from: 'main',
+      variantId: 'HBB_HbS',
+      overlay: [],
+    });
+    expect(workspace.branches.map((b) => b.name)).toContain('line/sickle-from-main');
+  });
+
+  it('does not swallow an unrelated failure', async () => {
+    // An unknown variant is a different fault and must not be reworded as a
+    // codon mismatch, or the translation would be hiding errors.
+    await expect(
+      createBranchAction({
+        name: 'line/nope',
+        from: 'main',
+        variantId: 'HBB_does_not_exist',
+        overlay: [],
+      }),
+    ).rejects.toThrow(/^(?![\s\S]*does not apply to)[\s\S]*/);
+  });
+});

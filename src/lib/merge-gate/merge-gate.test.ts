@@ -37,6 +37,7 @@ function checkRun(
     readonly signoffRole?: string;
     readonly signedOffBy?: string;
     readonly reasons?: readonly string[];
+    readonly blockedAtGate?: boolean;
   } = {},
 ): CheckRun {
   return {
@@ -47,6 +48,7 @@ function checkRun(
     reasons: extra.reasons ?? [],
     ...(extra.signoffRole !== undefined ? { signoffRole: extra.signoffRole } : {}),
     ...(extra.signedOffBy !== undefined ? { signedOffBy: extra.signedOffBy } : {}),
+    ...(extra.blockedAtGate !== undefined ? { blockedAtGate: extra.blockedAtGate } : {}),
   };
 }
 
@@ -705,6 +707,10 @@ describe('resolveSignoff is the only path to a signed check (SPEC §7.5)', () =>
       requiresSignoff: true,
       signoffRole: 'principal_investigator',
       reasons: ['Biosafety gate blocked this edit.'],
+      // A gate refusal now says so explicitly, because a verifier failure is
+      // also `failed` and the UI was announcing it as a gate refusal. The
+      // refusal is unchanged either way; only the wording is narrowed.
+      blockedAtGate: true,
     });
     const result = resolveSignoff(blocked, 'dr-reviewer');
     expect(result).toEqual({ ok: false, reason: 'blocked' });
@@ -758,5 +764,55 @@ describe('resolveSignoff is the only path to a signed check (SPEC §7.5)', () =>
     expect(
       isAllowedMerge(evaluateMerge({ repo, ours, theirs, checks: checksOf(resolved.check) })),
     ).toBe(true);
+  });
+});
+
+describe('a verifier failure is not reported as a biosafety refusal', () => {
+  // Both are `status: 'failed'` and neither is signable, but the UI announced
+  // both as "refused at the biosafety gate" — the one place the app said
+  // something false about the safety boundary. Wording is the only difference;
+  // these tests pin that the refusal itself is unchanged.
+  const base = {
+    id: 'check-1',
+    commit: 'a'.repeat(64),
+    requiresSignoff: false,
+    reasons: ['Independent hypoxic run: occlusion is substantially higher than the reference.'],
+  } as const;
+
+  it('words a failed check as a failed check, and says it was not the gate', () => {
+    const refusal = resolveSignoff({ ...base, status: 'failed' }, 'A. Reviewer');
+    expect(refusal.ok).toBe(false);
+    if (refusal.ok) return;
+    expect(refusal.reason).toBe('check-failed');
+    const text = signoffRefusalReason(refusal);
+    expect(text).toMatch(/did not pass its checks/);
+    expect(text).toMatch(/not refused at the biosafety gate/);
+  });
+
+  it('still words a gate refusal as a gate refusal', () => {
+    const refusal = resolveSignoff(
+      { ...base, status: 'failed', blockedAtGate: true, reasons: ['Biosafety gate blocked this edit.'] },
+      'A. Reviewer',
+    );
+    expect(refusal.ok).toBe(false);
+    if (refusal.ok) return;
+    expect(refusal.reason).toBe('blocked');
+    expect(signoffRefusalReason(refusal)).toMatch(/refused at the biosafety gate/);
+  });
+
+  it('refuses the sign-off either way — the distinction is wording only', () => {
+    for (const check of [
+      { ...base, status: 'failed' as const },
+      { ...base, status: 'failed' as const, blockedAtGate: true },
+      // Even if a crafted check claims a role and a sign-off requirement.
+      {
+        ...base,
+        status: 'failed' as const,
+        requiresSignoff: true,
+        signoffRole: 'institutional_biosafety_committee',
+      },
+    ]) {
+      expect(resolveSignoff(check, 'A. Reviewer').ok).toBe(false);
+    }
   });
 });

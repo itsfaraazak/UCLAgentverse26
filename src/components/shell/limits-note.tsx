@@ -5,6 +5,8 @@
 
 import { FileWarning } from 'lucide-react';
 
+import { SCREEN_LEXICAL_DISCLOSURE } from '@/lib/disclosures';
+
 export interface LimitsNoteProps {
   disclaimer: string;
   seed: number;
@@ -59,12 +61,8 @@ export function LimitsNote({
           </span>
         </li>
         <li className="py-1.5 last:pb-0">
-          <span>
-            The biosafety screen is a deterministic keyword-and-registry check, chosen so a
-            reviewer can re-derive every verdict by hand. It over-blocks on innocent phrasing and
-            can be evaded by paraphrase, and it belongs in front of an institutional biosafety
-            review, never in place of one.
-          </span>
+          {/* One copy, shared with the red-team consoles on every surface. */}
+          <span>{SCREEN_LEXICAL_DISCLOSURE}</span>
         </li>
         <li className="py-1.5 last:pb-0">
           <span>

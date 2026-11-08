@@ -97,7 +97,7 @@ export function CommandPalette({
           <CommandGroup heading="Pipeline">
             <CommandItem value="run checks pipeline agents" onSelect={close(onRunPipeline)}>
               <PlayCircle aria-hidden />
-              Run the seven agent checks
+              Run the agent checks
               <CommandShortcut>⌘⏎</CommandShortcut>
             </CommandItem>
             <CommandItem value="attempt merge gate" onSelect={close(onAttemptMerge)}>

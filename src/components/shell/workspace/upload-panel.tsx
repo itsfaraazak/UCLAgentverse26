@@ -41,7 +41,7 @@ export function UploadPanel({ locus }: UploadPanelProps) {
           <h2 className="work__h font-display">Upload a sequence</h2>
           <p className="work__sub">
             Compare your own {locus.gene} coding sequence with the curated reference
-            allele. The upload is screened before anything reads it, then drawn below
+            allele. The upload is screened in your browser before this view reads it, then drawn below
             once it is accepted.
           </p>
         </div>

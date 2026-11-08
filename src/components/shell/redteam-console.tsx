@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 
 import { screenRequestAction } from '@/app/actions';
+import { SCREEN_LEXICAL_DISCLOSURE } from '@/lib/disclosures';
 import type { ScreenView } from './model/types';
 import { StatusMark } from './status';
 import type { StatusTone } from './status';
@@ -113,6 +114,13 @@ export function RedTeamConsole({ example, onRun }: RedTeamConsoleProps) {
         downstream agent runs. Refused requests are reported by policy category only —
         the text is not stored or echoed back.
       </p>
+
+      {/*
+        SPEC §7.7. This surface is the default one and this box invites the
+        reader to try to get something past the gate, so saying what the gate
+        actually is belongs here rather than only on /bench.
+      */}
+      <p className="rt__note">{SCREEN_LEXICAL_DISCLOSURE}</p>
 
       <form
         className="rt__form"

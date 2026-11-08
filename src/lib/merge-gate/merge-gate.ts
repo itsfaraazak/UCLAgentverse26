@@ -260,6 +260,7 @@ export function recordSignoff(check: CheckRun, signedOffBy: string): CheckRun {
 export type SignoffRefusal =
   | { readonly ok: false; readonly reason: 'not-escalated' }
   | { readonly ok: false; readonly reason: 'blocked' }
+  | { readonly ok: false; readonly reason: 'check-failed' }
   | { readonly ok: false; readonly reason: 'no-role' }
   | { readonly ok: false; readonly reason: 'unnamed-actor' }
   | { readonly ok: false; readonly reason: 'already-signed' };
@@ -289,7 +290,12 @@ export type SignoffResult =
  * carries a `role` field, that is the bypass this function exists to remove.
  */
 export function resolveSignoff(check: CheckRun, signedOffBy: string): SignoffResult {
-  if (check.status === 'failed') return { ok: false, reason: 'blocked' };
+  // Both a gate refusal and a verifier failure are `failed`, and neither is
+  // signable. Only the wording differs, so a check that does not say it was
+  // blocked is reported as a failed check rather than as a refusal.
+  if (check.status === 'failed') {
+    return { ok: false, reason: check.blockedAtGate === true ? 'blocked' : 'check-failed' };
+  }
   if (check.status !== 'escalated' && !check.requiresSignoff) {
     return { ok: false, reason: 'not-escalated' };
   }
@@ -309,6 +315,8 @@ export function signoffRefusalReason(refusal: SignoffRefusal): string {
   switch (refusal.reason) {
     case 'blocked':
       return 'This run was refused at the biosafety gate. A refusal cannot be signed off.';
+    case 'check-failed':
+      return 'This run did not pass its checks, so there is nothing to sign off. It was not refused at the biosafety gate.';
     case 'not-escalated':
       return 'This run is not awaiting a sign-off.';
     case 'no-role':

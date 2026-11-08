@@ -68,6 +68,9 @@ export function checkRunFromPipeline(args: {
     id: args.id ?? args.result.headId,
     commit: args.commit,
     status: statusFromPipeline(args.result),
+    // Carried so a refusal can be worded as a refusal and a verifier failure
+    // as a verifier failure. Both remain unsignable.
+    blockedAtGate: args.result.blocked,
     requiresSignoff: args.result.requiresSignoff,
     ...(args.result.signoffRole !== undefined ? { signoffRole: args.result.signoffRole } : {}),
     ...(signedOffBy !== undefined ? { signedOffBy } : {}),

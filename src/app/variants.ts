@@ -1,7 +1,7 @@
 /**
  * The three surfaces, in one list.
  *
- * Shared by the landing page and by the in-app variant switcher, so a route
+ * Shared by the variant switcher on every surface and by the in-app variant switcher, so a route
  * cannot exist in one and be missing from the other. These are three views of
  * one product over the same `lib/` core (SPEC §6) — not three apps.
  */
