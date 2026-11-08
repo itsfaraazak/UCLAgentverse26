@@ -250,6 +250,26 @@ function parseLociFile(raw: unknown): readonly Locus[] {
 
 const LOCI: readonly Locus[] = parseLociFile(rawLoci);
 
+function parseDisclaimer(raw: unknown): string {
+  if (!isRecord(raw)) throw new Error('loci.json: not an object');
+  const value = raw._disclaimer;
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error('loci.json: _disclaimer must be a non-empty string');
+  }
+  return value;
+}
+
+/**
+ * The fixture's own statement of what it is and is not.
+ *
+ * SPEC §7.7 requires the UI to state the model's limits where the numbers
+ * appear, and §7.6 requires every fixture to carry its provenance. The text
+ * is authored in `loci.json` beside the data it describes, so it is loaded
+ * from there and rendered verbatim rather than paraphrased per surface — a
+ * paraphrase is how a disclosure quietly weakens.
+ */
+export const FIXTURE_DISCLAIMER: string = parseDisclaimer(rawLoci);
+
 const LOCI_BY_GENE: ReadonlyMap<string, Locus> = new Map(
   LOCI.map((locus) => [locus.gene.toUpperCase(), locus]),
 );

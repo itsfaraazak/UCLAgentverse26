@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { Repo, canonicalJson, oidOf, isCleanMerge } from './index';
+import { Repo, canonicalJson, oidOf, isCleanMerge, shortOid, SHORT_OID_LENGTH } from './index';
 import type { Oid } from './index';
 import type { Sequence } from '../genome';
 
@@ -348,5 +348,25 @@ describe('mergeBase and three-way merge', () => {
     if (tree.kind !== 'tree') return;
     const hbb = repo.read(tree.entries.HBB ?? '');
     expect(hbb.kind === 'blob' && hbb.sequence.bases).toBe('GGG');
+  });
+});
+
+describe('shortOid', () => {
+  it('abbreviates to the width SPEC §4.2 displays', () => {
+    const oid = oidOf({ kind: 'blob', sequence: { bases: 'ATG', label: 'x' } });
+    expect(oid).toHaveLength(64);
+    expect(shortOid(oid)).toBe(oid.slice(0, 12));
+    expect(shortOid(oid)).toHaveLength(SHORT_OID_LENGTH);
+  });
+
+  it('accepts an explicit width and rejects a nonsensical one', () => {
+    const oid = 'a'.repeat(64);
+    expect(shortOid(oid, 7)).toBe('aaaaaaa');
+    expect(() => shortOid(oid, 0)).toThrow(/positive integer/);
+    expect(() => shortOid(oid, 1.5)).toThrow(/positive integer/);
+  });
+
+  it('leaves an oid shorter than the width alone', () => {
+    expect(shortOid('abc')).toBe('abc');
   });
 });

@@ -44,7 +44,7 @@
   --secondary-foreground: oklch(0.27 0.014 255);
 
   --muted: oklch(0.955 0.004 250);
-  --muted-foreground: oklch(0.52 0.014 257);
+  --muted-foreground: oklch(0.49 0.013 257);
 
   --accent: oklch(0.945 0.008 253);
   --accent-foreground: oklch(0.27 0.014 255);
@@ -56,12 +56,61 @@
   --input: oklch(0.9 0.005 252);
   --ring: oklch(0.56 0.16 258);
 
-  /* Pipeline verdict colours. The biosafety gate's three outcomes must be
-     distinguishable by more than hue alone — every surface using these also
-     carries an icon and a text label (SPEC §5, accessibility). */
-  --verdict-pass: oklch(0.6 0.14 155);
-  --verdict-escalate: oklch(0.72 0.16 75);
-  --verdict-block: oklch(0.58 0.21 27);
+  /* Pipeline verdict colours — the single source of verdict tone for all
+     three surfaces. The gate's outcomes must be distinguishable by more than
+     hue alone, so every surface using these also carries an icon and a text
+     label (SPEC §5).
+
+     Darkened from the first pass (0.6 / 0.72): verdict text has to clear WCAG
+     AA against both `card` and its own soft tint, and it did not. That is
+     checked by src/lib/theme/contrast.test.ts, which reads this file, rather
+     than asserted in a comment. `conflict` is a merge conflict — not a
+     verdict the pipeline issues, but it reads as one in the UI. */
+  --verdict-pass: oklch(0.47 0.13 152);
+  --verdict-pass-soft: oklch(0.94 0.045 152);
+  --verdict-escalate: oklch(0.52 0.14 68);
+  --verdict-escalate-soft: oklch(0.95 0.055 80);
+  --verdict-block: oklch(0.54 0.2 24);
+  --verdict-block-soft: oklch(0.95 0.045 24);
+  --verdict-conflict: oklch(0.52 0.19 310);
+  --verdict-conflict-soft: oklch(0.95 0.04 310);
+  --verdict-neutral: oklch(0.49 0.012 258);
+  --verdict-neutral-soft: oklch(0.95 0.004 255);
+
+  /* Check-run statuses, as the run lists and gauges render them. Derived from
+     the verdict tones wherever they mean the same thing, so a passing check is
+     the same green in /ide's check list, /bench's gauge and /graph's node.
+     `warn` and `skipped` have no verdict equivalent. */
+  --status-pass: var(--verdict-pass);
+  --status-warn: oklch(0.47 0.11 80);
+  --status-fail: var(--verdict-block);
+  --status-blocked: oklch(0.42 0.2 12);
+  --status-escalated: var(--verdict-escalate);
+  --status-skipped: var(--verdict-neutral);
+
+  /* Diff registers, shared by all three diff views. */
+  --diff-same-fg: oklch(0.46 0.009 286);
+  --diff-changed: oklch(0.44 0.15 28);
+  --diff-changed-bg: oklch(0.955 0.035 28);
+  --diff-silent: oklch(0.44 0.09 86);
+  --diff-silent-bg: oklch(0.962 0.045 92);
+  --diff-added: oklch(0.42 0.11 150);
+  --diff-added-bg: oklch(0.952 0.04 150);
+  --diff-removed: oklch(0.45 0.13 15);
+  --diff-removed-bg: oklch(0.955 0.03 15);
+
+  /* Cell canvas and gene track. */
+  --cell-wall: oklch(0.86 0.006 286);
+  --cell-plasma: oklch(0.985 0.003 240);
+  --exon-modelled: oklch(0.55 0.11 258);
+  --exon-context: oklch(0.86 0.012 286);
+  --intron: oklch(0.9 0.004 286);
+  --marker: oklch(0.49 0.18 25);
+
+  /* Window chrome. */
+  --chrome: oklch(0.955 0.003 286);
+  --chrome-border: oklch(0.878 0.004 286);
+  --gutter: oklch(0.976 0.003 286);
 
   --chart-1: oklch(0.56 0.16 258);
   --chart-2: oklch(0.6 0.14 155);
@@ -99,9 +148,44 @@
   --input: oklch(1 0 0 / 16%);
   --ring: oklch(0.68 0.15 256);
 
-  --verdict-pass: oklch(0.7 0.14 157);
-  --verdict-escalate: oklch(0.79 0.15 78);
-  --verdict-block: oklch(0.66 0.19 25);
+  --verdict-pass: oklch(0.76 0.15 155);
+  --verdict-pass-soft: oklch(0.3 0.06 155);
+  --verdict-escalate: oklch(0.82 0.15 82);
+  --verdict-escalate-soft: oklch(0.33 0.06 82);
+  --verdict-block: oklch(0.72 0.18 25);
+  --verdict-block-soft: oklch(0.32 0.075 25);
+  --verdict-conflict: oklch(0.75 0.16 312);
+  --verdict-conflict-soft: oklch(0.32 0.07 312);
+  --verdict-neutral: oklch(0.71 0.012 256);
+  --verdict-neutral-soft: oklch(0.28 0.012 264);
+
+  --status-pass: var(--verdict-pass);
+  --status-warn: oklch(0.83 0.13 88);
+  --status-fail: var(--verdict-block);
+  --status-blocked: oklch(0.72 0.19 14);
+  --status-escalated: var(--verdict-escalate);
+  --status-skipped: var(--verdict-neutral);
+
+  --diff-same-fg: oklch(0.67 0.008 286);
+  --diff-changed: oklch(0.79 0.14 32);
+  --diff-changed-bg: oklch(0.265 0.05 30);
+  --diff-silent: oklch(0.83 0.13 92);
+  --diff-silent-bg: oklch(0.265 0.045 92);
+  --diff-added: oklch(0.79 0.14 155);
+  --diff-added-bg: oklch(0.265 0.045 155);
+  --diff-removed: oklch(0.78 0.14 18);
+  --diff-removed-bg: oklch(0.265 0.045 18);
+
+  --cell-wall: oklch(0.36 0.008 286);
+  --cell-plasma: oklch(0.21 0.008 240);
+  --exon-modelled: oklch(0.68 0.12 255);
+  --exon-context: oklch(0.36 0.012 286);
+  --intron: oklch(0.3 0.006 286);
+  --marker: oklch(0.76 0.17 26);
+
+  --chrome: oklch(0.195 0.006 286);
+  --chrome-border: oklch(0.283 0.007 286);
+  --gutter: oklch(0.188 0.006 286);
 
   --chart-1: oklch(0.68 0.15 256);
   --chart-2: oklch(0.7 0.14 157);
@@ -111,31 +195,83 @@
 }
 
 /* Follow the OS when no explicit .dark/.light class is set, so the app feels
-   native on first load. An explicit class always wins. */
+   native on first load and a no-JS reader still gets a coherent theme. An
+   explicit class always wins. Mirrors the `.dark` block above — add a dark
+   token there and here together. */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --background: oklch(0.17 0.008 258);
     --foreground: oklch(0.96 0.003 250);
+
     --card: oklch(0.21 0.01 258);
     --card-foreground: oklch(0.96 0.003 250);
+
     --popover: oklch(0.23 0.011 258);
     --popover-foreground: oklch(0.96 0.003 250);
+
     --primary: oklch(0.68 0.15 256);
     --primary-foreground: oklch(0.17 0.008 258);
+
     --secondary: oklch(0.26 0.012 258);
     --secondary-foreground: oklch(0.96 0.003 250);
+
     --muted: oklch(0.26 0.012 258);
     --muted-foreground: oklch(0.71 0.012 256);
+
     --accent: oklch(0.3 0.015 258);
     --accent-foreground: oklch(0.96 0.003 250);
+
     --destructive: oklch(0.66 0.19 25);
     --destructive-foreground: oklch(0.17 0.008 258);
+
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 16%);
     --ring: oklch(0.68 0.15 256);
-    --verdict-pass: oklch(0.7 0.14 157);
-    --verdict-escalate: oklch(0.79 0.15 78);
-    --verdict-block: oklch(0.66 0.19 25);
+
+    --verdict-pass: oklch(0.76 0.15 155);
+    --verdict-pass-soft: oklch(0.3 0.06 155);
+    --verdict-escalate: oklch(0.82 0.15 82);
+    --verdict-escalate-soft: oklch(0.33 0.06 82);
+    --verdict-block: oklch(0.72 0.18 25);
+    --verdict-block-soft: oklch(0.32 0.075 25);
+    --verdict-conflict: oklch(0.75 0.16 312);
+    --verdict-conflict-soft: oklch(0.32 0.07 312);
+    --verdict-neutral: oklch(0.71 0.012 256);
+    --verdict-neutral-soft: oklch(0.28 0.012 264);
+
+    --status-pass: var(--verdict-pass);
+    --status-warn: oklch(0.83 0.13 88);
+    --status-fail: var(--verdict-block);
+    --status-blocked: oklch(0.72 0.19 14);
+    --status-escalated: var(--verdict-escalate);
+    --status-skipped: var(--verdict-neutral);
+
+    --diff-same-fg: oklch(0.67 0.008 286);
+    --diff-changed: oklch(0.79 0.14 32);
+    --diff-changed-bg: oklch(0.265 0.05 30);
+    --diff-silent: oklch(0.83 0.13 92);
+    --diff-silent-bg: oklch(0.265 0.045 92);
+    --diff-added: oklch(0.79 0.14 155);
+    --diff-added-bg: oklch(0.265 0.045 155);
+    --diff-removed: oklch(0.78 0.14 18);
+    --diff-removed-bg: oklch(0.265 0.045 18);
+
+    --cell-wall: oklch(0.36 0.008 286);
+    --cell-plasma: oklch(0.21 0.008 240);
+    --exon-modelled: oklch(0.68 0.12 255);
+    --exon-context: oklch(0.36 0.012 286);
+    --intron: oklch(0.3 0.006 286);
+    --marker: oklch(0.76 0.17 26);
+
+    --chrome: oklch(0.195 0.006 286);
+    --chrome-border: oklch(0.283 0.007 286);
+    --gutter: oklch(0.188 0.006 286);
+
+    --chart-1: oklch(0.68 0.15 256);
+    --chart-2: oklch(0.7 0.14 157);
+    --chart-3: oklch(0.79 0.15 78);
+    --chart-4: oklch(0.66 0.19 25);
+    --chart-5: oklch(0.67 0.13 302);
   }
 }
 
@@ -161,8 +297,43 @@
   --color-ring: var(--ring);
 
   --color-verdict-pass: var(--verdict-pass);
+  --color-verdict-pass-soft: var(--verdict-pass-soft);
   --color-verdict-escalate: var(--verdict-escalate);
+  --color-verdict-escalate-soft: var(--verdict-escalate-soft);
   --color-verdict-block: var(--verdict-block);
+  --color-verdict-block-soft: var(--verdict-block-soft);
+  --color-verdict-conflict: var(--verdict-conflict);
+  --color-verdict-conflict-soft: var(--verdict-conflict-soft);
+  --color-verdict-neutral: var(--verdict-neutral);
+  --color-verdict-neutral-soft: var(--verdict-neutral-soft);
+
+  --color-status-pass: var(--status-pass);
+  --color-status-warn: var(--status-warn);
+  --color-status-fail: var(--status-fail);
+  --color-status-blocked: var(--status-blocked);
+  --color-status-escalated: var(--status-escalated);
+  --color-status-skipped: var(--status-skipped);
+
+  --color-diff-same-fg: var(--diff-same-fg);
+  --color-diff-changed: var(--diff-changed);
+  --color-diff-changed-bg: var(--diff-changed-bg);
+  --color-diff-silent: var(--diff-silent);
+  --color-diff-silent-bg: var(--diff-silent-bg);
+  --color-diff-added: var(--diff-added);
+  --color-diff-added-bg: var(--diff-added-bg);
+  --color-diff-removed: var(--diff-removed);
+  --color-diff-removed-bg: var(--diff-removed-bg);
+
+  --color-cell-wall: var(--cell-wall);
+  --color-cell-plasma: var(--cell-plasma);
+  --color-exon-modelled: var(--exon-modelled);
+  --color-exon-context: var(--exon-context);
+  --color-intron: var(--intron);
+  --color-marker: var(--marker);
+
+  --color-chrome: var(--chrome);
+  --color-chrome-border: var(--chrome-border);
+  --color-gutter: var(--gutter);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -245,6 +416,13 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.035em;
     text-transform: uppercase;
+  }
+
+  /* Tabular, fixed-advance digits for codon indices and metric readouts.
+     `body` already sets these; this is for elements that opt out locally. */
+  .nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 
   /* Translucent chrome, for the sidebar and titlebar surfaces that give the
@@ -382,4 +560,35 @@
     linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+/* Thin scrollbars, so the dense panes read as editor panes rather than as web
+   page scroll areas. */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 99px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* The triptych's panes own their scrolling; the window never bounces. */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
 }

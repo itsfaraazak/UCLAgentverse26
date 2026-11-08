@@ -4,7 +4,10 @@ export {
   introducedCommits,
   isAllowedMerge,
   recordSignoff,
+  resolveSignoff,
+  signoffRefusalReason,
 } from './merge-gate';
+export type { SignoffRefusal, SignoffResult } from './merge-gate';
 export type {
   CheckRun,
   CheckRunStatus,

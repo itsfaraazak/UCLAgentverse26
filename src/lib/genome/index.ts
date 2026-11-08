@@ -9,6 +9,7 @@ export {
 export { applyVariant, applyVariants } from './variant';
 export { diffSequences } from './diff';
 export {
+  FIXTURE_DISCLAIMER,
   loadLoci,
   getLocus,
   getLocusVariant,

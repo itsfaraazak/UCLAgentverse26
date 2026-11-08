@@ -6,6 +6,7 @@ export {
   DEFAULT_ASSAY_STEPS,
   PO2_RANGE,
   SIMULATION_DEFAULTS,
+  SIMULATION_NOTE,
   channelHalfHeight,
   resolveParams,
   runAssay,

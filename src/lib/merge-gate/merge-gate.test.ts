@@ -9,6 +9,8 @@ import {
   introducedCommits,
   isAllowedMerge,
   recordSignoff,
+  resolveSignoff,
+  signoffRefusalReason,
 } from './index';
 import type { CheckRun, CheckRunStatus, MergeDecision } from './index';
 
@@ -678,5 +680,83 @@ describe('checkRunFromPipeline', () => {
     expect(check.requiresSignoff).toBe(true);
     expect(check.signoffRole).toBe('institutional_biosafety_committee');
     expect(check.signedOffBy).toBeUndefined();
+  });
+});
+
+describe('resolveSignoff is the only path to a signed check (SPEC §7.5)', () => {
+  const oid = 'a'.repeat(64);
+
+  it('derives the role from the policy, so a caller cannot name it', () => {
+    const escalated = checkRun(oid, 'escalated', {
+      requiresSignoff: true,
+      signoffRole: 'institutional_biosafety_committee',
+    });
+    const result = resolveSignoff(escalated, 'dr-reviewer');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.role).toBe('institutional_biosafety_committee');
+    expect(result.check.signedOffBy).toBe('dr-reviewer');
+    // The signed check carries no role the caller chose.
+    expect(result.check.signoffRole).toBe('institutional_biosafety_committee');
+  });
+
+  it('refuses a blocked run outright — a refusal has no sign-off path', () => {
+    const blocked = checkRun(oid, 'failed', {
+      requiresSignoff: true,
+      signoffRole: 'principal_investigator',
+      reasons: ['Biosafety gate blocked this edit.'],
+    });
+    const result = resolveSignoff(blocked, 'dr-reviewer');
+    expect(result).toEqual({ ok: false, reason: 'blocked' });
+    expect(signoffRefusalReason({ ok: false, reason: 'blocked' })).toMatch(/cannot be signed/i);
+  });
+
+  it('refuses a run that is not awaiting a sign-off', () => {
+    const passed = checkRun(oid, 'passed');
+    expect(resolveSignoff(passed, 'dr-reviewer')).toEqual({
+      ok: false,
+      reason: 'not-escalated',
+    });
+  });
+
+  it('refuses an escalation the policy gave no role', () => {
+    const noRole = checkRun(oid, 'escalated', { requiresSignoff: true });
+    expect(resolveSignoff(noRole, 'dr-reviewer')).toEqual({ ok: false, reason: 'no-role' });
+  });
+
+  it('refuses an unnamed actor and a double sign-off', () => {
+    const escalated = checkRun(oid, 'escalated', {
+      requiresSignoff: true,
+      signoffRole: 'reviewer',
+    });
+    expect(resolveSignoff(escalated, '   ')).toEqual({ ok: false, reason: 'unnamed-actor' });
+    const signed = resolveSignoff(escalated, 'dr-reviewer');
+    expect(signed.ok).toBe(true);
+    if (!signed.ok) return;
+    expect(resolveSignoff(signed.check, 'someone-else')).toEqual({
+      ok: false,
+      reason: 'already-signed',
+    });
+  });
+
+  it('a resolved sign-off actually opens the gate, and a refused one does not', () => {
+    const { repo, ours } = diverged();
+    const theirs = theirsSyn(repo, 7, 'esc-check');
+    repo.checkout('main');
+    const escalated = checkRun(theirs, 'escalated', {
+      id: 'esc-check',
+      requiresSignoff: true,
+      signoffRole: 'principal_investigator',
+    });
+
+    const beforeSignoff = evaluateMerge({ repo, ours, theirs, checks: checksOf(escalated) });
+    expect(beforeSignoff.allowed).toBe(false);
+
+    const resolved = resolveSignoff(escalated, 'dr-okonjo');
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) return;
+    expect(
+      isAllowedMerge(evaluateMerge({ repo, ours, theirs, checks: checksOf(resolved.check) })),
+    ).toBe(true);
   });
 });

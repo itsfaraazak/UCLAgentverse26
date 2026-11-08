@@ -53,6 +53,15 @@ export const CHANNEL = {
   constrictionHalfLength: CONSTRICTION_HALF_LENGTH,
 } as const;
 
+/**
+ * The fixture's own note on these parameters, loaded rather than restated.
+ *
+ * SPEC §4.4 and §7.7: the simulation is illustrative and the UI must say so
+ * where its numbers appear. `ASSAY_MODEL_LIMITATION` below is this codebase's
+ * short form for a panel; this is the fixture author's full statement.
+ */
+export const SIMULATION_NOTE: string = lociFile.simulation._note;
+
 export const ASSAY_MODEL_LIMITATION =
   'Illustrative particle model, not validated haemorheology. ' +
   'Numbers are for teaching the genotype → flow coupling, not prediction.';
