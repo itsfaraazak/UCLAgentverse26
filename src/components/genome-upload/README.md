@@ -86,10 +86,9 @@ never a stack trace, never an error class name:
 
 | input | what the user sees |
 |---|---|
-| non-ACGT (SPEC §4.6 #13) | names the character and its 1-based position, and that the position counts the cleaned sequence after whitespace and any FASTA header were removed |
+| non-ACGT (SPEC §4.6 #13) | names the character and its 1-based position, says the position counts the *assembled* sequence after any FASTA header and line breaks were removed, and — for an `N`, a `U` or an IUPAC code — why that specific character is refused |
 | length not a multiple of 3 (SPEC §4.6 #14) | explains that this view diffs whole codons, and how many bases are extra. The sequence is **not** truncated to fit |
-| more than one FASTA record | says how many were found and asks for a single coding sequence |
-| sequence text above the header | refuses rather than silently dropping it |
+| more than one FASTA record | says how many were found and asks for one at a time; the first record is never silently used |
 | over the cap | states the limit and the observed size |
 
 Non-fatal observations are surfaced as warnings and still load: no `ATG`
@@ -98,10 +97,10 @@ legitimately has none), and a codon count differing from the reference.
 
 ## Caps
 
-Stated in the UI next to the input: **60,000 bases** (20,000 codons) and
-**1,000,000 characters** of raw input. A file over the raw cap is refused on
-`file.size` *before* it is opened. These are demo-scale limits that keep
-parsing, diffing and 3D instancing interactive — not biological ones.
+`UPLOAD_LIMITS` re-exports `lib/genome`'s `MAX_SEQUENCE_BASES` and
+`MAX_UPLOAD_CHARS` rather than declaring its own, so the number the UI states
+is the number that is enforced — a test asserts those stay equal. A file over
+the raw cap is refused on `file.size` *before* it is opened.
 
 ## Files
 
@@ -109,8 +108,14 @@ parsing, diffing and 3D instancing interactive — not biological ones.
 |---|---|
 | `GenomeUpload.tsx` | the component: drop zone, paste box, verdict surfaces |
 | `screening.ts` | the gate. The only path in. Owns the non-echo guarantee |
-| `fasta.ts` | strict FASTA / bare-sequence parsing and the size caps |
-| `validate.ts` | `lib/genome`'s rules as a discriminated result, never throwing |
+| `validate.ts` | `lib/genome`'s parser and rules as a discriminated result, never throwing |
+
+Parsing itself lives in **`lib/genome/fasta.ts`**, not here. This directory
+briefly carried its own FASTA reader; when the shared one landed it became a
+second copy with *different* size caps, which would have printed a limit the
+app did not enforce. It was deleted. `validate.ts` now wraps
+`parseSequenceUpload` and keeps only what is genuinely presentational: the
+discriminated result, the friendly sentences, and the warnings layer.
 
 Colour is never the only signal on a verdict: each notice pairs its
 `--verdict-*` tone with a lucide icon and a text label.

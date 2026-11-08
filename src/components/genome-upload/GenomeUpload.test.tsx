@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getLocus, referenceSequence } from '@/lib/genome';
 import type { GenomeModel } from '@/components/genome-3d';
 import { GenomeUpload } from './GenomeUpload';
-import { UPLOAD_LIMITS } from './fasta';
+import { UPLOAD_LIMITS } from './validate';
 
 /**
  * These tests pin the safety behaviour of the upload surface, not its looks:
@@ -14,9 +15,14 @@ import { UPLOAD_LIMITS } from './fasta';
  *  - The brief: uploaded data is session-only — no persistence, no network.
  */
 
-/** The curated HBB reference region: 31 codons, valid. */
-const HBB_REF =
-  'ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGG';
+/**
+ * The real curated HBB coding sequence, read from the fixture rather than
+ * pasted in: `loci.json` moved from a 31-codon excerpt to the full
+ * NM_000518.5 CDS, and a hardcoded copy here silently went stale.
+ */
+const locus = getLocus('HBB');
+if (locus === undefined) throw new Error('HBB fixture missing from loci.json');
+const HBB_REF = referenceSequence(locus).bases;
 
 function paste(value: string): void {
   const box = screen.getByLabelText(/paste a coding sequence/i);
@@ -64,7 +70,9 @@ describe('GenomeUpload — a valid sequence', () => {
     const onGenomeChange = vi.fn<(m: GenomeModel | null) => void>();
     render(<GenomeUpload onGenomeChange={onGenomeChange} />);
 
-    // One codon changed from the reference: codon 7 GAG → GTG (the sickle allele).
+    // Codon 7 (bases 18–20) GAG → GTG: the sickle allele, derived from the
+    // live reference so it survives another genome refresh.
+    expect(HBB_REF.slice(18, 21)).toBe('GAG');
     const altered = `${HBB_REF.slice(0, 18)}GTG${HBB_REF.slice(21)}`;
     paste(altered);
 

@@ -1,190 +1,163 @@
 import { describe, expect, it } from 'vitest';
-import { validateSequence } from './validate';
-import type { SequenceError, SequenceWarningCode } from './validate';
+import { getLocus, referenceSequence } from '@/lib/genome';
+import { UPLOAD_LIMITS, validateUpload } from './validate';
 
-const HBB_31 =
-  'ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGG';
-const HBB_PROTEIN = 'MVHLTPEEKSAVTALWGKVNVDEVGGEALGR';
+/**
+ * `validateUpload` is the presentational wrapper around `lib/genome`'s
+ * parser. These tests cover the wrapper's contract — never throws, returns a
+ * discriminated result, writes one friendly sentence per failure with no
+ * stack trace — and the warnings layer, which is the only logic that lives
+ * here. The parser itself is tested in `src/lib/genome/fasta.test.ts`.
+ */
 
-function warningCodes(
-  warnings: readonly { readonly code: SequenceWarningCode }[],
-): SequenceWarningCode[] {
-  return warnings.map((warning) => warning.code);
-}
+const locus = getLocus('HBB');
+if (locus === undefined) throw new Error('HBB fixture missing from loci.json');
+const REFERENCE = referenceSequence(locus).bases;
 
-function expectError(
-  result: ReturnType<typeof validateSequence>,
-): SequenceError {
-  expect(result.ok).toBe(false);
-  if (result.ok) {
-    throw new Error('expected a validation error');
+describe('validateUpload — the happy path on the real reference', () => {
+  it('accepts the curated HBB coding sequence and reports its real codon count', () => {
+    const result = validateUpload(REFERENCE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.sequence.bases).toBe(REFERENCE);
+    expect(result.sequence.codonCount).toBe(locus.cdsReference.codonCount);
+    expect(result.sequence.protein.startsWith('MVHLTPEEK')).toBe(true);
+    expect(result.sequence.wasFasta).toBe(false);
+    expect(result.sequence.warnings.map((w) => w.code)).not.toContain('no-start-codon');
+  });
+
+  it('normalises lowercase and accepts a FASTA record, taking its header as the label', () => {
+    const result = validateUpload(`>HBB NM_000518.5\n${REFERENCE.toLowerCase()}`);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.sequence.bases).toBe(REFERENCE);
+    expect(result.sequence.wasFasta).toBe(true);
+    expect(result.sequence.label).toContain('HBB');
+  });
+
+  it('uses the fallback label only when there is no header', () => {
+    const result = validateUpload(REFERENCE, { fallbackLabel: 'my-upload.fasta' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.sequence.label).toBe('my-upload.fasta');
+  });
+});
+
+describe('validateUpload — failures are friendly, never a stack trace', () => {
+  function errorOf(raw: string) {
+    const result = validateUpload(raw);
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error('expected a failure');
+    return result.error;
   }
-  return result.error;
-}
 
-describe('validateSequence', () => {
-  it('accepts the HBB 31-codon reference with a mild no-stop-codon warning', () => {
-    const result = validateSequence(HBB_31, 'HBB exon 1');
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.sequence.bases).toBe(HBB_31);
-    expect(result.sequence.label).toBe('HBB exon 1');
-    expect(result.sequence.codonCount).toBe(31);
-    expect(result.sequence.protein).toBe(HBB_PROTEIN);
-    expect(warningCodes(result.sequence.warnings)).toEqual(['no-stop-codon']);
-    expect(result.sequence.warnings[0]?.message).not.toMatch(/error/i);
-  });
-
-  it('normalises lowercase input to uppercase', () => {
-    const result = validateSequence('atggagtga', 'lower');
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.sequence.bases).toBe('ATGGAGTGA');
-    expect(result.sequence.protein).toBe('ME*');
-    expect(result.sequence.codonCount).toBe(3);
-  });
-
-  it('returns empty for empty or whitespace-only cleaned input', () => {
-    for (const input of ['', '   ', '\n\t']) {
-      const error = expectError(validateSequence(input, 'empty'));
-      expect(error.code).toBe('empty');
-      expect(error.message.length).toBeGreaterThan(0);
-      expect(error.message).not.toMatch(/Error|at Object|stack/i);
-    }
-  });
-
-  it('maps a bad base to invalid-base with char, offset and 1-based position', () => {
-    const error = expectError(validateSequence('ATGCGTN', 'ambig'));
-
-    expect(error.code).toBe('invalid-base');
-    expect(error.char).toBe('N');
-    expect(error.offset).toBe(6);
-    expect(error.position).toBe(7);
-    expect(error.message).toContain('"N"');
-    expect(error.message).toContain('position 7');
-    expect(error.message).toMatch(/cleaned sequence/i);
-    expect(error.message).not.toContain('InvalidBaseError');
-  });
-
-  it('rejects a trailing partial codon without truncating', () => {
-    const error = expectError(validateSequence('ATGGA', 'partial'));
-
-    expect(error.code).toBe('partial-codon');
-    expect(error.length).toBe(5);
-    expect(error.remainder).toBe(2);
-    expect(error.message).toMatch(/whole codon/i);
-    expect(error.message).toContain('2 extra bases');
-    expect(error.message).not.toContain('PartialCodonError');
-  });
-
-  it('reports a leftover single base as 1 extra base', () => {
-    const error = expectError(validateSequence('ATGGAGT', 'partial-1'));
-
-    expect(error.code).toBe('partial-codon');
-    expect(error.length).toBe(7);
-    expect(error.remainder).toBe(1);
-    expect(error.message).toContain('1 extra base');
-  });
-
-  it('checks the alphabet before the frame length so ATGN names the bad character', () => {
-    const error = expectError(validateSequence('ATGN', 'order'));
-
+  it('names a non-ACGT character and its 1-based position (SPEC §4.6 #13)', () => {
+    const error = errorOf('ATGNNNCCC');
     expect(error.code).toBe('invalid-base');
     expect(error.char).toBe('N');
     expect(error.offset).toBe(3);
     expect(error.position).toBe(4);
-    expect(error.message).toContain('"N"');
     expect(error.message).toContain('position 4');
-    expect(error.code).not.toBe('partial-codon');
+    // lib/genome explains *why* an N is refused; the wrapper must surface it.
+    expect(error.message).toMatch(/ambiguous/i);
+    // And it must say which coordinate system the position is in.
+    expect(error.message).toMatch(/assembled sequence/i);
   });
 
-  it('warns no-start-codon when the first codon is not ATG', () => {
-    const result = validateSequence('GTGGAGTAA', 'no-start');
+  it('explains a trailing partial codon and promises nothing was trimmed (SPEC §4.6 #14)', () => {
+    const error = errorOf('ATGGTGCA');
+    expect(error.code).toBe('partial-codon');
+    expect(error.length).toBe(8);
+    expect(error.remainder).toBe(2);
+    expect(error.message).toMatch(/whole number of codons/i);
+    expect(error.message).toMatch(/Nothing was trimmed/i);
+  });
 
+  it('checks the alphabet before the frame, so ATGN is a bad character not a bad length', () => {
+    expect(errorOf('ATGN').code).toBe('invalid-base');
+  });
+
+  it('reports empty input', () => {
+    expect(errorOf('   \n  ').code).toBe('empty');
+  });
+
+  it('refuses more than one record rather than silently using the first', () => {
+    const error = errorOf('>one\nATGGTG\n>two\nATGGTG');
+    expect(error.code).toBe('multiple-records');
+    expect(error.message).toMatch(/one coding sequence at a time/i);
+  });
+
+  it('refuses input over the base cap', () => {
+    const error = errorOf('ATG'.repeat(UPLOAD_LIMITS.maxBases));
+    expect(error.code).toBe('too-large');
+  });
+
+  it('never leaks an error class name or a file path into a message', () => {
+    for (const raw of ['ATGN', 'ATGGTGCA', '', '>a\nATG\n>b\nATG']) {
+      const result = validateUpload(raw);
+      if (result.ok) continue;
+      expect(result.error.message).not.toMatch(/Error:|\.ts:|at Object|InvalidBaseError/);
+    }
+  });
+
+  it('never throws, whatever it is handed', () => {
+    const hostile = ['', '   ', '\u0000', '123456', 'N'.repeat(1000), 'ATG-GTG', 'U'.repeat(9), '>'.repeat(50)];
+    for (const raw of hostile) {
+      expect(() => validateUpload(raw)).not.toThrow();
+    }
+  });
+});
+
+describe('validateUpload — non-fatal warnings', () => {
+  function warn(raw: string, referenceCodonCount?: number): readonly string[] {
+    const result = validateUpload(
+      raw,
+      referenceCodonCount === undefined ? {} : { referenceCodonCount },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return [];
+    return result.sequence.warnings.map((w) => w.code);
+  }
+
+  it('flags a missing ATG start', () => {
+    expect(warn('GTGGTGTAA')).toContain('no-start-codon');
+  });
+
+  it('flags a stop codon before the end, naming its position', () => {
+    const result = validateUpload('ATGTAAGTGTAA');
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(warningCodes(result.sequence.warnings)).toEqual(['no-start-codon']);
-    expect(result.sequence.warnings[0]?.message).toMatch(/ATG/);
+    const internal = result.sequence.warnings.find((w) => w.code === 'internal-stop');
+    expect(internal?.message).toContain('codon 2');
   });
 
-  it('warns internal-stop with a 1-based codon position', () => {
-    const result = validateSequence('ATGTAATAA', 'internal-stop');
-
-    expect(result.ok).toBe(true);
+  it('notes a missing stop codon mildly, since a partial CDS legitimately has none', () => {
+    const codes = warn('ATGGTGCAT');
+    expect(codes).toContain('no-stop-codon');
+    const result = validateUpload('ATGGTGCAT');
     if (!result.ok) return;
-    expect(warningCodes(result.sequence.warnings)).toEqual(['internal-stop']);
-    expect(result.sequence.warnings[0]?.message).toContain('codon 2');
-    expect(result.sequence.protein).toBe('M*');
+    const w = result.sequence.warnings.find((x) => x.code === 'no-stop-codon');
+    expect(w?.message).toMatch(/expected for a partial coding region/i);
   });
 
-  it('warns no-stop-codon as an observation when the last codon is not a stop', () => {
-    const result = validateSequence('ATGGAG', 'no-stop');
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(warningCodes(result.sequence.warnings)).toEqual(['no-stop-codon']);
-    expect(result.sequence.warnings[0]?.message).toMatch(/partial/i);
-    expect(result.sequence.warnings[0]?.message).not.toMatch(/\berror\b/i);
+  it('reports a codon-count difference in both directions', () => {
+    expect(warn('ATGGTGTAA', 50)).toContain('length-differs');
+    expect(warn('ATGGTGTAA', 1)).toContain('length-differs');
+    expect(warn('ATGGTGTAA', 3)).not.toContain('length-differs');
   });
 
-  it('warns length-differs in both directions and still returns ok', () => {
-    const shorter = validateSequence('ATGGAGTAA', 'shorter', {
-      referenceCodonCount: 4,
-    });
-    expect(shorter.ok).toBe(true);
-    if (!shorter.ok) return;
-    expect(warningCodes(shorter.sequence.warnings)).toContain('length-differs');
-    expect(shorter.sequence.warnings.find((w) => w.code === 'length-differs')?.message).toMatch(
-      /3 codons.*4/,
-    );
-    expect(shorter.sequence.warnings.find((w) => w.code === 'length-differs')?.message).toMatch(
-      /inserted or deleted/,
-    );
-
-    const longer = validateSequence('ATGGAGAAATAA', 'longer', {
-      referenceCodonCount: 3,
-    });
-    expect(longer.ok).toBe(true);
-    if (!longer.ok) return;
-    expect(warningCodes(longer.sequence.warnings)).toContain('length-differs');
-    expect(longer.sequence.warnings.find((w) => w.code === 'length-differs')?.message).toMatch(
-      /4 codons.*3/,
-    );
-  });
-
-  it('keeps ok true when warnings are present', () => {
-    const result = validateSequence(HBB_31, 'HBB', { referenceCodonCount: 30 });
-
+  it('still returns ok: true when warnings are present', () => {
+    const result = validateUpload('GTGGTGCAT');
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.sequence.warnings.length).toBeGreaterThan(0);
-    expect(warningCodes(result.sequence.warnings)).toEqual([
-      'no-stop-codon',
-      'length-differs',
-    ]);
   });
+});
 
-  it('never throws for hostile or awkward inputs', () => {
-    const inputs = [
-      '',
-      '   ',
-      '123',
-      'N',
-      'U',
-      'ATG' + 'GAG'.repeat(4000),
-      'ATG-GAG',
-      'nnn',
-      'TAA',
-    ];
-    for (const input of inputs) {
-      expect(() => validateSequence(input, 'hostile')).not.toThrow();
-      const result = validateSequence(input, 'hostile');
-      expect(result).toHaveProperty('ok');
-      if (!result.ok) {
-        expect(result.error.message).not.toMatch(/InvalidBaseError|PartialCodonError|at Object/);
-      }
-    }
+describe('validateUpload — the caps it advertises are the ones lib/genome enforces', () => {
+  it('re-exports lib/genome limits rather than inventing its own', async () => {
+    const lib = await import('@/lib/genome');
+    expect(UPLOAD_LIMITS.maxRawChars).toBe(lib.MAX_UPLOAD_CHARS);
+    expect(UPLOAD_LIMITS.maxBases).toBe(lib.MAX_SEQUENCE_BASES);
   });
 });

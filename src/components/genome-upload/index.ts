@@ -7,14 +7,8 @@ export {
   type UploadScreening,
 } from './screening';
 export {
-  parseFasta,
-  FastaParseError,
   UPLOAD_LIMITS,
-  type FastaErrorCode,
-  type ParsedFasta,
-} from './fasta';
-export {
-  validateSequence,
+  validateUpload,
   type SequenceError,
   type SequenceErrorCode,
   type SequenceWarning,

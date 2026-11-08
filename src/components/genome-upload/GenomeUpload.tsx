@@ -24,9 +24,13 @@ import { cn } from 'cn';
 import { Button } from '@/components/ui/button';
 import { getLocus, referenceSequence } from '@/lib/genome';
 import { buildGenomeModel, type GenomeModel } from '@/components/genome-3d';
-import { FastaParseError, UPLOAD_LIMITS, parseFasta } from './fasta';
 import { needsAcknowledgement, screenUpload, type UploadScreening } from './screening';
-import { validateSequence, type SequenceWarning, type ValidatedSequence } from './validate';
+import {
+  UPLOAD_LIMITS,
+  validateUpload,
+  type SequenceWarning,
+  type ValidatedSequence,
+} from './validate';
 
 /**
  * "Bring your own genome" — paste a coding sequence or drop a FASTA file.
@@ -159,33 +163,10 @@ export function GenomeUpload({
         return;
       }
 
-      // ---- 2. Parse. -----------------------------------------------------
-      let bases: string;
-      let label: string;
-      try {
-        const parsed = parseFasta(screened.text, {
-          fallbackLabel: fileName ?? 'Uploaded sequence',
-        });
-        bases = parsed.bases;
-        label = parsed.label;
-      } catch (err) {
-        setState({
-          phase: 'invalid',
-          problem: {
-            kind: 'parse',
-            message:
-              err instanceof FastaParseError
-                ? err.message
-                : 'That file could not be read as a sequence or a FASTA record.',
-          },
-        });
-        emit(null, null);
-        return;
-      }
-
-      // ---- 3. Validate against lib/genome's rules. -----------------------
+      // ---- 2. Parse and validate, both owned by lib/genome. --------------
       const reference = referenceSequence(locus);
-      const result = validateSequence(bases, label, {
+      const result = validateUpload(screened.text, {
+        fallbackLabel: fileName ?? 'Uploaded sequence',
         referenceCodonCount: locus.cdsReference.codonCount,
       });
       if (!result.ok) {
@@ -197,7 +178,7 @@ export function GenomeUpload({
         return;
       }
 
-      // ---- 4. Build the model the 3D view renders. -----------------------
+      // ---- 3. Build the model the 3D view renders. -----------------------
       let model: GenomeModel;
       try {
         model = buildGenomeModel({
@@ -220,7 +201,7 @@ export function GenomeUpload({
         return;
       }
 
-      // ---- 5. Escalation waits for a human (SPEC §7.5). ------------------
+      // ---- 4. Escalation waits for a human (SPEC §7.5). ------------------
       if (needsAcknowledgement(screened.screening)) {
         setState({
           phase: 'held',
@@ -416,7 +397,8 @@ export function GenomeUpload({
           )}
         </div>
         <p id={ids.note} className="mt-2 text-[0.6875rem] leading-relaxed text-muted-foreground">
-          Up to {formatInt(UPLOAD_LIMITS.maxBases)} bases ({formatInt(UPLOAD_LIMITS.maxBases / 3)}{' '}
+          Up to {formatInt(UPLOAD_LIMITS.maxBases)} bases (
+          {formatInt(Math.floor(UPLOAD_LIMITS.maxBases / 3))}{' '}
           codons), {formatInt(UPLOAD_LIMITS.maxRawChars)} characters of raw input. A/C/G/T only,
           in frame, a whole number of codons. Every upload is screened before it is read.
         </p>
