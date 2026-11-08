@@ -560,7 +560,9 @@ export function attemptMergeFor(
       signoffRole = result.signoffRole ?? null;
       if (signedOff) check = recordSignoff(check, SIGNOFF_ACTOR);
     }
-    checks.set(check.id, check);
+    // The gate looks a check up by `commit.checkRunId` or, failing that, by
+    // the commit oid. These commits carry no checkRunId, so key by oid.
+    checks.set(oid, check);
   }
 
   const decision = evaluateMerge({ repo, ours, theirs, checks });

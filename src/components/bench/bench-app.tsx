@@ -122,7 +122,9 @@ export function BenchApp({ data }: { data: BenchData }) {
             <h2 id="canvas-heading" className="sr-only">
               Live capillary simulation
             </h2>
-            <div className="engraved-grid relative h-[clamp(300px,44vh,520px)] overflow-hidden rounded-lg bg-background">
+            {/* The channel is 480 × 100 in simulation units; the hero keeps that
+                aspect so the capillary is not stretched out of shape. */}
+            <div className="engraved-grid relative aspect-[24/5] max-h-[52vh] min-h-[240px] w-full overflow-hidden rounded-lg bg-background">
               <CellCanvas
                 seed={data.simulation.seed}
                 cellCount={data.simulation.cellCount}
