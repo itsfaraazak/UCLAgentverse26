@@ -42,7 +42,7 @@ import { MergeView } from './merge-view';
 import { CellPanel } from './cell-panel';
 import { ProteinPanel } from './protein-panel';
 import { MountSlot } from './mount-slot';
-import { StatusPill, toneForCheck } from '../status';
+import { StatusPill, toneForRun } from '../status';
 
 export type WorkspaceTab =
   | 'overview'
@@ -146,7 +146,9 @@ export function WorkspacePanel({
           />
         ) : null}
 
-        {tab === 'diff' ? <DiffTab branch={branch} /> : null}
+        {/* Keyed by branch: a branch switch remounts with empty state rather
+            than resetting it from an effect. */}
+        {tab === 'diff' ? <DiffTab key={branch.name} branch={branch} /> : null}
 
         {tab === 'track' ? (
           <div className="work__pad">
@@ -230,8 +232,6 @@ function DiffTab({ branch }: { readonly branch: BranchView }) {
 
   useEffect(() => {
     let live = true;
-    setDiff(null);
-    setError(null);
     startTransition(async () => {
       try {
         const next = await diffAction(branch.name);
@@ -306,7 +306,7 @@ function Overview({
             {branch.genotypeLabel ?? branch.tipEdit?.label ?? locus.reference.label}
           </p>
         </div>
-        <StatusPill tone={toneForCheck(branch.run.check)} />
+        <StatusPill tone={toneForRun(branch.run)} />
       </div>
 
       <dl className="facts">

@@ -16,7 +16,7 @@
 import { Dna, GitBranch, Microscope } from 'lucide-react';
 
 import type { BranchView, LocusView } from './model/types';
-import { StatusMark, statusLabel, toneForCheck } from './status';
+import { StatusMark, statusLabel, toneForRun } from './status';
 
 export interface BranchRailProps {
   readonly locus: LocusView;
@@ -70,7 +70,7 @@ export function BranchRail({
         <ul className="contents" role="list">
           {branches.map((branch) => {
             const isCurrent = branch.name === current;
-            const tone = toneForCheck(branch.run.check);
+            const tone = toneForRun(branch.run);
             const Icon = branch.isDefault ? Dna : GitBranch;
             return (
               <li key={branch.name} className="contents">

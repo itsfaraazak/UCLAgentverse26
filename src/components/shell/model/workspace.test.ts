@@ -119,10 +119,27 @@ describe('buildWorkspace — branches come from lib/vcs over the fixture', () =>
     expect(order.length).toBe(7);
 
     for (const branch of workspace.branches) {
+      if (branch.run === null) continue;
       expect(branch.run.steps.map((s) => s.agent)).toEqual([...order]);
       expect(branch.run.steps.map((s) => s.position)).toEqual([1, 2, 3, 4, 5, 6, 7]);
       // The gate is position 2 and is structural, not a trailing disclaimer.
       expect(branch.run.steps[1]?.agent).toBe('BiosafetyGateAgent');
+    }
+  });
+
+  it('gives the reference line no check run, because it introduces no edit', () => {
+    const workspace = buildWorkspace();
+    const main = workspace.branches.find((b) => b.name === 'main');
+    expect(main?.tipEdit).toBeNull();
+    // Synthesising a run here would show the reference line the *repair*
+    // plan, since planEdit falls through to it when no operation parses.
+    expect(main?.run).toBeNull();
+    expect(main?.request).toBeNull();
+
+    // Every line that does propose an edit has one.
+    for (const branch of workspace.branches) {
+      if (branch.tipEdit === null) continue;
+      expect(branch.run).not.toBeNull();
     }
   });
 
@@ -134,9 +151,9 @@ describe('buildWorkspace — branches come from lib/vcs over the fixture', () =>
     // A demo where the verifier always agrees is a broken demo (SPEC §4.3).
     // Agent 5 reports `flow_preserved` at the default pO₂ of 95; agent 7
     // re-runs at pO₂ 10 against wildtype and disagrees (SPEC §4.5 #10).
-    expect(sickle?.run.passed).toBe(false);
-    expect(sickle?.run.check.status).toBe('failed');
-    expect(sickle?.run.disagreedWithAssay).toBe(true);
+    expect(sickle?.run?.passed).toBe(false);
+    expect(sickle?.run?.check.status).toBe('failed');
+    expect(sickle?.run?.disagreedWithAssay).toBe(true);
 
     // The repaired line ALSO fails, which is the engine's behaviour rather
     // than an assumption of this shell: at pO₂ 10 the post-repair genotype
@@ -145,12 +162,12 @@ describe('buildWorkspace — branches come from lib/vcs over the fixture', () =>
     // render a therapeutic line that does not merge — see the note in the
     // branch rail. Pinned here so a change in lib/agents or lib/cellsim
     // surfaces as a test failure rather than a silent UI change.
-    expect(repaired?.run.passed).toBe(false);
-    expect(repaired?.run.disagreedWithStructural).toBe(true);
+    expect(repaired?.run?.passed).toBe(false);
+    expect(repaired?.run?.disagreedWithStructural).toBe(true);
 
     // The verifier's numbers are measured, not asserted.
-    const low = sickle?.run.measured.lowPO2;
-    const refLow = sickle?.run.measured.referenceLowPO2;
+    const low = sickle?.run?.measured.lowPO2;
+    const refLow = sickle?.run?.measured.referenceLowPO2;
     expect(low).not.toBeNull();
     expect(refLow).not.toBeNull();
     expect(low?.occlusion).toBeGreaterThan(refLow?.occlusion ?? 0);
@@ -159,7 +176,7 @@ describe('buildWorkspace — branches come from lib/vcs over the fixture', () =>
   it('has at least one line the gate and verifier both clear, so a merge can succeed', () => {
     const workspace = buildWorkspace();
     const passing = workspace.branches.filter(
-      (b) => b.tipEdit !== null && b.run.check.status === 'passed',
+      (b) => b.tipEdit !== null && b.run?.check.status === 'passed',
     );
     expect(passing.length).toBeGreaterThan(0);
   });
@@ -168,8 +185,8 @@ describe('buildWorkspace — branches come from lib/vcs over the fixture', () =>
     const a = buildWorkspace();
     const b = buildWorkspace();
     expect(a.branches.map((x) => x.head)).toEqual(b.branches.map((x) => x.head));
-    expect(a.branches.map((x) => x.run.headId)).toEqual(
-      b.branches.map((x) => x.run.headId),
+    expect(a.branches.map((x) => x.run?.headId ?? null)).toEqual(
+      b.branches.map((x) => x.run?.headId ?? null),
     );
   });
 });

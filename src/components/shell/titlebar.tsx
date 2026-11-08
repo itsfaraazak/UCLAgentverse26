@@ -12,7 +12,7 @@
 import { Command, Moon, PanelLeft, PanelRight, Sun } from 'lucide-react';
 
 import type { BranchView, LocusView } from './model/types';
-import { StatusPill, toneForCheck } from './status';
+import { StatusPill, toneForRun } from './status';
 import type { ThemeMode } from './use-theme';
 
 export interface TitlebarProps {
@@ -38,7 +38,7 @@ export function Titlebar({
   onToggleTheme,
   onOpenPalette,
 }: TitlebarProps) {
-  const tone = toneForCheck(branch.run.check);
+  const tone = toneForRun(branch.run);
 
   return (
     <header className="tb vibrancy shell__titlebar">

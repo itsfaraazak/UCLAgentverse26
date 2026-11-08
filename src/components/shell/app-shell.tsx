@@ -71,7 +71,7 @@ export function AppShell({ workspace }: AppShellProps) {
         id: `branch:${b.name}`,
         group: 'Branch',
         label: `Switch to ${b.name}`,
-        hint: `${b.shortHead} · ${b.run.check.status}`,
+        hint: `${b.shortHead} · ${b.run === null ? 'no run' : b.run.check.status}`,
         icon: 'GitBranch',
         keywords: [
           b.name,
@@ -88,7 +88,7 @@ export function AppShell({ workspace }: AppShellProps) {
       id: 'pipeline:open',
       group: 'Pipeline',
       label: 'Show the agent run for this branch',
-      hint: `${branch.run.steps.length} agents`,
+      hint: branch.run === null ? 'no run' : `${branch.run.steps.length} agents`,
       icon: 'Play',
       keywords: ['ci', 'checks', 'pipeline', 'agents', 'run'],
       run: () => {
@@ -261,14 +261,26 @@ export function AppShell({ workspace }: AppShellProps) {
         </div>
 
         <div className="mid__body">
-          <AgentConsole
-            run={run}
-            caption={
-              consoleRun === null
-                ? 'Request screened by the gate'
-                : 'Request typed in the console'
-            }
-          />
+          {run === null ? (
+            <div className="run">
+              <p className="run__request m-2">
+                <span className="run__request-label">No check run</span>
+                <strong className="font-medium">{branch.name}</strong> holds the
+                imported reference and introduces no edit, so there is nothing for the
+                pipeline to screen. Switch to a genotype line, or type a request below
+                to run the seven agents against it.
+              </p>
+            </div>
+          ) : (
+            <AgentConsole
+              run={run}
+              caption={
+                consoleRun === null
+                  ? 'Request screened by the gate'
+                  : 'Request typed in the console'
+              }
+            />
+          )}
           <RedTeamConsole onRun={setConsoleRun} />
         </div>
       </section>

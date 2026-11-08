@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-import type { AgentStepView, CheckRunView } from './model/types';
+import type { AgentStepView, CheckRunView, RunView } from './model/types';
 
 export type StatusTone =
   | 'passed'
@@ -54,6 +54,15 @@ export function toneForCheck(check: CheckRunView): StatusTone {
     case 'pending':
       return 'pending';
   }
+}
+
+/**
+ * A branch's tone. `null` means the line proposes no edit, so there is
+ * nothing to check — reported as "no run" rather than as a pass or a failure,
+ * because neither would be true.
+ */
+export function toneForRun(run: RunView | null): StatusTone {
+  return run === null ? 'pending' : toneForCheck(run.check);
 }
 
 export function toneForStep(step: AgentStepView): StatusTone {

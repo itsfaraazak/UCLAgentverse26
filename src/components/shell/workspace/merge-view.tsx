@@ -35,25 +35,33 @@ export interface MergeViewProps {
 }
 
 export function MergeView({ branches, into, defaultBranch }: MergeViewProps) {
-  const [incoming, setIncoming] = useState<string>(() => firstOther(branches, into));
+  const [picked, setPicked] = useState<string | null>(null);
   const [signoff, setSignoff] = useState('');
   const [signatures, setSignatures] = useState<readonly string[]>([]);
   const [proposal, setProposal] = useState<MergeProposalView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  // Keep the incoming branch valid when the destination changes under us.
-  useEffect(() => {
-    if (incoming === into) setIncoming(firstOther(branches, into));
-  }, [branches, incoming, into]);
+  const others = branches.filter((b) => b.name !== into);
+
+  // Derived rather than synchronised. The destination can change under this
+  // component when the user switches branch, which would leave a stale
+  // selection pointing at `into` — resolving it here keeps that impossible
+  // without an effect that writes back into state.
+  const incoming =
+    picked !== null && picked !== into && others.some((b) => b.name === picked)
+      ? picked
+      : firstOther(branches, into);
 
   useEffect(() => {
     let live = true;
-    setError(null);
     startTransition(async () => {
       try {
         const next = await mergeProposalAction({ into, incoming, signedOffBy: signatures });
-        if (live) setProposal(next);
+        if (live) {
+          setProposal(next);
+          setError(null);
+        }
       } catch (cause) {
         if (live) {
           setError(cause instanceof Error ? cause.message : 'Could not evaluate the merge.');
@@ -64,8 +72,6 @@ export function MergeView({ branches, into, defaultBranch }: MergeViewProps) {
       live = false;
     };
   }, [into, incoming, signatures]);
-
-  const others = branches.filter((b) => b.name !== into);
 
   return (
     <div className="work__pad">
@@ -88,7 +94,9 @@ export function MergeView({ branches, into, defaultBranch }: MergeViewProps) {
             className="merge__select"
             value={incoming}
             onChange={(event) => {
-              setIncoming(event.currentTarget.value);
+              setPicked(event.currentTarget.value);
+              // A signature is for one specific proposal; changing the
+              // incoming branch discards it rather than carrying it over.
               setSignatures([]);
               setSignoff('');
             }}
