@@ -70,7 +70,7 @@ export function TripleDiff({ diff }: TripleDiffProps) {
 
       <div className="overflow-hidden rounded-xl border">
         <div className="max-h-[22rem] overflow-auto">
-          <table className="w-full border-collapse text-left seq text-[11.5px]">
+          <table className="w-full border-collapse text-left text-[11.5px]">
             <caption className="sr-only">
               Codon-by-codon diff of {diff.refLabel} against {diff.altLabel}, in three
               synchronised registers: DNA bases, codon index, and amino acid.
@@ -104,15 +104,15 @@ export function TripleDiff({ diff }: TripleDiffProps) {
                   className={`border-b border-border/50 last:border-0 ${STATUS_STYLE[row.status]}`}
                 >
                   <td className="px-2.5 py-1.5 text-muted-foreground tnum">{row.codonIndex}</td>
-                  <td className="px-2.5 py-1.5">
+                  <td className="seq px-2.5 py-1.5">
                     <Bases codon={row.refCodon} other={row.altCodon} />
                   </td>
-                  <td className="px-2.5 py-1.5">
+                  <td className="seq px-2.5 py-1.5">
                     <Bases codon={row.altCodon} other={row.refCodon} />
                   </td>
-                  <td className="px-2.5 py-1.5">{row.refAa ?? '–'}</td>
+                  <td className="seq px-2.5 py-1.5">{row.refAa ?? '–'}</td>
                   <td
-                    className={`px-2.5 py-1.5 ${
+                    className={`seq px-2.5 py-1.5 ${
                       row.status === 'changed' && !row.silent ? 'font-bold text-block' : ''
                     }`}
                   >

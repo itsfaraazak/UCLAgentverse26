@@ -119,7 +119,7 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
                   <span className="tnum font-mono opacity-70">{frame.shortOid}</span>
                 </span>
 
-                <span className="tnum flex items-center gap-2 rounded-md bg-background/70 px-2 py-1.5 seq text-xs">
+                <span className="tnum flex items-center gap-2 rounded-md bg-background/70 px-2 py-1.5 text-xs">
                   {edited === null || change === null ? (
                     <span className="text-muted-foreground">
                       {frame.role === 'reference'
@@ -128,11 +128,13 @@ export function Filmstrip({ frames, selectedId, onSelect }: FilmstripProps) {
                     </span>
                   ) : (
                     <>
-                      <span className="text-muted-foreground">c.{edited.codonIndex}</span>
-                      <span>{edited.refCodon}</span>
+                      <span className="font-mono text-muted-foreground">c.{edited.codonIndex}</span>
+                      <span className="seq">{edited.refCodon}</span>
                       <ArrowRight className="size-3" aria-hidden="true" />
-                      <span className="font-semibold text-signal-alarm">{edited.altCodon}</span>
-                      <span className="ml-auto">
+                      <span className="seq font-semibold text-signal-alarm">
+                        {edited.altCodon}
+                      </span>
+                      <span className="seq ml-auto">
                         {change.refAa}
                         <ArrowRight className="mx-0.5 inline size-3" aria-hidden="true" />
                         {change.altAa}

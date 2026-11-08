@@ -259,12 +259,15 @@ export function GeneTrack({
               x={x(markerCodon)}
               y={AXIS_Y - 45}
               textAnchor="middle"
-              className="seq fill-signal-alarm text-[10px] font-semibold"
+              className="fill-signal-alarm font-mono text-[10px] font-semibold"
             >
-              {refCodon !== null && altCodon !== null
-                ? `c.${markerCodon} ${refCodon}→${altCodon}`
-                : `c.${markerCodon}`}
-              {refAa !== null && altAa !== null ? ` · ${refAa}→${altAa}` : ''}
+              <tspan>{`c.${markerCodon}`}</tspan>
+              {refCodon !== null && altCodon !== null ? (
+                <tspan className="seq">{` ${refCodon}→${altCodon}`}</tspan>
+              ) : null}
+              {refAa !== null && altAa !== null ? (
+                <tspan className="seq">{` · ${refAa}→${altAa}`}</tspan>
+              ) : null}
             </text>
           </g>
         ) : null}

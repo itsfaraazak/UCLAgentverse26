@@ -377,8 +377,11 @@ function Overview({
             </div>
             <div className="facts__row">
               <dt className="facts__k">Codon change</dt>
-              <dd className="facts__v seq">
-                {tip.edit.refCodon} → {tip.edit.altCodon} at {tip.edit.codonIndex}
+              <dd className="facts__v">
+                <span className="seq">
+                  {tip.edit.refCodon} → {tip.edit.altCodon}
+                </span>{' '}
+                at codon {tip.edit.codonIndex}
               </dd>
             </div>
             <div className="facts__row">

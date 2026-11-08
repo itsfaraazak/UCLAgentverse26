@@ -102,7 +102,7 @@ function BaseRegister({
     return <span className="text-muted-foreground">···</span>;
   }
   return (
-    <span className="tracking-[0.18em]">
+    <span className="seq tracking-[0.18em]">
       {[...codon].map((base, i) => {
         const differs = other !== null && other[i] !== base;
         return (
@@ -177,9 +177,9 @@ export function DiffStack({
         <span className="pl-2">altered · DNA / codon / AA</span>
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto seq text-[12.5px]">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto text-[12.5px]">
         <table className="w-full border-collapse">
-          <caption className="sr-only">
+          <caption className="sr-only normal-case tracking-normal">
             Row-per-codon diff of {refLabel} against {altLabel}, in three synchronised registers:
             DNA bases, codon, and translated amino acid.
           </caption>
@@ -229,10 +229,10 @@ export function DiffStack({
                   <td className="px-2 py-[3px] align-top">
                     <div className="flex items-baseline gap-3">
                       <BaseRegister codon={row.refCodon} other={row.altCodon} tone={s.fg} />
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="seq text-[10px] text-muted-foreground">
                         {row.refCodon ?? '—'}
                       </span>
-                      <span className={`ml-auto text-[13px] font-semibold ${s.fg}`}>
+                      <span className={`seq ml-auto text-[13px] font-semibold ${s.fg}`}>
                         {row.refAa ?? '—'}
                       </span>
                     </div>
@@ -242,10 +242,10 @@ export function DiffStack({
                   <td className="border-l border-border/60 px-2 py-[3px] align-top">
                     <div className="flex items-baseline gap-3">
                       <BaseRegister codon={row.altCodon} other={row.refCodon} tone={s.fg} />
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="seq text-[10px] text-muted-foreground">
                         {row.altCodon ?? '—'}
                       </span>
-                      <span className={`ml-auto text-[13px] font-semibold ${s.fg}`}>
+                      <span className={`seq ml-auto text-[13px] font-semibold ${s.fg}`}>
                         {row.altAa ?? '—'}
                       </span>
                     </div>

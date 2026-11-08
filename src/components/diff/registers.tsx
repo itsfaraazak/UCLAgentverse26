@@ -39,7 +39,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
         </div>
 
         <div className="overflow-x-auto">
-          <table className="tnum border-collapse seq text-xs">
+          <table className="tnum border-collapse text-xs">
             <caption className="sr-only">
               {`Codon-by-codon diff between ${refLabel} and ${altLabel}, in three registers: DNA bases, codons and amino acids.`}
             </caption>
@@ -63,7 +63,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
                   <td
                     key={`r-${r.codonIndex}`}
                     className={cn(
-                      'px-1 py-1 text-center tracking-[0.08em]',
+                      'seq px-1 py-1 text-center tracking-[0.08em]',
                       r.codonIndex === focusCodon && 'bg-signal-alarm/10',
                     )}
                   >
@@ -84,7 +84,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
                   <td
                     key={`a-${r.codonIndex}`}
                     className={cn(
-                      'px-1 py-1 text-center tracking-[0.08em]',
+                      'seq px-1 py-1 text-center tracking-[0.08em]',
                       r.codonIndex === focusCodon && 'bg-signal-alarm/10',
                       r.status === 'changed' && !r.silent && 'bg-signal-alarm/15',
                       r.silent && 'bg-signal-warn/15',
@@ -109,7 +109,7 @@ export function Registers({ rows, refLabel, altLabel, focusCodon }: RegistersPro
                   <td
                     key={`aa-${r.codonIndex}`}
                     className={cn(
-                      'px-1 py-1 text-center',
+                      'seq px-1 py-1 text-center',
                       r.codonIndex === focusCodon && 'bg-signal-alarm/10',
                     )}
                   >
