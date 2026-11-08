@@ -1,0 +1,96 @@
+name: CI
+
+# Three variant branches land as PRs for the team to review. Each one should
+# arrive with build/lint/test already green or red, so a reviewer spends their
+# time on the design rather than on "does it even run".
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # A new push to the same PR supersedes the previous run.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: build · lint · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        # Variant branches may each have added shadcn components, so a branch's
+        # lockfile can legitimately differ from main's. Don't fail the run on
+        # that -- the merge is where lockfiles get reconciled.
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build (includes typecheck)
+        run: pnpm build
+
+  safety-boundary:
+    name: safety boundary unchanged
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # SPEC.md §7: the screening policy is a boundary, not ordinary code.
+      # Agents are instructed never to edit it. This makes that enforceable
+      # rather than merely requested -- a PR that touches it must say so out
+      # loud and get a human to override the check.
+      - name: Flag edits to the screening policy
+        run: |
+          BASE="origin/${{ github.base_ref }}"
+          if git diff --name-only "$BASE"...HEAD | grep -q '^src/lib/safety/'; then
+            echo "::error::This PR modifies src/lib/safety/, the screening policy boundary (SPEC.md §7)."
+            echo "::error::That is allowed only as a deliberate, human-reviewed change -- never as a drive-by edit."
+            git diff --stat "$BASE"...HEAD -- src/lib/safety/
+            exit 1
+          fi
+          echo "src/lib/safety/ untouched."
+
+      - name: Safety policy tests must pass
+        run: pnpm vitest run src/lib/safety --reporter=verbose
