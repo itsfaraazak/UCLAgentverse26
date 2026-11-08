@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+*.key
+deltagene/data/run_dag.json
+.delta/
+.pytest_cache/

@@ -1,0 +1,52 @@
+{
+  "_disclaimer": "All records below are either (a) well-established public-knowledge reference alleles used purely as teaching examples, never real patient data, or (b) explicitly synthetic fixtures invented to illustrate a documented statistical pattern from the cited literature (see README.md > Data and citations). None of this file represents a real patient, a real ClinVar accession number, or real-world diagnostic performance.",
+
+  "variants": [
+    {
+      "id": "HBB_c20A_T",
+      "label": "public-reference",
+      "gene": "HBB",
+      "variant_id": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+      "common_name": "rs334 / HbS allele (sickle cell mutation)",
+      "note": "The well-known public-domain beta-globin missense variant that causes sickle haemoglobin (HbS); used here only as a canonical, pedagogically-clear example of a pathogenic call feeding into a real approved therapy (see therapy_table.json).",
+      "acmg_inputs": {
+        "population_frequency": 0.0003,
+        "is_null_variant_in_lof_gene": false,
+        "matches_known_pathogenic_aa_change": true,
+        "in_silico_deleterious_score": 0.91,
+        "segregates_with_disease": true
+      },
+      "prior_classification": null
+    },
+    {
+      "id": "DEMO1_conflict",
+      "label": "synthetic-illustrative",
+      "gene": "DEMO1",
+      "variant_id": "SYN:DEMO1:c.100C>T (p.Arg34Cys)",
+      "note": "Fully synthetic fixture. Modeled on the 'clinically substantial conflict' pattern reported in Oliver et al. 2020 (epilepsy genes in ClinVar, ~3.2% of shared variants crossed the Uncertain-Significance / Likely-Pathogenic line). Invented to demo the Conflict and Compliance agents reacting to a threshold-crossing disagreement -- not a real gene finding.",
+      "acmg_inputs": {
+        "population_frequency": 0.0003,
+        "is_null_variant_in_lof_gene": false,
+        "matches_known_pathogenic_aa_change": true,
+        "in_silico_deleterious_score": 0.78,
+        "segregates_with_disease": true
+      },
+      "prior_classification": "Uncertain Significance"
+    },
+    {
+      "id": "DEMO2_benign",
+      "label": "synthetic-illustrative",
+      "gene": "DEMO2",
+      "variant_id": "SYN:DEMO2:c.55G>A (p.Val19Ile)",
+      "note": "Fully synthetic fixture demonstrating the BA1 'too common to be pathogenic' stand-alone benign rule -- shows the ACMG agent is a real branching rule engine, not a pathogenic-only demo.",
+      "acmg_inputs": {
+        "population_frequency": 0.08,
+        "is_null_variant_in_lof_gene": false,
+        "matches_known_pathogenic_aa_change": false,
+        "in_silico_deleterious_score": 0.1,
+        "segregates_with_disease": false
+      },
+      "prior_classification": null
+    }
+  ]
+}
