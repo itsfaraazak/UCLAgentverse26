@@ -27,10 +27,11 @@ import {
   type PipelineRun,
   type Signoff,
 } from '@/lib/agents';
-import type { ScreenResult } from '@/lib/safety/policy';
+import { digestRequest, type ScreenResult } from '@/lib/safety/policy';
 import {
   LOCI_DISCLAIMER,
   SIMULATION,
+  getVariant,
   requireLocus,
   requireVariant,
   type Locus,
@@ -545,13 +546,8 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
   const appliedMerges: MergeRequest[] = [];
   const requested = [SEEDED_MERGE, ...(input.appliedMerges ?? [])];
 
-  const signoffFor = (branch: string): Signoff | undefined => {
-    const run = runByBranch.get(branch);
-    if (run === undefined) return undefined;
-    const match = signoffRequests.find((s) => s.branch === branch);
-    if (match === undefined) return undefined;
-    return { runId: run.id, role: match.role, by: match.by, at: BASE_TIME + 24 * HOUR };
-  };
+  const signoffFor = (branch: string): Signoff | undefined =>
+    resolveSignoff(runByBranch.get(branch), signoffRequests, branch);
 
   for (const request of requested) {
     const gate = mergeGate(request, runByBranch, signoffFor(request.from));
@@ -595,6 +591,124 @@ export function buildScenario(input: ScenarioInput = {}): Scenario {
       signoffs: signoffRequests,
     }),
   };
+}
+
+/**
+ * Stand-in for the part of `EditPlannerAgent` that picks *which* curated edit
+ * a free-text proposal is asking for. The real agent resolves against
+ * data/loci.json itself (SPEC §4.3); this exists so the red-team console can
+ * drive a full seven-agent run, and should go away at integration.
+ *
+ * Deliberately crude and keyword-based, like the rest of the LLM-free demo: a
+ * judge can re-derive which variant any phrasing selects.
+ */
+function planVariantFor(locus: Locus, text: string): LocusVariant | undefined {
+  const lower = text.toLowerCase();
+  const has = (...needles: readonly string[]): boolean =>
+    needles.some((n) => lower.includes(n));
+  if (has('silent', 'synonymous', 'marker', 'tag', 'label')) {
+    return getVariant(locus, 'HBB_silent_demo');
+  }
+  if (has('sickle allele', 'hbs', 'record', 'baseline', 'introduce')) {
+    return getVariant(locus, 'HBB_HbS');
+  }
+  if (has('repair', 'restore', 'correct', 'revert', 'fix')) {
+    return getVariant(locus, 'HBB_repair');
+  }
+  return undefined;
+}
+
+export interface ProposalRun {
+  readonly id: string;
+  /** The full seven-agent run, already flattened for rendering. */
+  readonly run: RunView;
+  /** Derived, non-verbatim: how many tokens the proposal had. */
+  readonly tokenCount: number;
+  /** Curated loci resolved. Empty when the result is redacted. */
+  readonly resolvedTargets: readonly string[];
+  readonly plannedVariantLabel: string | null;
+}
+
+const WORD_RE = /[a-z0-9']+/g;
+
+/**
+ * Run the real seven-agent pipeline on a free-text proposal.
+ *
+ * The text goes in; **no text comes out.** `RunView` and `ProposalRun` have no
+ * field that can carry it, the pipeline's own delta payloads record only
+ * derived facts, and a `block` verdict terminates the run at step 2 with
+ * steps 3–7 recorded as skipped (SPEC §7.3, §7.4).
+ */
+export function runProposal(text: string, targets: readonly string[]): ProposalRun {
+  const trimmed = text.trim();
+  const locus = requireLocus(GENE);
+  const planned = targets.includes(GENE) ? planVariantFor(locus, trimmed) : undefined;
+
+  // The genotype the edit would land on: the current mainline tip.
+  const scenario = buildScenario();
+  const headTip = scenario.tipOf.get(MAIN);
+  const headCommit =
+    headTip === undefined ? undefined : scenario.view.commits.find((c) => c.oid === headTip);
+  const baseBases = headCommit?.genotype.bases ?? locus.cdsReference.bases;
+
+  let resultingBases = baseBases;
+  if (planned !== undefined) {
+    try {
+      resultingBases = applyVariant({ bases: baseBases, label: planned.label }, planned).bases;
+    } catch {
+      // The edit does not apply to the current genotype (for example a repair
+      // proposed against an already-repaired allele). Assay the genotype as it
+      // stands; the planner check will still report what it resolved.
+      resultingBases = baseBases;
+    }
+  }
+  const resolved = tendencyForSequence(locus, resultingBases);
+
+  const digest = digestRequest(trimmed);
+  const run = runPipeline({
+    runId: `console-${digest}`,
+    requestText: trimmed,
+    targets,
+    ...(planned === undefined ? {} : { variantId: planned.id }),
+    baselineTendency: resolved?.tendency ?? 0,
+    author: 'red-team-console',
+    startedAt: BASE_TIME + 48 * HOUR,
+  });
+
+  return {
+    id: `console-${digest}`,
+    run: runView(run, undefined),
+    tokenCount: (trimmed.toLowerCase().match(WORD_RE) ?? []).length,
+    resolvedTargets: run.screen.redacted ? [] : targets,
+    plannedVariantLabel: run.screen.redacted ? null : (planned?.label ?? null),
+  };
+}
+
+/**
+ * Turn a client-supplied sign-off into one the gate will accept — or into
+ * nothing at all.
+ *
+ * The role is taken from the **policy's** `signoffRole` for that branch's run,
+ * never from the request. A client therefore cannot name the role that clears
+ * an escalation; all it can supply is the attributed signer. A run that is not
+ * escalated, or that the policy gave no role, yields no sign-off, so a `block`
+ * can never be cleared this way (SPEC §7.5).
+ *
+ * This is the single place a `Signoff` is constructed. Keep it that way: an
+ * second construction site is how the forged-role hole comes back.
+ */
+export function resolveSignoff(
+  run: PipelineRun | undefined,
+  requests: readonly SignoffRequest[],
+  branch: string,
+): Signoff | undefined {
+  if (run === undefined) return undefined;
+  if (run.verdict !== 'escalated') return undefined;
+  const role = run.screen.signoffRole;
+  if (role === undefined) return undefined;
+  const match = requests.find((s) => s.branch === branch);
+  if (match === undefined) return undefined;
+  return { runId: run.id, role, by: match.by, at: BASE_TIME + 24 * HOUR };
 }
 
 /**
@@ -777,6 +891,7 @@ function buildView(input: ViewInput): ScenarioView {
       referenceBases: reference.bases,
       referenceProtein: translate(reference.bases),
       codonCount: reference.codonCount,
+      declaredCodonCount: reference.declaredCodonCount,
       startCodon: reference.startCodon,
       exons: locus.exons.map((exon) => ({
         index: exon.index,
@@ -785,6 +900,7 @@ function buildView(input: ViewInput): ScenarioView {
         codonEnd: exon.codonEnd,
         note: exon.note,
         modelled: exon.modelled,
+        partiallyModelled: exon.partiallyModelled,
       })),
       totalCodons: locus.exons.reduce((max, exon) => Math.max(max, exon.codonEnd), 0),
     },
@@ -813,17 +929,11 @@ function buildView(input: ViewInput): ScenarioView {
  */
 export function attemptMerge(input: ScenarioInput, request: MergeRequest): MergeOutcome {
   const before = buildScenario(input);
-  const run = before.runByBranch.get(request.from);
-  const signoffRequest = (input.signoffs ?? []).find((s) => s.branch === request.from);
-  const signoff: Signoff | undefined =
-    run === undefined || signoffRequest === undefined
-      ? undefined
-      : {
-          runId: run.id,
-          role: signoffRequest.role,
-          by: signoffRequest.by,
-          at: BASE_TIME + 24 * HOUR,
-        };
+  const signoff = resolveSignoff(
+    before.runByBranch.get(request.from),
+    input.signoffs ?? [],
+    request.from,
+  );
 
   const blocked = mergeGate(request, before.runByBranch, signoff);
   if (blocked !== null) {
@@ -846,6 +956,18 @@ export function attemptMerge(input: ScenarioInput, request: MergeRequest): Merge
       into: request.into,
       from: request.from,
       reason: 'One of the two branches could not be resolved to a commit.',
+    };
+  }
+
+  // Already up to date: `theirs` is an ancestor of `ours`, so there is nothing
+  // to merge. Without this, re-merging a merged branch appends a fresh merge
+  // commit every time and the history grows without bound.
+  if (before.repo.mergeBase(ours, theirs) === theirs) {
+    return {
+      kind: 'error',
+      into: request.into,
+      from: request.from,
+      reason: `${request.into} already contains ${request.from}. Nothing to merge.`,
     };
   }
 

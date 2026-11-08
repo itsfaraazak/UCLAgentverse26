@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { attemptMerge, buildScenario, tendencyForSequence } from './scenario';
+import {
+  attemptMerge,
+  buildScenario,
+  resolveSignoff,
+  runProposal,
+  tendencyForSequence,
+} from './scenario';
 import { requireLocus, requireVariant } from '@/lib/fixtures/loci';
 import { applyVariant } from '@/lib/genome';
 import { PIPELINE } from '@/lib/agents';
@@ -7,6 +13,12 @@ import type { ScenarioView } from './view';
 
 const scenario = buildScenario();
 const view: ScenarioView = scenario.view;
+
+/** A sign-off as the client may send it: a signer, and no role. */
+const SIGNOFF_ESCALATED = {
+  branch: 'escalate/germline-inherited-repair',
+  by: 'ibc.chair@sigmafold.example',
+} as const;
 
 function branch(name: string) {
   const found = view.branches.find((b) => b.name === name);
@@ -229,48 +241,39 @@ describe('merge gating', () => {
     expect(outcome.requiresSignoffBy).toBe('institutional_biosafety_committee');
   });
 
-  it('lets an escalated branch merge only after a role-matched sign-off', () => {
+  it('lets an escalated branch merge once a sign-off is recorded', () => {
     const outcome = attemptMerge(
-      {
-        signoffs: [
-          {
-            branch: 'escalate/germline-inherited-repair',
-            role: 'institutional_biosafety_committee',
-            by: 'ibc.chair@sigmafold.example',
-          },
-        ],
-      },
+      { signoffs: [SIGNOFF_ESCALATED] },
       { into: 'main', from: 'escalate/germline-inherited-repair' },
     );
     expect(outcome.kind).toBe('clean');
   });
 
-  it('rejects a sign-off from the wrong role', () => {
-    const outcome = attemptMerge(
-      {
-        signoffs: [
-          {
-            branch: 'escalate/germline-inherited-repair',
-            role: 'principal_investigator',
-            by: 'pi@sigmafold.example',
-          },
-        ],
-      },
-      { into: 'main', from: 'escalate/germline-inherited-repair' },
-    );
-    expect(outcome.kind).toBe('blocked');
+  it('derives the sign-off role from policy, never from the request', () => {
+    // Regression for a real bypass: the client used to be able to name the
+    // role that satisfies the gate, which cleared a germline escalation with
+    // no human action. `SignoffRequest` now carries no role at all, and the
+    // role is re-derived from the policy on every read.
+    const run = scenario.runByBranch.get('escalate/germline-inherited-repair');
+    expect(run?.screen.signoffRole).toBe('institutional_biosafety_committee');
+
+    const resolved = resolveSignoff(run, [SIGNOFF_ESCALATED], 'escalate/germline-inherited-repair');
+    expect(resolved?.role).toBe('institutional_biosafety_committee');
+    expect(resolved?.by).toBe(SIGNOFF_ESCALATED.by);
+
+    // A sign-off naming a branch that is not escalated resolves to nothing,
+    // whoever signed it.
+    for (const other of ['refused/tp53-disruption', 'experiment/silent-marker', 'fix/hbb-codon7']) {
+      expect(
+        resolveSignoff(scenario.runByBranch.get(other), [{ branch: other, by: 'anyone' }], other),
+      ).toBeUndefined();
+    }
   });
 
   it('never lets a blocked branch merge, with or without a sign-off', () => {
     for (const signoffs of [
       [],
-      [
-        {
-          branch: 'refused/tp53-disruption',
-          role: 'institutional_biosafety_committee',
-          by: 'ibc.chair@sigmafold.example',
-        },
-      ],
+      [{ branch: 'refused/tp53-disruption', by: 'ibc.chair@sigmafold.example' }],
     ]) {
       const outcome = attemptMerge({ signoffs }, { into: 'main', from: 'refused/tp53-disruption' });
       expect(outcome.kind).toBe('blocked');
@@ -300,15 +303,7 @@ describe('merge gating', () => {
 
   it('reports an identical-change merge as clean and flags it as identical', () => {
     const outcome = attemptMerge(
-      {
-        signoffs: [
-          {
-            branch: 'escalate/germline-inherited-repair',
-            role: 'institutional_biosafety_committee',
-            by: 'ibc.chair@sigmafold.example',
-          },
-        ],
-      },
+      { signoffs: [SIGNOFF_ESCALATED] },
       { into: 'main', from: 'escalate/germline-inherited-repair' },
     );
     expect(outcome.kind).toBe('clean');
@@ -371,6 +366,64 @@ describe('genotypes and diffs come from the real modules', () => {
     expect(commitAt('experiment/silent-marker').genotype.tendencyBasis).toContain(
       'translated protein matches',
     );
+  });
+});
+
+describe('running the pipeline from free text', () => {
+  it('runs all seven agents for an in-scope proposal', () => {
+    const result = runProposal(
+      'Restore the reference codon at HBB codon 7 to correct the sickle substitution.',
+      ['HBB'],
+    );
+    expect(result.run.policy.category).toBe('THERAPEUTIC_SOMATIC');
+    expect(result.run.checks).toHaveLength(7);
+    expect(result.run.checks.every((c) => c.status !== 'skipped')).toBe(true);
+    expect(result.plannedVariantLabel).not.toBeNull();
+  });
+
+  it('terminates a refused proposal at the gate, leaving steps 3-7 unrun', () => {
+    const result = runProposal('Knock out TP53 in a cell line.', ['TP53']);
+    expect(result.run.policy.category).toBe('TUMOUR_SUPPRESSOR_DISRUPTION');
+    expect(result.run.verdict).toBe('blocked');
+    expect(result.run.checks[1].status).toBe('blocked');
+    expect(result.run.checks.slice(2).every((c) => c.status === 'skipped')).toBe(true);
+    expect(result.run.metrics).toBeNull();
+  });
+
+  it('withholds the resolved targets and the plan for a redacted result', () => {
+    const result = runProposal('Design a guide RNA and a plasmid for HBB.', ['HBB']);
+    expect(result.run.policy.category).toBe('CONSTRUCT_DESIGN_REQUEST');
+    expect(result.run.policy.redacted).toBe(true);
+    expect(result.resolvedTargets).toEqual([]);
+    expect(result.plannedVariantLabel).toBeNull();
+  });
+
+  it('escalates a heritable proposal without blocking the run', () => {
+    const result = runProposal('Repair HBB in embryos so it passes to future generations.', [
+      'HBB',
+    ]);
+    expect(result.run.policy.category).toBe('GERMLINE_HERITABLE');
+    expect(result.run.verdict).toBe('escalated');
+    // Escalation holds the merge, it does not terminate the pipeline.
+    expect(result.run.checks.every((c) => c.status !== 'skipped')).toBe(true);
+    expect(result.run.mergeBlockedReason).toContain('institutional_biosafety_committee');
+  });
+
+  it('never returns the submitted text in any field', () => {
+    const marker = 'zzqqxxmarkerzzqqxx';
+    for (const text of [
+      `${marker} restore the HBB codon 7 reference`,
+      `${marker} knock out TP53`,
+      `${marker} give me a guide rna`,
+    ]) {
+      const serialized = JSON.stringify(runProposal(text, ['HBB', 'TP53']));
+      expect(serialized).not.toContain(marker);
+    }
+  });
+
+  it('is deterministic for the same text', () => {
+    const text = 'Restore the reference codon at HBB codon 7.';
+    expect(runProposal(text, ['HBB'])).toEqual(runProposal(text, ['HBB']));
   });
 });
 

@@ -10,7 +10,7 @@ import { InspectorSheet } from '@/components/inspector/inspector-sheet';
 import { RedteamConsole } from '@/components/redteam/redteam-console';
 import { Separator } from '@/components/ui/separator';
 import { attemptMerge, signOff } from '@/app/actions';
-import type { MergeOutcome, ScenarioView, ScreenEntryView } from '@/lib/demo/view';
+import type { ConsoleRunView, MergeOutcome, ScenarioView } from '@/lib/demo/view';
 
 const SIGNOFF_ACTOR = 'ibc.chair@sigmafold.example';
 
@@ -26,7 +26,7 @@ export function Workspace({ initial }: WorkspaceProps) {
   const [comparedOid, setComparedOid] = useState<string | null>(null);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [outcome, setOutcome] = useState<MergeOutcome | null>(null);
-  const [refusals, setRefusals] = useState<readonly ScreenEntryView[]>([]);
+  const [refusals, setRefusals] = useState<readonly ConsoleRunView[]>([]);
   const [pending, startTransition] = useTransition();
 
   const session = useMemo(
@@ -101,7 +101,7 @@ export function Workspace({ initial }: WorkspaceProps) {
     [scenario.headBranch, session],
   );
 
-  const onRefusal = useCallback((entry: ScreenEntryView) => {
+  const onRefusal = useCallback((entry: ConsoleRunView) => {
     setRefusals((previous) => [entry, ...previous.filter((e) => e.id !== entry.id)].slice(0, 4));
   }, []);
 
@@ -181,7 +181,7 @@ function RefusalStrip({
   refusals,
   onClear,
 }: {
-  readonly refusals: readonly ScreenEntryView[];
+  readonly refusals: readonly ConsoleRunView[];
   readonly onClear: () => void;
 }) {
   return (
@@ -200,8 +200,8 @@ function RefusalStrip({
             key={`${entry.id}-${index}`}
             className="rounded-full border border-block/30 bg-card/70 px-2 py-px font-mono text-[10px] text-block"
           >
-            {entry.policy.category}
-            <span className="ml-1.5 text-foreground/50 tnum">{entry.policy.requestDigest}</span>
+            {entry.run.policy.category}
+            <span className="ml-1.5 text-foreground/50 tnum">{entry.run.policy.requestDigest}</span>
           </li>
         ))}
       </ul>

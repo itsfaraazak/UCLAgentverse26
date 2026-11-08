@@ -139,9 +139,10 @@ export function GeneTrack({ locus, edit, changedCodons }: GeneTrackProps) {
                   height={TRACK_H}
                   rx={4}
                   fill={exon.modelled ? 'var(--primary)' : 'var(--muted)'}
-                  fillOpacity={exon.modelled ? 0.22 : 1}
+                  fillOpacity={exon.modelled ? (exon.partiallyModelled ? 0.12 : 0.22) : 1}
                   stroke={exon.modelled ? 'var(--primary)' : 'var(--border)'}
                   strokeWidth={exon.modelled ? 1.5 : 1}
+                  strokeDasharray={exon.partiallyModelled ? '4 3' : undefined}
                 />
                 {w > 52 && (
                   <text
@@ -302,10 +303,21 @@ export function GeneTrack({ locus, edit, changedCodons }: GeneTrackProps) {
       </div>
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">
-        Exons 2 and 3 are annotation context only — this prototype models codons 1–
-        {locus.codonCount} of the coding sequence, which is all it needs to diff and translate
-        the worked example. Structural annotations are textbook teaching summaries, not
-        structure-prediction output.
+        This prototype models codons 1–{locus.codonCount} of {locus.gene}&rsquo;s{' '}
+        {locus.totalCodons}-codon coding sequence — enough to diff and translate the worked
+        example. Exons drawn with a dashed edge extend past the modelled window; solid grey
+        exons are annotation context only. Structural annotations are textbook teaching
+        summaries, not structure-prediction output.
+        {locus.declaredCodonCount !== null && (
+          <>
+            {' '}
+            <span className="text-conflict">
+              Note: the fixture declares {locus.declaredCodonCount} codons, but its sequence is{' '}
+              {locus.codonCount * 3}&nbsp;nt — {locus.codonCount} codons. The sequence is taken
+              as authoritative here, so this track agrees with the diff.
+            </span>
+          </>
+        )}
       </p>
       {marked !== null && scope !== 'codon' && (
         <Button

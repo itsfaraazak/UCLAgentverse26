@@ -125,7 +125,11 @@ function CheckRow({
         >
           <span
             className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: `${look.color}1f`, color: look.color }}
+            style={{
+              // `var(--x)1f` is not a colour; mix instead so the tint renders.
+              backgroundColor: `color-mix(in oklab, ${look.color} 14%, transparent)`,
+              color: look.color,
+            }}
           >
             <look.Icon className="size-3.5" aria-hidden="true" />
           </span>

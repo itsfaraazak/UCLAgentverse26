@@ -22,8 +22,10 @@ export interface LocusExon {
   readonly codonStart: number;
   readonly codonEnd: number;
   readonly note: string;
-  /** True when this exon falls inside the modelled CDS window. */
+  /** True when any part of this exon lies inside the modelled CDS window. */
   readonly modelled: boolean;
+  /** True when the exon straddles the edge of the modelled window. */
+  readonly partiallyModelled: boolean;
 }
 
 export interface StructuralAnnotation {
@@ -64,7 +66,10 @@ export interface Locus {
   readonly cdsReference: {
     readonly label: string;
     readonly startCodon: number;
+    /** Derived from `bases`, not read from the file. See the note below. */
     readonly codonCount: number;
+    /** The file's own `codonCount`, when it disagrees with the sequence. */
+    readonly declaredCodonCount: number | null;
     readonly bases: string;
   };
   readonly exons: readonly LocusExon[];
@@ -101,7 +106,19 @@ function kindOf(value: string, field: string): Variant['kind'] {
 
 const LOCI: readonly Locus[] = Object.freeze(
   raw.loci.map((locus): Locus => {
-    const codonCount = locus.cdsReference.codonCount;
+    const bases = locus.cdsReference.bases.toUpperCase();
+    if (bases.length % 3 !== 0) {
+      throw new Error(
+        `loci.json: ${locus.gene} CDS is ${bases.length} nt, not a whole number of codons`,
+      );
+    }
+    // The sequence is authoritative. The file currently declares 30 codons for
+    // a 93 nt (31 codon) region; `diffSequences` and `translate` both work off
+    // the bases, so taking the declared value here would make the gene track
+    // disagree with the diff about how many codons exist. The declared value
+    // is kept so the UI can disclose the discrepancy rather than hide it.
+    const codonCount = bases.length / 3;
+    const declared = locus.cdsReference.codonCount;
     return {
       gene: locus.gene,
       provenance: provenanceOf(locus.provenance, `${locus.gene}.provenance`),
@@ -112,7 +129,8 @@ const LOCI: readonly Locus[] = Object.freeze(
         label: locus.cdsReference.label,
         startCodon: locus.cdsReference.startCodon,
         codonCount,
-        bases: locus.cdsReference.bases.toUpperCase(),
+        declaredCodonCount: declared === codonCount ? null : declared,
+        bases,
       },
       exons: locus.exons.map((exon) => ({
         index: exon.index,
@@ -120,7 +138,10 @@ const LOCI: readonly Locus[] = Object.freeze(
         codonStart: exon.codonStart,
         codonEnd: exon.codonEnd,
         note: exon.note,
-        modelled: exon.codonStart <= codonCount,
+        // A genuine overlap test: an exon counts as modelled when any of it
+        // falls inside codons 1..codonCount, not merely when it starts there.
+        modelled: exon.codonStart <= codonCount && exon.codonEnd >= 1,
+        partiallyModelled: exon.codonStart <= codonCount && exon.codonEnd > codonCount,
       })),
       variants: locus.variants.map((variant): LocusVariant => {
         const base: LocusVariant = {

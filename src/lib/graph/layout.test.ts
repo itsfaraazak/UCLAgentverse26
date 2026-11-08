@@ -412,6 +412,88 @@ describe('layoutGraph', () => {
   });
 });
 
+describe('layout invariants hold for arbitrary DAGs', () => {
+  it('does not route a branch line through an unrelated node (regression)', () => {
+    // Minimised from a fuzz run. `c1` has a first parent that is already
+    // lane-reserved AND a merge parent; the merge parent used to claim c1's
+    // own lane, which suppressed the hold and let `c2` land inside the
+    // corridor of the c1->c3 edge.
+    const layout = layoutGraph([
+      c('c0', ['c3'], 400),
+      c('c1', ['c3', 'c2'], 318),
+      c('c2', ['c3'], 217),
+      c('c3', [], 130),
+    ]);
+    assertNoNodeInEdgeCorridor(layout);
+  });
+
+  /** Mulberry32, so the generated cases are the same on every run. */
+  function rng(seed: number): () => number {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /** A random DAG: a commit may only parent commits created before it. */
+  function randomDag(random: () => number, size: number): LayoutCommit[] {
+    const commits: LayoutCommit[] = [];
+    for (let i = 0; i < size; i += 1) {
+      const parents: string[] = [];
+      const maxParents = random() < 0.15 ? 3 : random() < 0.3 ? 2 : 1;
+      for (let p = 0; p < maxParents && i > 0; p += 1) {
+        const pick = `n${Math.floor(random() * i)}`;
+        if (!parents.includes(pick)) parents.push(pick);
+      }
+      commits.push({ oid: `n${i}`, parents, timestamp: Math.floor(random() * 10_000) });
+    }
+    return commits;
+  }
+
+  it('holds the corridor and leg invariants across 400 random DAGs', () => {
+    const random = rng(0x5f3a21);
+    for (let i = 0; i < 400; i += 1) {
+      const commits = randomDag(random, 2 + Math.floor(random() * 24));
+      const layout = layoutGraph(commits);
+      expect(layout.nodes).toHaveLength(commits.length);
+      assertNoNodeInEdgeCorridor(layout);
+    }
+  });
+
+  it('emits only well-formed, monotonically descending paths for random DAGs', () => {
+    const random = rng(0x1234abc);
+    for (let i = 0; i < 200; i += 1) {
+      const layout = layoutGraph(randomDag(random, 2 + Math.floor(random() * 24)));
+      for (const edge of layout.edges) {
+        expect(edge.path).not.toContain('NaN');
+        const ys = pathPoints(edge.path).map(([, y]) => y);
+        for (let k = 1; k < ys.length; k += 1) {
+          expect(ys[k]).toBeGreaterThanOrEqual(ys[k - 1]);
+        }
+      }
+    }
+  });
+
+  it('clamps non-finite layout metrics instead of emitting NaN paths', () => {
+    const layout = layoutGraph(DIAMOND, {
+      rowHeight: Number.NaN,
+      laneWidth: Number.POSITIVE_INFINITY,
+      cornerRadius: Number.NaN,
+    });
+    for (const edge of layout.edges) expect(edge.path).not.toContain('NaN');
+    for (const node of layout.nodes) {
+      expect(Number.isFinite(node.x)).toBe(true);
+      expect(Number.isFinite(node.y)).toBe(true);
+    }
+    expect(Number.isFinite(layout.width)).toBe(true);
+    expect(Number.isFinite(layout.height)).toBe(true);
+  });
+});
+
 describe('describeGraph', () => {
   it('describes each row, its lane, and its parents for screen readers', () => {
     const lines = describeGraph(layoutGraph(DIAMOND), (oid) => oid.toUpperCase());

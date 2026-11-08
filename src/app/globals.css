@@ -56,9 +56,12 @@
     oklch(0.965 0.004 255);
 
   /* Verdict scale — the only saturated colours in the app. */
-  --verdict-pass: oklch(0.56 0.14 152);
+  /* Darkened from 0.56/0.65 so verdict text clears WCAG AA on both `card`
+     and its own `-soft` tint; the lighter values measured 3.96:1 and 3.02:1.
+     Guarded by src/lib/theme/contrast.test.ts. */
+  --verdict-pass: oklch(0.47 0.13 152);
   --verdict-pass-soft: oklch(0.94 0.045 152);
-  --verdict-escalate: oklch(0.65 0.15 72);
+  --verdict-escalate: oklch(0.52 0.14 68);
   --verdict-escalate-soft: oklch(0.95 0.055 80);
   --verdict-block: oklch(0.54 0.2 24);
   --verdict-block-soft: oklch(0.95 0.045 24);

@@ -179,6 +179,7 @@ export interface ExonView {
   readonly codonEnd: number;
   readonly note: string;
   readonly modelled: boolean;
+  readonly partiallyModelled: boolean;
 }
 
 export interface LocusView {
@@ -191,6 +192,8 @@ export interface LocusView {
   readonly referenceBases: string;
   readonly referenceProtein: string;
   readonly codonCount: number;
+  /** Set when data/loci.json's own codonCount disagrees with its sequence. */
+  readonly declaredCodonCount: number | null;
   readonly startCodon: number;
   readonly exons: readonly ExonView[];
   /** Last codon of the gene, from the annotation — includes unmodelled exons. */
@@ -228,9 +231,16 @@ export interface MergeRequest {
   readonly from: string;
 }
 
+/**
+ * A recorded human sign-off, as it travels from the client.
+ *
+ * There is deliberately **no `role` field**. The role that satisfies an
+ * escalation is read server-side from the policy's own `signoffRole` for that
+ * branch's run, so a client cannot name a role that clears the gate. Adding a
+ * `role` here would reopen that hole (SPEC §7.5).
+ */
 export interface SignoffRequest {
   readonly branch: string;
-  readonly role: string;
   readonly by: string;
 }
 
@@ -279,17 +289,17 @@ export type MergeOutcome =
     };
 
 /**
- * A red-team console entry. Carries no request text by construction — only
- * the policy's own output plus non-verbatim derived counts.
+ * A red-team console entry carrying a full seven-agent run.
+ *
+ * Like every type here it has **no field for the request text** — only the
+ * run's own output plus non-verbatim derived counts.
  */
-export interface ScreenEntryView {
+export interface ConsoleRunView {
   readonly id: string;
   readonly at: number;
-  readonly policy: PolicyView;
-  /** Token count of the submission. Derived, never the text itself. */
+  readonly run: RunView;
   readonly tokenCount: number;
-  /** Curated loci resolved from the request. Empty when the result is redacted. */
   readonly resolvedTargets: readonly string[];
-  /** True when the request would have been allowed to enter the pipeline. */
+  readonly plannedVariantLabel: string | null;
   readonly passedGate: boolean;
 }

@@ -73,7 +73,11 @@ export interface LayoutEdge {
   readonly toLane: number;
   /** `first` is parent[0]; `merge` is any later parent. */
   readonly kind: 'first' | 'merge';
-  /** SVG path data. Monotonically descending in y. */
+  /**
+   * SVG path data. Monotonically descending in y for well-formed (acyclic)
+   * input; a cycle has no consistent top-to-bottom order, so an edge inside
+   * one degrades to a straight segment that may ascend.
+   */
   readonly path: string;
   /**
    * The lane whose colour this edge takes. A `first` edge belongs to the
@@ -217,24 +221,28 @@ function assignLanes(commits: readonly LayoutCommit[]): Assignment {
     }
 
     const parents = parentsOf(commit);
-    let laneInherited = false;
-    parents.forEach((parent, index) => {
-      if (lanes.includes(parent)) return; // already reserved elsewhere
-      if (index === 0 && lanes[lane] === null) {
-        lanes[lane] = parent; // the first parent inherits this commit's lane
-        laneInherited = true;
-      } else {
-        lanes[firstFreeLane(lanes)] = parent;
-      }
-    });
-
-    // Rule 3: the first parent did not take this lane over, so this commit's
-    // own edge runs down the lane until that parent is placed. Hold it.
     const firstParent = parents[0];
-    if (firstParent !== undefined && !laneInherited && lanes[lane] === null) {
-      lanes[lane] = HELD_LANE;
-      held.set(lane, firstParent);
+
+    // Settle this commit's own lane FIRST — either the first parent inherits
+    // it, or it is held for the edge running down it — before any other parent
+    // is given a lane. Reserving a merge parent first would let it claim this
+    // very lane (just vacated above), and the hold below would then be skipped,
+    // leaving a later commit free to land inside the corridor this commit's
+    // first-parent edge still occupies.
+    if (firstParent !== undefined) {
+      if (lanes.includes(firstParent)) {
+        lanes[lane] = HELD_LANE; // rejoin: the edge needs the lane until then
+        held.set(lane, firstParent);
+      } else {
+        lanes[lane] = firstParent; // the first parent inherits this lane
+      }
     }
+
+    // Remaining parents (merge parents) each take a lane of their own.
+    parents.forEach((parent, index) => {
+      if (index === 0 || lanes.includes(parent)) return;
+      lanes[firstFreeLane(lanes)] = parent;
+    });
 
     for (const parent of parents) {
       if (placed.has(parent)) continue;
@@ -337,7 +345,17 @@ export function layoutGraph(
   commits: readonly LayoutCommit[],
   options: LayoutOptions = {},
 ): GraphLayout {
-  const metrics: Required<LayoutOptions> = { ...DEFAULTS, ...options };
+  // A non-finite metric would propagate into every coordinate and every path
+  // string, so fall back to the default rather than emitting `NaN` geometry.
+  const finite = (value: number | undefined, fallback: number): number =>
+    value !== undefined && Number.isFinite(value) ? value : fallback;
+  const metrics: Required<LayoutOptions> = {
+    rowHeight: finite(options.rowHeight, DEFAULTS.rowHeight),
+    laneWidth: finite(options.laneWidth, DEFAULTS.laneWidth),
+    paddingX: finite(options.paddingX, DEFAULTS.paddingX),
+    paddingY: finite(options.paddingY, DEFAULTS.paddingY),
+    cornerRadius: finite(options.cornerRadius, DEFAULTS.cornerRadius),
+  };
   const { ordered, laneOf, laneCount, inGraph } = assignLanes(commits);
 
   const xOf = (lane: number): number => metrics.paddingX + lane * metrics.laneWidth;
