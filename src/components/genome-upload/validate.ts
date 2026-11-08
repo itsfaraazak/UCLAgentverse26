@@ -1,5 +1,6 @@
 import {
   EmptySequenceError,
+  ExplainedInvalidBaseError,
   InvalidBaseError,
   MAX_SEQUENCE_BASES,
   MAX_UPLOAD_CHARS,
@@ -111,11 +112,11 @@ function formatInt(n: number): string {
 function toSequenceError(err: unknown): SequenceError {
   if (err instanceof InvalidBaseError) {
     const position = err.offset + 1;
-    // ExplainedInvalidBaseError extends InvalidBaseError and already says
-    // *why* an N or a U is refused, so prefer its richer message.
-    const detail = err.message.includes('—')
-      ? err.message.slice(err.message.indexOf('—') + 1).trim()
-      : null;
+    // `ExplainedInvalidBaseError` carries the reason as a typed field. Read
+    // it; do not recover it by slicing the message, which would silently
+    // pick up the wrong text the moment the base message is reworded.
+    const detail =
+      err instanceof ExplainedInvalidBaseError ? err.explanation : null;
     return {
       code: 'invalid-base',
       char: err.char,

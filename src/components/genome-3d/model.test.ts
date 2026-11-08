@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import lociFile from '@/data/loci.json';
-import {
-  InvalidBaseError,
-  PartialCodonError,
-  getLocus,
-  referenceSequence,
-  translate,
-} from '@/lib/genome';
-import type { Sequence } from '@/lib/genome';
+import { InvalidBaseError, PartialCodonError, getLocus, referenceSequence } from '@/lib/genome';
+import type { Locus, Sequence } from '@/lib/genome';
 import {
   UnknownLocusError,
   buildGenomeModel,
@@ -17,10 +10,6 @@ import {
   type CodonSegment,
   type GenomeModel,
 } from './model';
-
-const hbb = lociFile.loci.find((locus) => locus.gene === 'HBB');
-if (hbb === undefined) throw new Error('HBB fixture missing from loci.json');
-const HBB_CODON_COUNT = hbb.cdsReference.codonCount;
 
 function seq(bases: string, label = 'test'): Sequence {
   return { bases, label };
@@ -32,41 +21,126 @@ function segmentAt(model: GenomeModel, codonIndex: number): CodonSegment | undef
   return segment;
 }
 
+function hbbLocus(): Locus {
+  const locus = getLocus('HBB');
+  if (locus === undefined) throw new Error('loci.json has no HBB locus');
+  return locus;
+}
+
+/** Extent facts read from the fixture, so a sequence update cannot strand them. */
+function extentOf(locus: Locus) {
+  const modelled = locus.cdsReference.codonCount;
+  const annotatedEnd = Math.max(...locus.exons.map((e) => e.codonEnd));
+  return { modelled, annotatedEnd, expectedTotal: Math.max(modelled, annotatedEnd) };
+}
+
+function exonContaining(locus: Locus, codonIndex: number): number | null {
+  const exon = locus.exons.find((e) => codonIndex >= e.codonStart && codonIndex <= e.codonEnd);
+  return exon === undefined ? null : exon.index;
+}
+
+function expectStructurallySound(model: GenomeModel): void {
+  expect(model.segments).toHaveLength(model.totalCodonCount);
+  expect(model.segments.map((segment) => segment.codonIndex)).toEqual(
+    Array.from({ length: model.totalCodonCount }, (_, i) => i + 1),
+  );
+  expect(model.segments.filter((segment) => segment.modelled)).toHaveLength(
+    model.modelledCodonCount,
+  );
+}
+
 describe('buildLocusModel — HBB_HbS from loci.json', () => {
   it('builds the sickle substitution with the verified fixture facts', () => {
+    const locus = hbbLocus();
+    const { modelled, expectedTotal } = extentOf(locus);
     const model = buildLocusModel({ variantId: 'HBB_HbS' });
 
     expect(model.gene).toBe('HBB');
-    expect(model.modelledCodonCount).toBe(HBB_CODON_COUNT);
-    expect(model.totalCodonCount).toBe(HBB_CODON_COUNT);
+    expect(model.modelledCodonCount).toBe(modelled);
+    expect(model.totalCodonCount).toBe(expectedTotal);
     expect(model.editedCodonIndices).toEqual([7]);
     expect(model.primaryEditedCodon).toBe(7);
     expect(model.coordinatesDiverge).toBe(false);
-    expect(model.refProtein).toBe(translate(hbb.cdsReference.bases));
     expect(model.refProtein.startsWith('MVHLTPEEKSAVTALWGKVNVDEVGGEALGR')).toBe(true);
     expect(model.altProtein.startsWith('MVHLTPVEKSAVTALWGKVNVDEVGGEALGR')).toBe(true);
+
+    // A substitution: same length, differing at residue 7 and nowhere else.
+    expect(model.altProtein).toHaveLength(model.refProtein.length);
+    const differingResidues = [...model.refProtein]
+      .map((aa, i) => (aa === model.altProtein[i] ? null : i + 1))
+      .filter((residue) => residue !== null);
+    expect(differingResidues).toEqual([7]);
+    expect(model.refProtein[6]).toBe('E');
+    expect(model.altProtein[6]).toBe('V');
   });
 
   it('emits one segment per annotated codon, 1-based and gapless', () => {
     const model = buildLocusModel({ variantId: 'HBB_HbS' });
-
-    expect(model.segments).toHaveLength(model.totalCodonCount);
-    expect(model.segments.map((segment) => segment.codonIndex)).toEqual(
-      Array.from({ length: HBB_CODON_COUNT }, (_, i) => i + 1),
-    );
+    expectStructurallySound(model);
   });
 
-  it('emits a real ACGT codon for every fixture codon and invents none', () => {
+  it('models every codon of the current HBB fixture: zero unsequenced codons', () => {
+    const { modelled, annotatedEnd } = extentOf(hbbLocus());
     const model = buildLocusModel({ variantId: 'HBB_HbS' });
 
-    expect(model.segments).toHaveLength(HBB_CODON_COUNT);
-    expect(model.segments.every((segment) => segment.modelled)).toBe(true);
-
+    // The fixture carries the full CDS, so it reaches at least as far as the annotation.
+    expect(modelled).toBeGreaterThanOrEqual(annotatedEnd);
+    expect(model.segments.filter((segment) => segment.status === 'unsequenced')).toEqual([]);
     for (const segment of model.segments) {
-      expect(segment.refCodon).toMatch(/^[ACGT]{3}$/);
-      expect(segment.altCodon).toMatch(/^[ACGT]{3}$/);
-      expect(segment.status).not.toBe('unsequenced');
+      expect(segment.modelled).toBe(true);
+      expect(segment.refCodon).not.toBeNull();
+      expect(segment.altCodon).not.toBeNull();
     }
+    // A full CDS ends in its terminator.
+    expect(model.segments.at(-1)?.refAa).toBe('*');
+  });
+
+  it('never invents bases past the modelled codons', () => {
+    const ref = seq('ATGGAGAAACCC', 'ref');
+    const alt = seq('ATGGTGAAACCT', 'alt');
+    const model = buildGenomeModel({ ref, alt, totalCodonCount: 20 });
+
+    expect(model.modelledCodonCount).toBe(4);
+    expect(model.totalCodonCount).toBe(20);
+    expectStructurallySound(model);
+
+    const real = model.segments.slice(0, model.modelledCodonCount);
+    expect(real.map((segment) => [segment.refCodon, segment.altCodon])).toEqual([
+      ['ATG', 'ATG'],
+      ['GAG', 'GTG'],
+      ['AAA', 'AAA'],
+      ['CCC', 'CCT'],
+    ]);
+    expect(real.map((segment) => segment.status)).toEqual(['same', 'changed', 'same', 'changed']);
+    expect(real.every((segment) => segment.modelled)).toBe(true);
+    expect(model.editedCodonIndices).toEqual([2, 4]);
+
+    const unsequenced = model.segments.slice(model.modelledCodonCount);
+    expect(unsequenced).toHaveLength(model.totalCodonCount - model.modelledCodonCount);
+    for (const segment of unsequenced) {
+      expect(segment).toEqual({
+        codonIndex: segment.codonIndex,
+        refCodon: null,
+        altCodon: null,
+        refAa: null,
+        altAa: null,
+        status: 'unsequenced',
+        silent: false,
+        modelled: false,
+        exonIndex: null,
+      });
+    }
+    expect(structuralSummary(model)).toContain('4 codons modelled of 20 annotated for this locus');
+  });
+
+  it('never lets the override shrink the drawn extent below the modelled codons', () => {
+    const model = buildGenomeModel({
+      ref: seq('ATGGAGAAA', 'ref'),
+      alt: seq('ATGGTGAAA', 'alt'),
+      totalCodonCount: 1,
+    });
+    expect(model.totalCodonCount).toBe(model.modelledCodonCount);
+    expect(model.segments.some((segment) => segment.status === 'unsequenced')).toBe(false);
   });
 
   it('describes codon 7 as the missense GAG→GTG / E→V change', () => {
@@ -87,50 +161,37 @@ describe('buildLocusModel — HBB_HbS from loci.json', () => {
     });
   });
 
-  it('attributes codon 40 to exon 2, codon 147 to exon 3, and the terminator to no exon', () => {
-    const model = buildLocusModel({ variantId: 'HBB_HbS' });
-    const codon40 = segmentAt(model, 40);
-    if (codon40 === undefined) return;
+  it('attributes unsequenced codons to their annotated exon when the sequence stops short', () => {
+    const locus = hbbLocus();
+    const { annotatedEnd } = extentOf(locus);
+    const firstExon = locus.exons.find((e) => e.index === 1);
+    expect(firstExon).toBeDefined();
+    if (firstExon === undefined) return;
 
-    expect(codon40).toEqual({
-      codonIndex: 40,
-      refCodon: 'CAG',
-      altCodon: 'CAG',
-      refAa: 'Q',
-      altAa: 'Q',
-      status: 'same',
-      silent: false,
-      modelled: true,
-      exonIndex: 2,
-    });
+    // Only exon 1 sequenced: the rest of the annotated locus has no bases.
+    const truncatedCodons = firstExon.codonEnd;
+    const ref = seq(referenceSequence(locus).bases.slice(0, truncatedCodons * 3), 'ref');
+    const model = buildGenomeModel({ ref, alt: ref, locus });
 
-    const codon147 = segmentAt(model, 147);
-    if (codon147 === undefined) return;
-    expect(codon147).toEqual({
-      codonIndex: 147,
-      refCodon: 'CAC',
-      altCodon: 'CAC',
-      refAa: 'H',
-      altAa: 'H',
-      status: 'same',
-      silent: false,
-      modelled: true,
-      exonIndex: 3,
-    });
+    expect(model.modelledCodonCount).toBe(truncatedCodons);
+    expect(model.totalCodonCount).toBe(annotatedEnd);
+    expectStructurallySound(model);
 
-    const codon148 = segmentAt(model, 148);
-    if (codon148 === undefined) return;
-    expect(codon148).toEqual({
-      codonIndex: 148,
-      refCodon: 'TAA',
-      altCodon: 'TAA',
-      refAa: '*',
-      altAa: '*',
-      status: 'same',
-      silent: false,
-      modelled: true,
-      exonIndex: null,
-    });
+    const unsequenced = model.segments.filter((segment) => segment.status === 'unsequenced');
+    expect(unsequenced).toHaveLength(model.totalCodonCount - model.modelledCodonCount);
+    expect(unsequenced[0]?.codonIndex).toBe(truncatedCodons + 1);
+    for (const segment of unsequenced) {
+      expect(segment.modelled).toBe(false);
+      expect(segment.refCodon).toBeNull();
+      expect(segment.altCodon).toBeNull();
+      expect(segment.refAa).toBeNull();
+      expect(segment.altAa).toBeNull();
+      expect(segment.exonIndex).toBe(exonContaining(locus, segment.codonIndex));
+    }
+    // The tail spans every later exon, through to the last annotated codon.
+    expect(new Set(unsequenced.map((segment) => segment.exonIndex))).toEqual(
+      new Set(locus.exons.filter((e) => e.index !== 1).map((e) => e.index)),
+    );
   });
 });
 
@@ -282,8 +343,10 @@ describe('describeEdit and structuralSummary', () => {
     expect(summary).toContain(
       'A negatively charged, hydrophilic surface residue is replaced by a small hydrophobic one',
     );
-    expect(summary).toContain(`${HBB_CODON_COUNT} codons modelled`);
-    expect(summary).not.toContain('annotated for this locus');
+    const { modelled, expectedTotal } = extentOf(hbbLocus());
+    expect(summary).toContain(`${modelled} codons modelled`);
+    // "of N annotated" appears only when the annotation outruns the sequence.
+    expect(summary.includes('annotated for this locus')).toBe(expectedTotal > modelled);
     expect(summary.includes('..')).toBe(false);
     expect(summary.endsWith('.')).toBe(true);
   });
@@ -371,10 +434,27 @@ describe('exon attribution stops at an indel', () => {
   });
 
   it('still attributes exons normally when nothing shifted', () => {
+    const locus = hbbLocus();
     const model = buildLocusModel({ variantId: 'HBB_HbS' });
     expect(model.coordinatesDiverge).toBe(false);
     expect(model.segments[0]?.exonIndex).toBe(1);
     expect(model.segments[39]?.exonIndex).toBe(2);
     expect(model.segments[146]?.exonIndex).toBe(3);
+    for (const segment of model.segments) {
+      expect(segment.exonIndex).toBe(exonContaining(locus, segment.codonIndex));
+    }
+  });
+
+  it('reports no exon for modelled codons past the last annotated exon', () => {
+    const locus = hbbLocus();
+    const { modelled, annotatedEnd } = extentOf(locus);
+    const model = buildLocusModel({ variantId: 'HBB_HbS' });
+
+    const beyond = model.segments.filter((segment) => segment.codonIndex > annotatedEnd);
+    expect(beyond).toHaveLength(Math.max(0, modelled - annotatedEnd));
+    for (const segment of beyond) {
+      expect(segment.modelled).toBe(true);
+      expect(segment.exonIndex).toBeNull();
+    }
   });
 });
