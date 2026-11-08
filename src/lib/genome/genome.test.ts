@@ -12,6 +12,10 @@ import {
   getGenotype,
   referenceSequence,
   sequenceForGenotype,
+  GenomeInputError,
+  InvalidBaseError,
+  PartialCodonError,
+  InsertionRefCodonError,
 } from './index';
 import type { Sequence, Variant } from './types';
 
@@ -100,7 +104,7 @@ describe('applyVariant', () => {
     const v: Variant = {
       gene: 'X',
       codonIndex: 2,
-      refCodon: 'TTT',
+      refCodon: '',
       altCodon: 'GGG',
       kind: 'insertion',
       label: 'ins',
@@ -253,5 +257,124 @@ describe('loci loader', () => {
     expect(codons(rp.bases)[6]).toBe('GAG');
     expect(rp.bases).toBe(wt.bases);
     expect(sc.label).toBe('HbS / HbS');
+  });
+});
+
+describe('SPEC §4.6 sequence and variant validation', () => {
+  it('rejects non-ACGT and names the offending character and 0-based offset (#13)', () => {
+    const cases: Array<{ input: string; char: string; offset: number }> = [
+      { input: 'ATGNNNCCC', char: 'N', offset: 3 },
+      { input: 'ATGUGC', char: 'U', offset: 3 },
+      { input: 'ATG CCC', char: ' ', offset: 3 },
+      { input: 'nATG', char: 'n', offset: 0 },
+    ];
+    for (const { input, char, offset } of cases) {
+      try {
+        translate(input);
+        throw new Error(`expected translate(${JSON.stringify(input)}) to throw`);
+      } catch (err) {
+        expect(err).toBeInstanceOf(InvalidBaseError);
+        expect(err).toBeInstanceOf(GenomeInputError);
+        if (!(err instanceof InvalidBaseError)) return;
+        expect(err.char).toBe(char);
+        expect(err.offset).toBe(offset);
+        expect(err.message).toContain(JSON.stringify(char));
+        expect(err.message).toContain(`offset ${offset}`);
+      }
+    }
+    expect(() => diffSequences(seq('ATGNNN'), seq('ATGCCC'))).toThrow(InvalidBaseError);
+    expect(() => applyVariant(seq('ATGNNN'), {
+      gene: 'X',
+      codonIndex: 1,
+      refCodon: 'ATG',
+      altCodon: 'AAA',
+      kind: 'substitution',
+      label: 'bad',
+    })).toThrow(InvalidBaseError);
+  });
+
+  it('still accepts lowercase ACGT and normalises it (#13 must not over-reject)', () => {
+    expect(codons('atg')).toEqual(['ATG']);
+    expect(translate('atgtaa')).toBe('M*');
+    const rows = diffSequences(seq('atggagttt'), seq('ATGGAGTTT'));
+    expect(rows.every((row) => row.status === 'same')).toBe(true);
+    const result = applyVariant(seq('atggag'), {
+      gene: 'X',
+      codonIndex: 2,
+      refCodon: 'gag',
+      altCodon: 'gtg',
+      kind: 'substitution',
+      label: 'lower',
+    });
+    expect(codons(result.bases)).toEqual(['ATG', 'GTG']);
+  });
+
+  it('rejects a trailing partial codon in diffSequences (#14)', () => {
+    expect(() => diffSequences(seq('ATGAA', 'left'), seq('ATGAA', 'right'))).toThrow(
+      PartialCodonError,
+    );
+    try {
+      diffSequences(seq('ATGAA', 'left'), seq('ATGCCC', 'right'));
+      throw new Error('expected throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(PartialCodonError);
+      expect(err).toBeInstanceOf(GenomeInputError);
+      if (!(err instanceof PartialCodonError)) return;
+      expect(err.length).toBe(5);
+      expect(err.message).toContain('left');
+      expect(err.message).toContain('5');
+      expect(err.message).toContain('multiple of 3');
+    }
+    expect(() => diffSequences(seq('ATG'), seq('AT'))).toThrow(/multiple of 3/);
+  });
+
+  it('still diffs unequal codon counts — indels, not unequal remainders (#14)', () => {
+    const rows = diffSequences(seq('AAATTT'), seq('AAATTTCCC'));
+    expect(rows).toHaveLength(3);
+    expect(rows[2]).toMatchObject({ refCodon: null, altCodon: 'CCC', status: 'added' });
+    expect(() => diffSequences(seq(''), seq('ATGAAATTT'))).not.toThrow();
+    expect(() => diffSequences(seq('ATGAAATTT'), seq('ATGAAA'))).not.toThrow();
+  });
+
+  it('rejects a non-empty refCodon on insertion and still inserts when it is empty (#15)', () => {
+    const host = seq('AAATTTCCC');
+    expect(() =>
+      applyVariant(host, {
+        gene: 'X',
+        codonIndex: 2,
+        refCodon: 'TTT',
+        altCodon: 'GGG',
+        kind: 'insertion',
+        label: 'ins',
+      }),
+    ).toThrow(InsertionRefCodonError);
+    try {
+      applyVariant(host, {
+        gene: 'X',
+        codonIndex: 1,
+        refCodon: 'GGG',
+        altCodon: 'CCC',
+        kind: 'insertion',
+        label: 'ins',
+      });
+      throw new Error('expected throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(InsertionRefCodonError);
+      expect(err).toBeInstanceOf(GenomeInputError);
+      if (!(err instanceof InsertionRefCodonError)) return;
+      expect(err.refCodon).toBe('GGG');
+      expect(err.message).toContain('GGG');
+      expect(err.message).toMatch(/invalid variant/);
+      expect(err.message).not.toMatch(/refCodon mismatch/);
+    }
+    const result = applyVariant(host, {
+      gene: 'X',
+      codonIndex: 2,
+      refCodon: '',
+      altCodon: 'GGG',
+      kind: 'insertion',
+      label: 'ins',
+    });
+    expect(codons(result.bases)).toEqual(['AAA', 'GGG', 'TTT', 'CCC']);
   });
 });

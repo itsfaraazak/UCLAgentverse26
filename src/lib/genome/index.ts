@@ -1,5 +1,11 @@
 export { CODON_TABLE, aminoAcid, isStopCodon } from './codon-table';
 export { translate, codons } from './translate';
+export {
+  GenomeInputError,
+  InvalidBaseError,
+  PartialCodonError,
+  InsertionRefCodonError,
+} from './errors';
 export { applyVariant, applyVariants } from './variant';
 export { diffSequences } from './diff';
 export {

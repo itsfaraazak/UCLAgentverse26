@@ -1,5 +1,6 @@
 import { aminoAcid } from './codon-table';
-import { codons } from './translate';
+import { PartialCodonError } from './errors';
+import { codons, normalizeDna } from './translate';
 import type { DiffRow, Sequence } from './types';
 
 const MATCH = 2;
@@ -95,12 +96,21 @@ function statusOf(
   return 'changed';
 }
 
+function requireCompleteCodons(seq: Sequence): string {
+  const normalized = normalizeDna(seq.bases);
+  if (normalized.length % 3 !== 0) {
+    throw new PartialCodonError(seq.label, normalized.length);
+  }
+  return normalized;
+}
+
 /**
- * Aligned codon-by-codon diff. Pure. Unequal lengths (insertions / deletions)
+ * Aligned codon-by-codon diff. Pure. Unequal codon counts (insertions / deletions)
  * produce `added` / `removed` rows and keep subsequent matching codons aligned.
+ * A trailing 1–2 nt partial codon is malformed and rejected (SPEC §4.6 #14).
  */
 export function diffSequences(ref: Sequence, alt: Sequence): DiffRow[] {
-  const pairs = alignCodons(codons(ref.bases), codons(alt.bases));
+  const pairs = alignCodons(codons(requireCompleteCodons(ref)), codons(requireCompleteCodons(alt)));
   return pairs.map((pair, offset) => {
     const refAa = pair.refCodon === null ? null : aminoAcid(pair.refCodon);
     const altAa = pair.altCodon === null ? null : aminoAcid(pair.altCodon);

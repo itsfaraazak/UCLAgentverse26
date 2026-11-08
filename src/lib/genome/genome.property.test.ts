@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { CODON_TABLE, aminoAcid, translate, codons, applyVariant, diffSequences } from './index';
+import {
+  CODON_TABLE,
+  aminoAcid,
+  translate,
+  codons,
+  applyVariant,
+  diffSequences,
+  InvalidBaseError,
+  PartialCodonError,
+  InsertionRefCodonError,
+} from './index';
 import type { DiffRow, Sequence, Variant } from './types';
 
 const BASES = ['A', 'C', 'G', 'T'] as const;
@@ -461,7 +471,7 @@ describe('property: applyVariant', () => {
           variant({
             kind: 'insertion',
             codonIndex: at,
-            refCodon: at <= n ? (codonList[at - 1] ?? '') : '',
+            refCodon: '',
             altCodon: inserted,
           }),
         );
@@ -550,33 +560,50 @@ describe('property: robustness of the documented uppercase 5′→3′ contract'
     });
   });
 
-  it.skip('rejects sequences that are not uppercase ACGT — SPEC §4.1 is silent on invalid alphabets', () => {
-    // SPEC §4.1 says Sequence is always uppercase 5′→3′ and Base = A|C|G|T.
-    // It does not say whether translate/diff/applyVariant must throw on N,
-    // RNA U, or other characters. Current behaviour silently uppercases and
-    // then halts translation at the first codon missing from CODON_TABLE, so
-    // ATGNNNCCC becomes "M" and the trailing CCC is dropped. That is either
-    // a clean halt or silent data loss; the spec does not pick a policy.
-    expect(() => translate('ATGNNNCCC')).toThrow();
-    expect(() => diffSequences(seq('ATGNNN'), seq('ATGCCC'))).toThrow();
+  it('rejects sequences that are not ACGT (SPEC §4.6 #13)', () => {
+    // Silent halt-at-unknown-codon dropped the trailing CCC of ATGNNNCCC.
+    // The decided policy is to throw, naming the character and offset.
+    expect(() => translate('ATGNNNCCC')).toThrow(InvalidBaseError);
+    expect(() => diffSequences(seq('ATGNNN'), seq('ATGCCC'))).toThrow(InvalidBaseError);
+    try {
+      translate('ATGNNNCCC');
+    } catch (err) {
+      expect(err).toBeInstanceOf(InvalidBaseError);
+      if (!(err instanceof InvalidBaseError)) return;
+      expect(err.char).toBe('N');
+      expect(err.offset).toBe(3);
+      expect(err.message).toContain('"N"');
+      expect(err.message).toContain('offset 3');
+    }
   });
 
-  it.skip('represents a trailing partial codon in the diff — SPEC §4.1 is codon-row scoped', () => {
-    // diffSequences is specified as an aligned row-per-codon view. A leftover
-    // 1–2 nt tail cannot be a DiffRow. Round-trip of the *codon stream* holds
-    // (tested above); whether the tail must be preserved is unspecified.
-    const rows = diffSequences(seq('ATGAA'), seq('ATGAA'));
-    expect(reconstruct(rows, 'alt')).toBe('ATGAA');
+  it('rejects a trailing partial codon in the diff (SPEC §4.6 #14)', () => {
+    // Rewritten from the skipped form, which asserted that reconstruct() should
+    // keep the leftover 1–2 nt. §4.6 decided the opposite: a non-multiple-of-3
+    // input is malformed. Unequal *codon counts* remain supported (indel tests
+    // above); it is unequal *remainders* that are refused.
+    expect(() => diffSequences(seq('ATGAA'), seq('ATGAA'))).toThrow(PartialCodonError);
+    expect(() => diffSequences(seq('ATGAA'), seq('ATGAA'))).toThrow(/multiple of 3/);
+    const indel = diffSequences(seq('ATGAAA'), seq('ATGAAACCC'));
+    expect(indel.some((row) => row.status === 'added')).toBe(true);
   });
 
-  it.skip('validates insertion refCodon — SPEC §4.5 #6 only defines altCodon placement', () => {
-    // Substitution and deletion check refCodon. Insertion currently ignores it.
-    // §4.5 #6 does not require a match, so requiring one would be invented policy.
-    expect(() =>
+  it('rejects a non-empty refCodon on insertion (SPEC §4.6 #15)', () => {
+    // Rewritten from the skipped form, which expected `/refCodon mismatch/`
+    // (i.e. a check against the host sequence). §4.6 decided insertions are
+    // *unvalidated* against the sequence, and a non-empty refCodon must throw
+    // so no caller believes a check happened that did not.
+    try {
       applyVariant(
         seq('AAATTT'),
         variant({ kind: 'insertion', codonIndex: 1, refCodon: 'GGG', altCodon: 'CCC' }),
-      ),
-    ).toThrow(/refCodon mismatch/);
+      );
+      throw new Error('expected insertion with a non-empty refCodon to throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(InsertionRefCodonError);
+      const msg = err instanceof Error ? err.message : String(err);
+      expect(msg).toContain('GGG');
+      expect(msg).not.toMatch(/refCodon mismatch/);
+    }
   });
 });
