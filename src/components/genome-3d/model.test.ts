@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { InvalidBaseError, PartialCodonError } from '@/lib/genome';
+import { InvalidBaseError, PartialCodonError, getLocus, referenceSequence } from '@/lib/genome';
 import type { Sequence } from '@/lib/genome';
 import {
   UnknownLocusError,
@@ -307,5 +307,44 @@ describe('preferredCodonIndex', () => {
       preferredCodonIndex: 2,
     });
     expect(identical.primaryEditedCodon).toBe(null);
+  });
+});
+
+describe('exon attribution stops at an indel', () => {
+  it('reports no exon for rows past the first indel, rather than a wrong one', () => {
+    const locus = getLocus('HBB');
+    expect(locus).toBeDefined();
+    if (locus === undefined) return;
+
+    const ref = referenceSequence(locus);
+    // Delete codon 3: every later row is an alignment row, not a CDS codon.
+    const codonList = ref.bases.match(/.{3}/g) ?? [];
+    const alt = {
+      bases: [...codonList.slice(0, 2), ...codonList.slice(3)].join(''),
+      label: 'deletion',
+    };
+
+    const model = buildGenomeModel({ ref, alt, locus });
+    expect(model.coordinatesDiverge).toBe(true);
+
+    const indelAt = model.segments.findIndex(
+      (s) => s.status === 'added' || s.status === 'removed',
+    );
+    expect(indelAt).toBeGreaterThan(0);
+
+    // Before the indel the coordinate is still a real CDS codon.
+    expect(model.segments[0]?.exonIndex).toBe(1);
+    // From the indel onward we decline to name an exon.
+    for (const segment of model.segments.slice(indelAt)) {
+      expect(segment.exonIndex).toBeNull();
+    }
+  });
+
+  it('still attributes exons normally when nothing shifted', () => {
+    const model = buildLocusModel({ variantId: 'HBB_HbS' });
+    expect(model.coordinatesDiverge).toBe(false);
+    expect(model.segments[0]?.exonIndex).toBe(1);
+    expect(model.segments[39]?.exonIndex).toBe(2);
+    expect(model.segments[146]?.exonIndex).toBe(3);
   });
 });

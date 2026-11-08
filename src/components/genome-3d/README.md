@@ -68,6 +68,14 @@ the model sets `coordinatesDiverge`, the UI switches the word "codon" to
 "alignment row", and a note explains that the two sequences no longer share
 one coordinate system. It is not silently papered over.
 
+The same rule governs exons. `loci.json` annotates exons in CDS coordinates,
+and an alignment row only *is* a CDS codon while the two sequences are still
+in step — so from the first indel onward `exonIndex` is `null` rather than a
+confident lookup by a row number that no longer names a CDS position. No
+curated locus currently carries an indel (SPEC §4.8 records that gap), so
+this only bites once one is added; it is pinned by a test on a synthetic
+deletion so it cannot regress silently.
+
 ## Instancing
 
 147 codons and 93 base pairs are drawn from a handful of geometries:

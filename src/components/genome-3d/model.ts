@@ -118,7 +118,19 @@ function segmentsFromDiff(
   locus: Locus | null,
   totalCodonCount: number,
 ): CodonSegment[] {
-  const segments: CodonSegment[] = rows.map((row) => ({
+  /**
+   * Exons are annotated in CDS codon coordinates, and an alignment row only
+   * *is* a CDS codon while the two sequences still share one coordinate
+   * system. From the first indel onward the row number no longer names a CDS
+   * position (SPEC §4.5 #2), so looking an exon up by it would confidently
+   * attribute codons to the wrong exon. Past that point we report no exon
+   * rather than a wrong one.
+   */
+  const firstIndel = rows.findIndex((r) => r.status === 'added' || r.status === 'removed');
+  const exonAt = (codonIndex: number, rowOffset: number): number | null =>
+    firstIndel !== -1 && rowOffset >= firstIndel ? null : exonIndexFor(locus, codonIndex);
+
+  const segments: CodonSegment[] = rows.map((row, offset) => ({
     codonIndex: row.codonIndex,
     refCodon: row.refCodon,
     altCodon: row.altCodon,
@@ -127,7 +139,7 @@ function segmentsFromDiff(
     status: row.status,
     silent: row.silent,
     modelled: true,
-    exonIndex: exonIndexFor(locus, row.codonIndex),
+    exonIndex: exonAt(row.codonIndex, offset),
   }));
 
   for (let i = rows.length + 1; i <= totalCodonCount; i += 1) {
@@ -140,7 +152,7 @@ function segmentsFromDiff(
       status: 'unsequenced',
       silent: false,
       modelled: false,
-      exonIndex: exonIndexFor(locus, i),
+      exonIndex: exonAt(i, i - 1),
     });
   }
   return segments;
