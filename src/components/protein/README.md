@@ -51,5 +51,5 @@ below the canvas regardless.
 ## Shared runtime
 
 `runtime/` (renderer selection, resource tracking, viewport, error vocabulary,
-status UI) is also used by `components/cell3d`. It lives here only because this
-task allowed files in these two directories; it has no protein-specific code.
+status UI) is also used by `components/cell3d` and has no protein-specific
+code.

@@ -5,9 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { FailureKind } from './errors';
 import type { RendererKind } from './renderer';
 
-/**
- * Presentational pieces shared by both 3D shells. three-free.
- */
+// Presentational pieces shared by both 3D shells. three-free.
 
 export interface RendererBadgeProps {
   readonly state:
@@ -16,7 +14,7 @@ export interface RendererBadgeProps {
     | { readonly phase: 'none' };
 }
 
-/** Small, unobtrusive "which GPU path is live" pill. Useful on stage. */
+/** Pill showing which GPU path is live. */
 export function RendererBadge({ state }: RendererBadgeProps) {
   let text: string;
   let title: string;
