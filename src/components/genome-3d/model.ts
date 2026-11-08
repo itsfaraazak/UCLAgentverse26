@@ -23,11 +23,18 @@ import {
  *
  * Two honesty rules are encoded in these types rather than left to the UI:
  *
- *  1. `loci.json` annotates HBB's exons out to codon 147, but only the first
- *     31 codons carry real sequence. Codons past the modelled region are
- *     emitted with `status: 'unsequenced'` and `refCodon: null`, so the view
- *     can draw the locus at its true extent without fabricating bases. The
- *     gene track already greys this region for context; we do the same in 3D.
+ *  1. A locus can be annotated further than it is sequenced. Codons past the
+ *     modelled region are emitted with `status: 'unsequenced'` and
+ *     `refCodon: null`, so the view can draw the locus at its true extent
+ *     without fabricating bases, and the gene track's convention of greying
+ *     that region carries over into 3D.
+ *
+ *     HBB no longer exercises this: `loci.json` used to hold a 31-codon
+ *     excerpt inside exons annotated to codon 147, and now holds the full
+ *     NM_000518.5 CDS (148 codons, the last being the stop), so nothing is
+ *     unsequenced. The path is kept, and tested on a synthetic short locus,
+ *     because it is what stops a future partial fixture being drawn as
+ *     though it were sequenced.
  *
  *  2. `DiffRow.codonIndex` is an *alignment row*, not a CDS coordinate, once
  *     an indel has shifted the two sequences apart (SPEC §4.5 #2). When the
@@ -35,8 +42,8 @@ import {
  *     stop presenting row numbers as CDS codon positions past that point.
  */
 
-/** Per-codon status. `unsequenced` extends `DiffRow['status']` for the
- *  annotated-but-not-modelled tail of the locus. */
+/** Per-codon status. `unsequenced` extends `DiffRow['status']` for a tail
+ *  that the locus annotates but holds no bases for. */
 export type CodonStatus = DiffRow['status'] | 'unsequenced';
 
 export interface CodonSegment {
