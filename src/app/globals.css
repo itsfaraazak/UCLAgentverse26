@@ -170,12 +170,14 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* System font stack — part of reading as a native macOS app rather than a
-     web page. Falls back sanely on other platforms. */
-  --font-sans: var(--font-geist-sans), ui-sans-serif, -apple-system,
+  /* Three faces, each with one job — see src/app/layout.tsx for the reasoning.
+     System fallbacks keep it feeling native if a webfont fails to load. */
+  --font-sans: var(--font-sans-src), ui-sans-serif, -apple-system,
     BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", "JetBrains Mono",
-    Menlo, Consolas, monospace;
+  --font-mono: var(--font-mono-src), ui-monospace, "SF Mono", Menlo, Consolas,
+    monospace;
+  --font-display: var(--font-display-src), ui-serif, "New York", Georgia,
+    "Times New Roman", serif;
 }
 
 @layer base {
@@ -207,6 +209,49 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Wordmark, section headings, large figures. Single weight — use size and
+     colour for hierarchy, never font-bold. */
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /*
+   * Nucleotide and amino-acid sequence text.
+   *
+   * JetBrains Mono ships coding ligatures, which would visually fuse adjacent
+   * characters in a sequence — exactly wrong when a reader is comparing bases
+   * one position at a time. Ligatures and contextual alternates are therefore
+   * switched off here, and slightly looser tracking keeps codon boundaries
+   * readable at small sizes.
+   *
+   * Use this anywhere raw sequence is rendered, not plain `font-mono`.
+   */
+  .seq {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0, "ss01" 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+
+  /* Translucent chrome, for the sidebar and titlebar surfaces that give the
+     app its native feel. Degrades to a solid surface where unsupported. */
+  .vibrancy {
+    background-color: color-mix(in oklab, var(--card) 72%, transparent);
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    .vibrancy {
+      backdrop-filter: saturate(180%) blur(20px);
+      background-color: color-mix(in oklab, var(--card) 55%, transparent);
     }
   }
 }
