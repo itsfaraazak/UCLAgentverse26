@@ -1,0 +1,105 @@
+{
+  "_disclaimer": "Curated fixtures for the SigmaFold prototype. Every entry is either (a) public reference knowledge about a human gene, used as a teaching example, or (b) explicitly synthetic and labelled as such. No real patient data. No construct designs, guides, primers, vectors or protocols appear anywhere in this file, by policy (see SPEC.md section 7). Structural and simulation annotations are illustrative teaching summaries, not predictions from a validated model.",
+
+  "loci": [
+    {
+      "gene": "HBB",
+      "provenance": "public-reference",
+      "name": "Haemoglobin subunit beta",
+      "chromosome": "11",
+      "note": "The worked example for this prototype. Only the first 30 codons of the coding sequence are included — enough to diff and translate the classic codon-7 substitution. This is standard textbook reference material.",
+      "cdsReference": {
+        "label": "HbA (reference allele)",
+        "startCodon": 1,
+        "codonCount": 30,
+        "bases": "ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGG"
+      },
+      "exons": [
+        { "index": 1, "label": "Exon 1", "codonStart": 1, "codonEnd": 30, "note": "Truncated to the modelled region." },
+        { "index": 2, "label": "Exon 2", "codonStart": 31, "codonEnd": 104, "note": "Not modelled; shown greyed on the gene track for context." },
+        { "index": 3, "label": "Exon 3", "codonStart": 105, "codonEnd": 147, "note": "Not modelled; shown greyed on the gene track for context." }
+      ],
+      "variants": [
+        {
+          "id": "HBB_HbS",
+          "provenance": "public-reference",
+          "label": "HbS (sickle allele)",
+          "hgvs": "NM_000518.5(HBB):c.20A>T",
+          "proteinHgvs": "p.Glu7Val",
+          "legacyName": "Glu6Val / E6V",
+          "numberingNote": "Codon 7 in CDS numbering. The legacy 'Glu6Val' name counts from the mature protein, after the initiator methionine is removed. Both names describe the same substitution.",
+          "codonIndex": 7,
+          "refCodon": "GAG",
+          "altCodon": "GTG",
+          "kind": "substitution",
+          "structural": {
+            "refAa": "E",
+            "altAa": "V",
+            "refAaName": "Glutamate",
+            "altAaName": "Valine",
+            "summary": "A negatively charged, hydrophilic surface residue is replaced by a small hydrophobic one.",
+            "consequence": "The substituted hydrophobic residue sits on the surface of the beta-globin subunit. On deoxygenation this creates a sticky patch that favours contact between haemoglobin molecules, so they associate into fibres instead of staying in solution. Fibre formation is what stiffens and deforms the red cell.",
+            "polymerizationTendency": 0.85,
+            "confidence": "textbook-consensus",
+            "limitation": "A qualitative teaching summary of a well-documented mechanism. Not output from a structure-prediction model."
+          }
+        },
+        {
+          "id": "HBB_repair",
+          "provenance": "public-reference",
+          "label": "Repaired to reference codon",
+          "hgvs": "NM_000518.5(HBB):c.20T>A",
+          "proteinHgvs": "p.Val7Glu",
+          "numberingNote": "The reverse substitution, restoring the reference codon at position 7.",
+          "codonIndex": 7,
+          "refCodon": "GTG",
+          "altCodon": "GAG",
+          "kind": "substitution",
+          "structural": {
+            "refAa": "V",
+            "altAa": "E",
+            "refAaName": "Valine",
+            "altAaName": "Glutamate",
+            "summary": "Restores the reference charged surface residue.",
+            "consequence": "With the reference residue restored, the hydrophobic surface patch is gone and the deoxygenated protein no longer favours fibre formation, so cell shape is retained as oxygen tension falls.",
+            "polymerizationTendency": 0.05,
+            "confidence": "textbook-consensus",
+            "limitation": "Models the sequence-level consequence only. Says nothing about whether any particular editing approach would achieve this in a cell, which is out of scope for this tool."
+          }
+        },
+        {
+          "id": "HBB_silent_demo",
+          "provenance": "synthetic-illustrative",
+          "label": "Synthetic silent variant",
+          "codonIndex": 5,
+          "refCodon": "ACT",
+          "altCodon": "ACC",
+          "kind": "substitution",
+          "numberingNote": "Invented fixture. Both codons encode threonine, so this exercises the diff view's 'silent' case — DNA changes, amino acid does not.",
+          "structural": {
+            "refAa": "T",
+            "altAa": "T",
+            "refAaName": "Threonine",
+            "altAaName": "Threonine",
+            "summary": "Synonymous substitution; no amino-acid change.",
+            "consequence": "No predicted change to the protein in this model.",
+            "polymerizationTendency": 0.0,
+            "confidence": "synthetic",
+            "limitation": "Entirely synthetic, included to test the diff renderer."
+          }
+        }
+      ],
+      "genotypes": [
+        { "id": "wildtype", "label": "HbA / HbA", "appliedVariants": [], "polymerizationTendency": 0.0 },
+        { "id": "sickle", "label": "HbS / HbS", "appliedVariants": ["HBB_HbS"], "polymerizationTendency": 0.85 },
+        { "id": "repaired", "label": "Post-repair", "appliedVariants": ["HBB_HbS", "HBB_repair"], "polymerizationTendency": 0.05 }
+      ]
+    }
+  ],
+
+  "simulation": {
+    "_note": "Parameters for the illustrative particle model in src/lib/cellsim. Chosen so the demo reads clearly on screen; they are not calibrated against experimental haemorheology data and must be presented in the UI as illustrative.",
+    "defaults": { "seed": 20260308, "cellCount": 140, "pO2": 95, "capillaryConstriction": 0.42 },
+    "pO2": { "min": 10, "max": 100, "unit": "mmHg", "label": "Oxygen tension", "sicklingOnsetBelow": 60 }
+  }
+}
