@@ -48,10 +48,17 @@ export interface ToolTrace {
   readonly ms: number;
 }
 
+/**
+ * `VARIANT_INTERPRETATION` is the workbench's own category for reading an
+ * observed variant: it proposes no edit, so it is in scope for any gene. The
+ * edit categories come unchanged from `lib/safety/policy`.
+ */
+export type GateCategory = PolicyCategory | 'VARIANT_INTERPRETATION';
+
 export interface GateData {
   readonly mode: RequestMode;
   readonly verdict: Verdict;
-  readonly category: PolicyCategory;
+  readonly category: GateCategory;
   readonly reason: string;
   readonly requiresSignoff: boolean;
   readonly signoffRole: string | null;
