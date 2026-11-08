@@ -199,5 +199,16 @@ const good = {head, sequence: "MVH", pdb, provider: "ESM Metagenomic Atlas", mod
   assert.equal(invalidAuto.pending.length, 1);
   assert.match(invalidAuto.status.textContent, /Could not load/);
   assert.throws(() => setup({automatic: true}), /requires Modal/);
+
+  const reference = setup({state: {branch: "main", head: null}});
+  assert.match(all(reference.host).map(node => node.textContent).join("\n"), /Reference sequence/);
+  assert.equal(reference.pending[0].path, "/api/sequence?branch=main");
+  reference.pending[0].resolve(response({head: null, sequence: "MVH"})); await tick();
+  assert.equal(reference.sequence.textContent, "MVH");
+  assert.equal(reference.predict.disabled, false);
+  const referenceRequest = reference.predict.listeners.click();
+  assert.deepEqual(JSON.parse(reference.pending[1].options.body), {branch: "main", expected_head: null, consent: true});
+  reference.pending[1].resolve(response({...good, head: null, commit: "reference"})); await referenceRequest;
+  assert.equal(reference.result.hidden, false);
   console.log("fold prediction tests passed");
 })().catch(error => { console.error(error); process.exitCode = 1; });

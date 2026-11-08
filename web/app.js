@@ -172,15 +172,12 @@
   async function refresh() {
     const version = ++loadVersion, selected = branch;
     try {
-      const [seq, history] = await Promise.all([
-        request(`/api/sequence?branch=${encodeURIComponent(selected)}`),
-        request(`/api/notes?branch=${encodeURIComponent(selected)}`)
-      ]);
+      const seq = await request(`/api/sequence?branch=${encodeURIComponent(selected)}`);
       if (version !== loadVersion || selected !== branch) return;
-      if (seq.head !== history.head) throw new Error("Branch changed while loading. Refresh to retry.");
-      notes = history;
+      if (!Array.isArray(seq.history)) throw new Error("Commit history is missing.");
+      notes = {head: seq.head, history: seq.history, content: ""};
       renderSequence(seq);
-      renderHistory(history.history);
+      renderHistory(seq.history);
       $("substitution-status").textContent = "Positions and reference letters use the canonical sequence.";
       $("branch-status").textContent = `${branch} · ${seq.head ? seq.head.slice(0, 10) : "no commits"}`;
       error("");
@@ -278,6 +275,7 @@
       if (branch !== selected) return;
       resetMerge();
       renderSequence(data);
+      if (Array.isArray(data.history)) renderHistory(data.history);
       drafts.delete(branch);
       ["residue-position", "replacement", "commit-message"].forEach(id => { $(id).value = ""; });
       $("substitution-status").textContent = "Sequence proposal committed.";
@@ -301,6 +299,7 @@
       if (selected !== branch) return;
       resetMerge();
       renderSequence(data);
+      if (Array.isArray(data.history)) renderHistory(data.history);
       $("rollback-message").value = "";
       await refresh();
     } catch (err) { error(`Restore failed: ${err.message}`); }

@@ -139,8 +139,9 @@
       sequence.textContent = "";
       predict.disabled = true;
       clearViewer();
-      identity.textContent = `Branch: ${next.branch || "none"} · Full commit: ${next.head || "none"} · Model: ESMFold`;
-      if (typeof next.branch !== "string" || !next.branch || typeof next.head !== "string" || !next.head) {
+      const reference = next.head == null;
+      identity.textContent = `Branch: ${next.branch || "none"} · ${reference ? "Reference sequence (no substitutions)" : `Full commit: ${next.head}`} · Model: ESMFold`;
+      if (typeof next.branch !== "string" || !next.branch || (!reference && typeof next.head !== "string")) {
         status.textContent = "Select a saved branch and commit.";
         return;
       }

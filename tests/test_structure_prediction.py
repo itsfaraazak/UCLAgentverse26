@@ -502,11 +502,22 @@ class PredictionHTTPTests(unittest.TestCase):
                     self.assertNotIn("private note", json.dumps(result))
             remote.assert_not_called()
 
+    def test_empty_branch_predicts_the_reference_sequence(self):
+        with patch.object(prediction, "_request", return_value=pdb_for(SEQUENCE)) as remote:
+            status, result = self.post({"branch": "main", "expected_head": None})
+        self.assertEqual(status, 200)
+        self.assertEqual(result["head"], None)
+        self.assertEqual(result["commit"], "reference")
+        self.assertEqual(result["sequence"], SEQUENCE)
+        self.assertEqual(result["model"], "ESMFold")
+        remote.assert_called_once_with(SEQUENCE)
+        self.assertIsNone(server.NOTES.sequence_read()["head"])
+
     def test_stale_missing_invalid_and_snapshot_race(self):
         with patch.object(prediction, "_request") as remote:
-            self.assertEqual(self.post({"branch": "main", "expected_head": None})[0], 400)
             self.assertEqual(self.post({"branch": "main", "expected_head": "a" * 40})[0], 400)
             first = server.NOTES.save("private note", None, "initial")
+            self.assertEqual(self.post({"branch": "main", "expected_head": None})[0], 400)
             self.assertEqual(self.post({"branch": "main", "expected_head": "a" * 40})[0], 409)
             self.assertEqual(self.post({"branch": "missing", "expected_head": first["head"]})[0], 400)
             self.assertEqual(self.post({"branch": "main", "expected_head": first["head"], "sequence": SEQUENCE})[0], 400)

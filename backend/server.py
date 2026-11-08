@@ -680,9 +680,16 @@ def structure_predict(body):
     if body["consent"] is not True:
         raise APIError("Explicit consent to send the sequence for prediction is required.")
     expected = body["expected_head"]
+    snapshot = NOTES.sequence_read(body["branch"])
+    # An empty branch still has the canonical HBB reference. Predict that
+    # sequence without inventing a commit; once history exists, a real head is required.
+    if expected is None and snapshot["head"] is None:
+        sequence = snapshot["sequence"]
+        pdb = structure_prediction.predict(sequence)
+        return {"head": None, "commit": "reference", "sequence": sequence, "pdb": pdb,
+                "provider": structure_prediction.provider_name(), "model": "ESMFold"}
     if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", expected):
         raise APIError("An existing expected head is required.")
-    snapshot = NOTES.sequence_read(body["branch"])
     if snapshot["head"] is None:
         raise APIError("An existing branch head is required.")
     if snapshot["head"] != expected:
