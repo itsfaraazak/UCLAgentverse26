@@ -1,4 +1,5 @@
-import { codons } from './translate';
+import { InsertionRefCodonError } from './errors';
+import { codons, normalizeDna } from './translate';
 import type { Sequence, Variant } from './types';
 
 function requireCodonIndex(v: Variant, length: number, allowEnd: boolean): number {
@@ -19,20 +20,17 @@ function normalizeCodon(codon: string): string {
   return codon.toUpperCase();
 }
 
-function leftoverBases(bases: string): string {
-  const rem = bases.length % 3;
-  if (rem === 0) return '';
-  return bases.slice(bases.length - rem).toUpperCase();
-}
-
 /**
  * Apply a single variant to a coding sequence. Coordinates are 1-based codon indices.
  * Substitution and deletion require `refCodon` to match the codon at `codonIndex`.
- * Insertion places `altCodon` at `codonIndex` (existing codons from that index shift right).
+ * Insertion places `altCodon` at `codonIndex` (existing codons from that index shift right)
+ * and must be passed an empty `refCodon` — there is nothing to verify (SPEC §4.6 #15).
  */
 export function applyVariant(seq: Sequence, v: Variant): Sequence {
-  const list = [...codons(seq.bases)];
-  const tail = leftoverBases(seq.bases);
+  const normalized = normalizeDna(seq.bases);
+  const list = [...codons(normalized)];
+  const rem = normalized.length % 3;
+  const tail = rem === 0 ? '' : normalized.slice(normalized.length - rem);
 
   switch (v.kind) {
     case 'substitution': {
@@ -64,6 +62,9 @@ export function applyVariant(seq: Sequence, v: Variant): Sequence {
       break;
     }
     case 'insertion': {
+      if (v.refCodon.length > 0) {
+        throw new InsertionRefCodonError(v.refCodon);
+      }
       const idx = requireCodonIndex(v, list.length, true);
       list.splice(idx, 0, normalizeCodon(v.altCodon));
       break;
