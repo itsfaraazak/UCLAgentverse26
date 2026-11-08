@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { InvalidBaseError, PartialCodonError, getLocus, referenceSequence } from '@/lib/genome';
+import lociFile from '@/data/loci.json';
+import {
+  InvalidBaseError,
+  PartialCodonError,
+  getLocus,
+  referenceSequence,
+  translate,
+} from '@/lib/genome';
 import type { Sequence } from '@/lib/genome';
 import {
   UnknownLocusError,
@@ -10,6 +17,10 @@ import {
   type CodonSegment,
   type GenomeModel,
 } from './model';
+
+const hbb = lociFile.loci.find((locus) => locus.gene === 'HBB');
+if (hbb === undefined) throw new Error('HBB fixture missing from loci.json');
+const HBB_CODON_COUNT = hbb.cdsReference.codonCount;
 
 function seq(bases: string, label = 'test'): Sequence {
   return { bases, label };
@@ -26,13 +37,14 @@ describe('buildLocusModel — HBB_HbS from loci.json', () => {
     const model = buildLocusModel({ variantId: 'HBB_HbS' });
 
     expect(model.gene).toBe('HBB');
-    expect(model.modelledCodonCount).toBe(31);
-    expect(model.totalCodonCount).toBe(147);
+    expect(model.modelledCodonCount).toBe(HBB_CODON_COUNT);
+    expect(model.totalCodonCount).toBe(HBB_CODON_COUNT);
     expect(model.editedCodonIndices).toEqual([7]);
     expect(model.primaryEditedCodon).toBe(7);
     expect(model.coordinatesDiverge).toBe(false);
-    expect(model.refProtein).toBe('MVHLTPEEKSAVTALWGKVNVDEVGGEALGR');
-    expect(model.altProtein).toBe('MVHLTPVEKSAVTALWGKVNVDEVGGEALGR');
+    expect(model.refProtein).toBe(translate(hbb.cdsReference.bases));
+    expect(model.refProtein.startsWith('MVHLTPEEKSAVTALWGKVNVDEVGGEALGR')).toBe(true);
+    expect(model.altProtein.startsWith('MVHLTPVEKSAVTALWGKVNVDEVGGEALGR')).toBe(true);
   });
 
   it('emits one segment per annotated codon, 1-based and gapless', () => {
@@ -40,25 +52,20 @@ describe('buildLocusModel — HBB_HbS from loci.json', () => {
 
     expect(model.segments).toHaveLength(model.totalCodonCount);
     expect(model.segments.map((segment) => segment.codonIndex)).toEqual(
-      Array.from({ length: 147 }, (_, i) => i + 1),
+      Array.from({ length: HBB_CODON_COUNT }, (_, i) => i + 1),
     );
   });
 
-  it('never invents bases past the 31 modelled codons', () => {
+  it('emits a real ACGT codon for every fixture codon and invents none', () => {
     const model = buildLocusModel({ variantId: 'HBB_HbS' });
-    const modelled = model.segments.filter((segment) => segment.modelled);
-    const unsequenced = model.segments.filter((segment) => !segment.modelled);
 
-    expect(modelled).toHaveLength(31);
-    expect(unsequenced).toHaveLength(116);
+    expect(model.segments).toHaveLength(HBB_CODON_COUNT);
+    expect(model.segments.every((segment) => segment.modelled)).toBe(true);
 
-    for (const segment of unsequenced) {
-      expect(segment.status).toBe('unsequenced');
-      expect(segment.refCodon).toBe(null);
-      expect(segment.altCodon).toBe(null);
-      expect(segment.refAa).toBe(null);
-      expect(segment.altAa).toBe(null);
-      expect(segment.modelled).toBe(false);
+    for (const segment of model.segments) {
+      expect(segment.refCodon).toMatch(/^[ACGT]{3}$/);
+      expect(segment.altCodon).toMatch(/^[ACGT]{3}$/);
+      expect(segment.status).not.toBe('unsequenced');
     }
   });
 
@@ -80,28 +87,50 @@ describe('buildLocusModel — HBB_HbS from loci.json', () => {
     });
   });
 
-  it('leaves codon 40 unsequenced in exon 2 and codon 147 in exon 3', () => {
+  it('attributes codon 40 to exon 2, codon 147 to exon 3, and the terminator to no exon', () => {
     const model = buildLocusModel({ variantId: 'HBB_HbS' });
     const codon40 = segmentAt(model, 40);
     if (codon40 === undefined) return;
 
     expect(codon40).toEqual({
       codonIndex: 40,
-      refCodon: null,
-      altCodon: null,
-      refAa: null,
-      altAa: null,
-      status: 'unsequenced',
+      refCodon: 'CAG',
+      altCodon: 'CAG',
+      refAa: 'Q',
+      altAa: 'Q',
+      status: 'same',
       silent: false,
-      modelled: false,
+      modelled: true,
       exonIndex: 2,
     });
 
     const codon147 = segmentAt(model, 147);
     if (codon147 === undefined) return;
-    expect(codon147.exonIndex).toBe(3);
-    expect(codon147.status).toBe('unsequenced');
-    expect(codon147.modelled).toBe(false);
+    expect(codon147).toEqual({
+      codonIndex: 147,
+      refCodon: 'CAC',
+      altCodon: 'CAC',
+      refAa: 'H',
+      altAa: 'H',
+      status: 'same',
+      silent: false,
+      modelled: true,
+      exonIndex: 3,
+    });
+
+    const codon148 = segmentAt(model, 148);
+    if (codon148 === undefined) return;
+    expect(codon148).toEqual({
+      codonIndex: 148,
+      refCodon: 'TAA',
+      altCodon: 'TAA',
+      refAa: '*',
+      altAa: '*',
+      status: 'same',
+      silent: false,
+      modelled: true,
+      exonIndex: null,
+    });
   });
 });
 
@@ -253,7 +282,8 @@ describe('describeEdit and structuralSummary', () => {
     expect(summary).toContain(
       'A negatively charged, hydrophilic surface residue is replaced by a small hydrophobic one',
     );
-    expect(summary).toContain('31 codons modelled of 147 annotated for this locus');
+    expect(summary).toContain(`${HBB_CODON_COUNT} codons modelled`);
+    expect(summary).not.toContain('annotated for this locus');
     expect(summary.includes('..')).toBe(false);
     expect(summary.endsWith('.')).toBe(true);
   });

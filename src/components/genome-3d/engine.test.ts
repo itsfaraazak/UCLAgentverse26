@@ -1,11 +1,17 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BufferGeometry, Material } from 'three';
+import lociFile from '@/data/loci.json';
 import { createFakeRenderer } from '@/components/protein/__fixtures__/fake-renderer';
 import { classifyFailure } from '@/components/protein/runtime/errors';
 import { selectRenderer } from '@/components/protein/runtime/renderer';
 import { mountGenomeEngine } from './engine';
 import { buildGenomeModel, buildLocusModel } from './model';
+
+const hbb = lociFile.loci.find((locus) => locus.gene === 'HBB');
+if (hbb === undefined) throw new Error('HBB fixture missing from loci.json');
+const HBB_CODON_COUNT = hbb.cdsReference.codonCount;
+const HBB_RUNG_COUNT = HBB_CODON_COUNT * 3;
 
 function host(): HTMLDivElement {
   const el = document.createElement('div');
@@ -28,12 +34,12 @@ describe('mountGenomeEngine — instancing driven by the real locus', () => {
       createRenderer: async () => createFakeRenderer(),
     });
 
-    // HBB: 31 codons of real sequence inside a locus annotated to codon 147.
-    expect(model.modelledCodonCount).toBe(31);
-    expect(model.totalCodonCount).toBe(147);
-    expect(engine.scene.codonInstances).toBe(147);
-    expect(engine.scene.rungInstances).toBe(31 * 3);
-    expect(engine.scene.unsequencedCodons).toBe(147 - 31);
+    // HBB: the full NM_000518.5 CDS — every annotated codon is sequenced.
+    expect(model.modelledCodonCount).toBe(HBB_CODON_COUNT);
+    expect(model.totalCodonCount).toBe(HBB_CODON_COUNT);
+    expect(engine.scene.codonInstances).toBe(HBB_CODON_COUNT);
+    expect(engine.scene.rungInstances).toBe(HBB_RUNG_COUNT);
+    expect(engine.scene.unsequencedCodons).toBe(0);
     expect(engine.scene.editedCodonIndices).toEqual([7]);
     engine.dispose();
   });
@@ -47,13 +53,13 @@ describe('mountGenomeEngine — instancing driven by the real locus', () => {
       createRenderer: async () => createFakeRenderer(),
     });
 
-    // 147 codons and 93 rungs are drawn, but the scene holds only a handful
+    // The full CDS and its rungs are drawn, but the scene holds only a handful
     // of geometries/materials — which is what proves they are instanced and
     // not one mesh (and one geometry) per codon.
-    expect(engine.scene.codonInstances).toBe(147);
-    expect(engine.scene.rungInstances).toBe(93);
+    expect(engine.scene.codonInstances).toBe(HBB_CODON_COUNT);
+    expect(engine.scene.rungInstances).toBe(HBB_RUNG_COUNT);
     expect(engine.trackedResourceCount()).toBeLessThan(20);
-    expect(created.mock.calls.length).toBeLessThan(147);
+    expect(created.mock.calls.length).toBeLessThan(HBB_CODON_COUNT);
     engine.dispose();
   });
 
@@ -85,15 +91,15 @@ describe('mountGenomeEngine — focus and framing', () => {
       createRenderer: async () => createFakeRenderer(),
     });
     // The view lands on the edit site rather than on the whole locus: at
-    // true B-DNA proportions 147 codons is a ~150-unit hairline, so the
+    // true B-DNA proportions the full CDS is a long hairline, so the
     // default framing has to be a readable stretch around the edit.
     expect(engine.scene.focusedCodon).toBe(7);
     engine.resetView();
     expect(engine.scene.focusedCodon).toBeNull();
     expect(engine.focusEdit()).toBe(true);
     expect(engine.scene.focusedCodon).toBe(7);
-    expect(engine.focusCodon(147)).toBe(true);
-    expect(engine.focusCodon(148)).toBe(false);
+    expect(engine.focusCodon(HBB_CODON_COUNT)).toBe(true);
+    expect(engine.focusCodon(HBB_CODON_COUNT + 1)).toBe(false);
     expect(engine.focusCodon(0)).toBe(false);
     engine.resetView();
     expect(engine.scene.focusedCodon).toBeNull();
