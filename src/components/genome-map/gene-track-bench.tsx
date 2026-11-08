@@ -259,7 +259,7 @@ export function GeneTrack({
               x={x(markerCodon)}
               y={AXIS_Y - 45}
               textAnchor="middle"
-              className="seq fill-signal-alarm text-[10px] font-semibold"
+              className="fill-signal-alarm font-mono text-[10px] font-semibold"
             >
               {`c.${markerCodon}`}
               {refCodon !== null && altCodon !== null ? (

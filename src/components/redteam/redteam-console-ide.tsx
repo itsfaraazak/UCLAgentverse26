@@ -198,7 +198,7 @@ export function RedTeamConsole() {
                     {style.label}
                   </span>
                   <span className="truncate text-[10.5px] text-foreground">{entry.category}</span>
-                  <span className="nums ml-auto shrink-0 text-[10px] text-muted-foreground">
+                  <span className="nums ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
                     {entry.requestDigest}
                   </span>
                 </li>

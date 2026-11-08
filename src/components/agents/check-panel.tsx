@@ -335,9 +335,12 @@ export function CheckPanel({
 
         {run !== null && run.requiresSignoff ? (
           <div className="flex flex-col gap-2 rounded-md bg-signal-warn/10 p-2">
-            <span className="text-xs">
+            <span className="flex items-start gap-1.5 text-xs">
+              <ShieldAlert className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+              <span>
               Escalated. Named human sign-off required
               {run.signoffRole !== null ? `: ${run.signoffRole}` : ''}.
+              </span>
             </span>
             {/*
               The name is the sign-off. It is sent to the server and the gate

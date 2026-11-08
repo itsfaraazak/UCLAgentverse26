@@ -570,14 +570,18 @@
    The aliases point at the shared verdict tokens, so they inherit the AA
    guarantee contrast.test.ts enforces rather than restating it. Lane colours
    are categorical data — which line of history a commit is on — not accents.
+   They are also used as 10px branch-name text, so each one clears 4.5:1 on
+   both --card and --accent (the selected row) in both themes. Lanes 2, 3 and
+   5 were darkened in light mode to get there. contrast.test.ts does not
+   cover the lanes yet: re-measure if you touch them.
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
   --graph-lane-1: oklch(0.52 0.16 258);
-  --graph-lane-2: oklch(0.56 0.14 152);
-  --graph-lane-3: oklch(0.6 0.15 48);
+  --graph-lane-2: oklch(0.48 0.14 152);
+  --graph-lane-3: oklch(0.5 0.15 48);
   --graph-lane-4: oklch(0.54 0.18 310);
-  --graph-lane-5: oklch(0.55 0.14 196);
+  --graph-lane-5: oklch(0.47 0.14 196);
   --graph-lane-6: oklch(0.54 0.17 10);
   --graph-grid: oklch(0.52 0.02 262 / 0.06);
 }

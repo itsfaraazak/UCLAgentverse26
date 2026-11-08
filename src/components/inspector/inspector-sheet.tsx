@@ -6,6 +6,8 @@ import {
   GitCommitVertical,
   GitMerge,
   Hash,
+  ShieldAlert,
+  ShieldX,
   Tag,
   User,
 } from 'lucide-react';
@@ -120,14 +122,21 @@ function InspectorBody({
         </dl>
         {commit.run?.mergeBlockedReason != null && (
           <p
-            className={`mt-2 rounded-md px-3 py-2 text-[11.5px] leading-relaxed ${
+            className={`mt-2 flex items-start gap-1.5 rounded-md px-3 py-2 text-[11.5px] leading-relaxed ${
               commit.status === 'escalated'
                 ? 'bg-escalate-soft/50 text-escalate'
                 : 'bg-block-soft/50 text-block'
             }`}
           >
-            <strong className="font-semibold">Merge blocked.</strong>{' '}
-            {commit.run.mergeBlockedReason}
+            {commit.status === 'escalated' ? (
+              <ShieldAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            ) : (
+              <ShieldX className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            )}
+            <span>
+              <strong className="font-semibold">Merge blocked.</strong>{' '}
+              {commit.run.mergeBlockedReason}
+            </span>
           </p>
         )}
       </SheetHeader>
