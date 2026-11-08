@@ -216,4 +216,16 @@ pnpm typecheck
 All must pass. **Never run `pnpm dev` in the foreground** — it does not exit. Background it on a
 free port, check, kill it.
 
+### Why `typecheck` needs Next's generated types
+
+`src/app/layout.tsx` uses `LayoutProps<"/">`, one of Next's route-aware global helpers. Those
+live in `.next/types/`, which `tsconfig.json` includes, and Next writes them during `next dev`,
+`next build` or `next typegen`. So on a clean checkout, `tsc --noEmit` on its own fails with
+`Cannot find name 'LayoutProps'` — a missing generated file, not a type error in the code.
+
+A `pretypecheck` script runs `next typegen` (about four seconds, no full build), so
+`pnpm typecheck` passes on its own from a fresh clone and the order above is a convenience
+rather than a requirement. If you ever see that error, you are running `tsc` directly: run
+`pnpm typecheck`, or `next typegen` first.
+
 Report what actually happened. If a step was skipped, say so.

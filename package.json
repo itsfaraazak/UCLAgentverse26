@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:visual": "vitest run tests/visual",
     "test:watch": "vitest",
+    "pretypecheck": "next typegen",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
