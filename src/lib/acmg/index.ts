@@ -5,6 +5,7 @@ export { THERAPY_TABLE_DISCLAIMER, lookupTherapies } from './therapy';
 export type { TherapyEntry, TherapyLookup } from './therapy';
 export {
   ACMG_FIXTURE_DISCLAIMER,
+  ACMG_PRIOR_CALL_LIMITATION,
   ACMG_VARIANT_RECORDS,
   parseAcmgRecord,
 } from './registry';

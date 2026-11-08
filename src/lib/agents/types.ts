@@ -144,6 +144,8 @@ export interface ConflictPayload {
   readonly newClassification: AcmgClassification | null;
   readonly crossesActionableThreshold: boolean;
   readonly note: string;
+  /** ACMG_PRIOR_CALL_LIMITATION: the prior call is simulated, not ClinVar. */
+  readonly limitation: string;
 }
 
 export interface TherapyMatchPayload {

@@ -85,3 +85,10 @@ function parseFile(raw: unknown): readonly AcmgVariantRecord[] {
 export const ACMG_VARIANT_RECORDS: readonly AcmgVariantRecord[] = parseFile(file);
 
 export const ACMG_FIXTURE_DISCLAIMER: string = file._disclaimer;
+
+/**
+ * Why a `priorClassification` is not evidence: it simulates the call already
+ * on record rather than querying ClinVar. Surfaced wherever a conflict is
+ * shown, so the simulation is never mistaken for a real prior submission.
+ */
+export const ACMG_PRIOR_CALL_LIMITATION: string = file._limitation;

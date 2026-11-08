@@ -43,7 +43,14 @@ export const ACMG_SCOPE_LIMITATION =
   'Implements 8 of the ~28 ACMG/AMP 2015 criteria using Tavtigian et al. 2018 ' +
   'point values (Genet Med 20:1054-1060). PS1, BS1 and PP1 are approximated ' +
   'from a single input field each rather than the orthogonal evidence lines ' +
-  'the official codes require. Not a substitute for a clinical geneticist.';
+  'the official codes require. Because the scoped subset omits the ' +
+  'case-control and functional-study criteria, it is deliberately ' +
+  'conservative: it can land one band below a full curation (the HBB rs334 ' +
+  'example scores Likely Pathogenic where ClinVar reports Pathogenic). ' +
+  'The only negative weights in this subset are -4 and -1, so the lowest ' +
+  'reachable total is -5: Likely Benign is unreachable by points, and Benign ' +
+  'is reached only by the BA1 stand-alone rule. Not a substitute for a ' +
+  'clinical geneticist.';
 
 export const ACMG_CITATION =
   'Richards et al. 2015, Genet Med 17:405-424 (ACMG/AMP criteria); ' +

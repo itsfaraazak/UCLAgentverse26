@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { ACMG_FIXTURE_DISCLAIMER, ACMG_VARIANT_RECORDS, parseAcmgRecord } from './registry';
+import {
+  ACMG_FIXTURE_DISCLAIMER,
+  ACMG_PRIOR_CALL_LIMITATION,
+  ACMG_VARIANT_RECORDS,
+  parseAcmgRecord,
+} from './registry';
 import { scoreAcmg } from './score';
 
 const VALID = {
@@ -53,5 +58,17 @@ describe('parseAcmgRecord refuses malformed input', () => {
     ['a non-object', 'nope'],
   ])('throws on %s', (_label, value) => {
     expect(() => parseAcmgRecord(value)).toThrow();
+  });
+});
+
+describe('the prior-call caveat is caller-reachable, not just JSON', () => {
+  it('states that the prior classification is simulated rather than queried', () => {
+    expect(ACMG_PRIOR_CALL_LIMITATION).toMatch(/not a live ClinVar query/);
+    expect(ACMG_PRIOR_CALL_LIMITATION).toMatch(/single-field approximations/);
+  });
+
+  it('no longer points at a README section this repo does not have', () => {
+    expect(ACMG_FIXTURE_DISCLAIMER).not.toMatch(/README\.md > Data and citations/);
+    expect(ACMG_FIXTURE_DISCLAIMER).toMatch(/Honest limits/);
   });
 });

@@ -292,3 +292,19 @@ describe('caveat', () => {
     expect(ACMG_SCOPE_LIMITATION).toMatch(/not a certified clinical tool/);
   });
 });
+
+describe('the limitation string carries every caveat the source stated', () => {
+  it('names the conservative-by-design behaviour and the HBB/ClinVar gap', () => {
+    expect(ACMG_SCOPE_LIMITATION).toMatch(/conservative/);
+    expect(ACMG_SCOPE_LIMITATION).toMatch(/ClinVar reports Pathogenic/);
+  });
+
+  it('states that Likely Benign is unreachable by points', () => {
+    expect(ACMG_SCOPE_LIMITATION).toMatch(/Likely Benign is unreachable by points/);
+  });
+
+  it('names the criterion count and the point-value citation', () => {
+    expect(ACMG_SCOPE_LIMITATION).toMatch(/8 of the ~28/);
+    expect(ACMG_SCOPE_LIMITATION).toMatch(/20:1054-1060/);
+  });
+});
