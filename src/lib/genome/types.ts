@@ -16,7 +16,7 @@ export interface Variant {
   readonly refCodon: string;
   readonly altCodon: string;
   readonly kind: VariantKind;
-  /** Human-readable, e.g. "HbS (Glu6Val)". */
+  /** Human-readable, e.g. "HbS (sickle allele)". */
   readonly label: string;
 }
 

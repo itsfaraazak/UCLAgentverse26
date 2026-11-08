@@ -62,7 +62,8 @@ describe('codons / translate', () => {
     if (hbb === undefined) return;
     const protein = translate(hbb.cdsReference.bases);
     expect(protein.startsWith('MVHLTPEEK')).toBe(true);
-    // Fixture `codonCount` is 30, but `bases` is 93 nt = 31 complete codons.
+    // Fixture `codonCount` is 31, matching `bases` at 93 nt = 31 complete codons.
+    // Codon 31 straddles the exon 1 / exon 2 boundary; see SPEC.md §4.5 #7.
     // Translation follows the bases, which is the authoritative sequence.
     expect(protein).toHaveLength(codons(hbb.cdsReference.bases).length);
     expect(protein.includes('*')).toBe(false);

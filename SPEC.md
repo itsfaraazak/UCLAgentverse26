@@ -26,9 +26,16 @@ SigmaFold is that artifact.
 
 The headline worked example is the textbook sickle-cell case:
 
-- `HBB` reference allele (HbA), codon 6 `GAG` → Glu
-- the sickle allele (HbS), codon 6 `GTG` → Val — a single-nucleotide substitution
+- `HBB` reference allele (HbA), codon 7 `GAG` → Glu
+- the sickle allele (HbS), codon 7 `GTG` → Val — a single-nucleotide substitution
 - a proposed repair edit that restores the reference codon
+
+**A note on the numbering, because it trips people up.** This is codon **7** in CDS
+numbering (`NM_000518.5(HBB):c.20A>T`, `p.Glu7Val`). The familiar legacy name is
+"Glu6Val" / "E6V", which counts from the *mature* protein after the initiator methionine
+is cleaved. Same substitution, two conventions. This spec and the code use CDS numbering
+throughout; `loci.json` records both and carries a `numberingNote`. Do not silently
+convert between them.
 
 This example is used **descriptively and pedagogically only**. See §7.
 
@@ -78,7 +85,7 @@ interface Variant {
   refCodon: string;
   altCodon: string;
   kind: 'substitution' | 'deletion' | 'insertion';
-  label: string;             // human-readable, e.g. "HbS (Glu6Val)"
+  label: string;             // human-readable, e.g. "HbS (sickle allele)"
 }
 
 function applyVariant(seq: Sequence, v: Variant): Sequence;
