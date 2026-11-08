@@ -21,13 +21,8 @@
  * can hand the result straight to a client one.
  */
 
-import {
-  latestOfKind,
-  pipelineAgentOrder,
-  type Delta,
-  type DeltaKind,
-  type PipelineResult,
-} from '@/lib/agents';
+import { latestOfKind, type Delta, type DeltaKind, type PipelineResult } from '@/lib/agents';
+import { AGENT_ORDER, agentDeltaKind } from './steps';
 import {
   isAssayPayload,
   isEditPlanPayload,
@@ -117,26 +112,6 @@ export interface RunView {
   } | null;
 }
 
-const KIND_FOR_AGENT: Readonly<Record<string, DeltaKind>> = {
-  IntentAgent: 'intent',
-  BiosafetyGateAgent: 'screen',
-  EditPlannerAgent: 'edit_plan',
-  StructuralImpactAgent: 'structural',
-  FunctionalAssayAgent: 'assay',
-  OffTargetRiskAgent: 'offtarget',
-  VerifierAgent: 'verdict',
-};
-
-const ROLE_FOR_AGENT: Readonly<Record<string, string>> = {
-  IntentAgent: 'Normalise the request into a structured intent',
-  BiosafetyGateAgent: 'Screen the intent before any downstream work',
-  EditPlannerAgent: 'Resolve the target locus and edit against the fixture',
-  StructuralImpactAgent: 'Amino-acid change → annotated structural consequence',
-  FunctionalAssayAgent: 'Run the simulation headless and report metrics',
-  OffTargetRiskAgent: 'Flag the target against the curated sensitive-locus registry',
-  VerifierAgent: 'Cross-check the claims against measured output',
-};
-
 const STRUCTURAL_LIMITATION =
   'Curated annotation from the fixture, not a structural prediction.';
 
@@ -196,8 +171,8 @@ function stepFor(
   result: PipelineResult,
   screen: ScreenView,
 ): StepView {
-  const kind = KIND_FOR_AGENT[agent] ?? 'intent';
-  const step = pipelineAgentOrder().indexOf(agent) + 1;
+  const kind = agentDeltaKind(agent) ?? 'intent';
+  const step = AGENT_ORDER.indexOf(agent as never) + 1;
 
   if (delta === undefined) {
     return {
@@ -418,9 +393,8 @@ export function runView(result: PipelineResult): RunView {
   const deltas = result.dag.all();
   const screen = screenView(result);
 
-  const steps = pipelineAgentOrder().map((agent) => {
-    const kind = KIND_FOR_AGENT[agent];
-    const delta = kind === undefined ? undefined : latestOfKind(deltas, kind);
+  const steps = AGENT_ORDER.map((agent) => {
+    const delta = latestOfKind(deltas, agentDeltaKind(agent) ?? 'intent');
     return stepFor(agent, delta, result, screen);
   });
 
@@ -445,32 +419,11 @@ export function runView(result: PipelineResult): RunView {
   };
 }
 
-/** What each agent is for. Shared so the three surfaces label them alike. */
-export function agentRole(agent: string): string {
-  return ROLE_FOR_AGENT[agent] ?? '';
-}
-
-export interface PipelineStepSpec {
-  /** 1-based position in the fixed order of SPEC §4.3. */
-  readonly step: number;
-  readonly agent: string;
-  readonly kind: DeltaKind;
-  readonly role: string;
-}
-
-/**
- * The pipeline, described for a UI: the seven agents in their fixed order,
- * with the delta kind each emits and what each is for.
- *
- * Derived from `pipelineAgentOrder()` rather than restated, so a surface
- * cannot render a different pipeline than the one that runs. The gate is
- * position 2 here because it is position 2 there.
- */
-export const PIPELINE_STEPS: readonly PipelineStepSpec[] = pipelineAgentOrder().map(
-  (agent, index) => ({
-    step: index + 1,
-    agent,
-    kind: KIND_FOR_AGENT[agent] ?? 'intent',
-    role: agentRole(agent),
-  }),
-);
+export {
+  AGENT_ORDER,
+  PIPELINE_STEPS,
+  agentDeltaKind,
+  agentRole,
+  type AgentName,
+  type PipelineStepSpec,
+} from './steps';
