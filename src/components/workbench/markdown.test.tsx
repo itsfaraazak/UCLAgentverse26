@@ -34,6 +34,17 @@ describe('Markdown', () => {
     expect(onDeltaRef).toHaveBeenLastCalledWith(ID.reference);
   });
 
+  it('links every id in a comma-separated citation', () => {
+    const onDeltaRef = vi.fn();
+    render(
+      <Markdown text={`Both [${ID.evidence.slice(0, 8)}, ${ID.reference.slice(0, 8)}].`} knownIds={IDS} onDeltaRef={onDeltaRef} />,
+    );
+    const refs = screen.getAllByRole('button');
+    expect(refs.map((b) => b.textContent)).toEqual([ID.evidence.slice(0, 8), ID.reference.slice(0, 8)]);
+    fireEvent.click(refs[1]);
+    expect(onDeltaRef).toHaveBeenCalledWith(ID.reference);
+  });
+
   it('leaves unknown or ambiguous refs as plain text', () => {
     const onDeltaRef = vi.fn();
     const { container } = render(

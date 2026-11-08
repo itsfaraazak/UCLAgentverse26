@@ -96,7 +96,7 @@ export function parseBlocks(source: string): Block[] {
 }
 
 const INLINE =
-  /(`[^`\n]+`)|(\*\*[^*\n]+?\*\*)|(\[[^\]\n]+\]\([^)\s]+\))|(\[[0-9a-fA-F]{6,16}\])|(\*[^*\s][^*\n]*\*)|(\b_[^_\n]+_\b)/g;
+  /(`[^`\n]+`)|(\*\*[^*\n]+?\*\*)|(\[[^\]\n]+\]\([^)\s]+\))|(\[[0-9a-fA-F]{6,16}(?:\s*,\s*[0-9a-fA-F]{6,16})*\])|(\*[^*\s][^*\n]*\*)|(\b_[^_\n]+_\b)/g;
 
 function safeHref(url: string): string | null {
   return /^(https?:\/\/|mailto:)/i.test(url) ? url : null;
@@ -140,24 +140,32 @@ export function renderInline(text: string, ctx: InlineContext, keyPrefix = 'i'):
         ),
       );
     } else if (ref) {
-      const id = resolveDeltaRef(ref.slice(1, -1), ctx.ids);
-      out.push(
-        id && ctx.onDeltaRef ? (
-          <button
-            key={key}
-            type="button"
-            className="wb-ref"
-            onClick={() => ctx.onDeltaRef?.(id)}
-            title={`Show delta ${id}`}
-          >
-            {shortId(id)}
-          </button>
-        ) : (
-          <span key={key} className="wb-ref wb-ref--plain">
-            {ref}
-          </span>
-        ),
-      );
+      ref
+        .slice(1, -1)
+        .split(',')
+        .map((part) => part.trim())
+        .forEach((raw, j) => {
+          const id = resolveDeltaRef(raw, ctx.ids);
+          const refKey = `${key}-${j}`;
+          if (j > 0) out.push(' ');
+          out.push(
+            id && ctx.onDeltaRef ? (
+              <button
+                key={refKey}
+                type="button"
+                className="wb-ref"
+                onClick={() => ctx.onDeltaRef?.(id)}
+                title={`Show delta ${id}`}
+              >
+                {shortId(id)}
+              </button>
+            ) : (
+              <span key={refKey} className="wb-ref wb-ref--plain">
+                [{raw}]
+              </span>
+            ),
+          );
+        });
     } else if (star || under) {
       const inner = (star ?? under)!.slice(1, -1);
       out.push(<em key={key}>{renderInline(inner, ctx, key)}</em>);
