@@ -4,7 +4,7 @@
 
 ### Git for protein hypotheses. An agent proposes, a gate verifies, a scientist signs off.
 
-Check it out at: https://dheer309--SigmaFold-hosted-serve.us-east.modal.run/
+Check it out at: https://dheer309--editverse-hosted-serve.us-east.modal.run
 
 **An agent-assisted research workspace for human β-globin (*HBB*), the gene behind sickle cell disease.**
 Every AI-proposed sequence change is checked in code, traced to real sources, versioned like source code, and committed only when a human approves it.
@@ -25,7 +25,7 @@ Every AI-proposed sequence change is checked in code, traced to real sources, ve
 
 ## Run it in one line
 
-Check it out here: https://dheer309--SigmaFold-hosted-serve.us-east.modal.run/
+Check it out here: https://dheer309--editverse-hosted-serve.us-east.modal.run
 
 OR
 
