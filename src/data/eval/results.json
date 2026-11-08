@@ -1,0 +1,6821 @@
+{
+  "schemaVersion": 1,
+  "dataset": {
+    "title": "SigmaFold ClinVar expert-consensus benchmark",
+    "dataNote": "Real, public, de-identified variant annotations from ClinVar, gnomAD, dbNSFP (AlphaMissense), CADD and snpEff via MyVariant.info. No patient data: these are population-level reference records, not individual genomes.",
+    "fetchedAt": "2026-11-08T09:25:02.422Z",
+    "seed": 20261108,
+    "geneCap": 5,
+    "inclusion": "ClinVar review status of at least 2 stars (reviewed by expert panel, or criteria provided, multiple submitters, no conflicts) and a consensus of Pathogenic/Likely Pathogenic or Benign/Likely Benign under the evidence layer's own ClinVar parser (conflicting and VUS records excluded). Consequence (missense vs stop/frameshift/canonical splice) from the evidence layer's normaliser. Candidates come from 6 seeded random pages of 100 per stratum (all hits when fewer), shuffled with the seed, then taken in order with at most 5 variants per gene across the whole set.",
+    "api": "https://myvariant.info/v1",
+    "strata": [
+      {
+        "id": "benign-lof",
+        "truth": "B/LB",
+        "group": "lof",
+        "query": "clinvar.rcv.review_status:(\"reviewed by expert panel\" OR \"criteria provided, multiple submitters, no conflicts\") AND clinvar.rcv.clinical_significance:(\"Benign\" OR \"Likely benign\" OR \"Benign/Likely benign\") AND snpeff.ann.effect:(stop_gained OR frameshift_variant OR splice_acceptor_variant OR splice_donor_variant)",
+        "total": 258,
+        "pages": [
+          {
+            "from": 0,
+            "size": 258
+          }
+        ],
+        "eligible": 181,
+        "target": 30,
+        "selected": 30
+      },
+      {
+        "id": "pathogenic-lof",
+        "truth": "P/LP",
+        "group": "lof",
+        "query": "clinvar.rcv.review_status:(\"reviewed by expert panel\" OR \"criteria provided, multiple submitters, no conflicts\") AND clinvar.rcv.clinical_significance:(\"Pathogenic\" OR \"Likely pathogenic\" OR \"Pathogenic/Likely pathogenic\") AND snpeff.ann.effect:(stop_gained OR frameshift_variant OR splice_acceptor_variant OR splice_donor_variant)",
+        "total": 20883,
+        "pages": [
+          {
+            "from": 2952,
+            "size": 100
+          },
+          {
+            "from": 4502,
+            "size": 100
+          },
+          {
+            "from": 4883,
+            "size": 100
+          },
+          {
+            "from": 6052,
+            "size": 100
+          },
+          {
+            "from": 6540,
+            "size": 100
+          },
+          {
+            "from": 8757,
+            "size": 100
+          }
+        ],
+        "eligible": 598,
+        "target": 50,
+        "selected": 50
+      },
+      {
+        "id": "pathogenic-missense",
+        "truth": "P/LP",
+        "group": "missense",
+        "query": "clinvar.rcv.review_status:(\"reviewed by expert panel\" OR \"criteria provided, multiple submitters, no conflicts\") AND clinvar.rcv.clinical_significance:(\"Pathogenic\" OR \"Likely pathogenic\" OR \"Pathogenic/Likely pathogenic\") AND snpeff.ann.effect:missense_variant",
+        "total": 16052,
+        "pages": [
+          {
+            "from": 71,
+            "size": 100
+          },
+          {
+            "from": 499,
+            "size": 100
+          },
+          {
+            "from": 1096,
+            "size": 100
+          },
+          {
+            "from": 2233,
+            "size": 100
+          },
+          {
+            "from": 3300,
+            "size": 100
+          },
+          {
+            "from": 4451,
+            "size": 100
+          }
+        ],
+        "eligible": 577,
+        "target": 50,
+        "selected": 50
+      },
+      {
+        "id": "benign-missense",
+        "truth": "B/LB",
+        "group": "missense",
+        "query": "clinvar.rcv.review_status:(\"reviewed by expert panel\" OR \"criteria provided, multiple submitters, no conflicts\") AND clinvar.rcv.clinical_significance:(\"Benign\" OR \"Likely benign\" OR \"Benign/Likely benign\") AND snpeff.ann.effect:missense_variant",
+        "total": 43874,
+        "pages": [
+          {
+            "from": 133,
+            "size": 100
+          },
+          {
+            "from": 3369,
+            "size": 100
+          },
+          {
+            "from": 4053,
+            "size": 100
+          },
+          {
+            "from": 7066,
+            "size": 100
+          },
+          {
+            "from": 7606,
+            "size": 100
+          },
+          {
+            "from": 9406,
+            "size": 100
+          }
+        ],
+        "eligible": 516,
+        "target": 70,
+        "selected": 70
+      }
+    ],
+    "licences": [
+      {
+        "name": "ClinVar (NCBI)",
+        "licence": "NCBI places no restrictions on use or redistribution of molecular data (US Government work); submitters may retain rights.",
+        "licenceUrl": "https://www.ncbi.nlm.nih.gov/home/about/policies/"
+      },
+      {
+        "name": "gnomAD (v2.1.1, via MyVariant.info)",
+        "licence": "Primary gnomAD data: CC0 1.0 public domain dedication; attribution to gnomAD requested.",
+        "licenceUrl": "https://gnomad.broadinstitute.org/terms"
+      },
+      {
+        "name": "AlphaMissense (via dbNSFP 4.8a)",
+        "licence": "AlphaMissense predictions: CC BY 4.0, (c) 2023 DeepMind Technologies Limited (Cheng et al. 2023, Science 381:eadg7492). Delivered through dbNSFP, whose compilation is for academic use.",
+        "licenceUrl": "https://github.com/google-deepmind/alphamissense#alphamissense-predictions-license"
+      },
+      {
+        "name": "CADD (via MyVariant.info)",
+        "licence": "CADD scores are free for non-commercial use; commercial use requires a licence from the University of Washington.",
+        "licenceUrl": "https://cadd.gs.washington.edu/contact"
+      },
+      {
+        "name": "snpEff (v4.3k, via MyVariant.info)",
+        "licence": "Computed annotation from snpEff software (LGPLv3 at v4.3k; MIT from later releases).",
+        "licenceUrl": "https://github.com/pcingola/SnpEff"
+      },
+      {
+        "name": "dbSNP (NCBI)",
+        "licence": "NCBI places no restrictions on use or redistribution of molecular data (US Government work); submitters may retain rights.",
+        "licenceUrl": "https://www.ncbi.nlm.nih.gov/home/about/policies/"
+      },
+      {
+        "name": "MyVariant.info",
+        "licence": "Free public API (BioThings, Scripps Research; code Apache-2.0). Each aggregated source keeps its own terms.",
+        "licenceUrl": "https://myvariant.info/terms/"
+      }
+    ],
+    "n": 200,
+    "genes": 157,
+    "maxPerGene": 5,
+    "byTruth": {
+      "P/LP": 100,
+      "B/LB": 100
+    },
+    "byGroup": {
+      "missense": 120,
+      "lof": 80,
+      "other": 0
+    },
+    "byTruthAndGroup": {
+      "B/LB lof": 30,
+      "P/LP lof": 50,
+      "P/LP missense": 50,
+      "B/LB missense": 70
+    },
+    "byClinvarClass": {
+      "Likely Benign": 59,
+      "Benign": 41,
+      "Likely Pathogenic": 55,
+      "Pathogenic": 45
+    },
+    "byStars": {
+      "2": 134,
+      "3": 66
+    },
+    "withAlphaMissense": 120,
+    "withCadd": 0,
+    "inGnomad": 141
+  },
+  "methods": [
+    {
+      "id": "sigmafold",
+      "name": "SigmaFold classifier",
+      "rule": "interpret(evidence) with no human assertions: 8 scoped ACMG/AMP criteria, Tavtigian 2018 points. ClinVar is never visible to it.",
+      "overall": {
+        "n": 200,
+        "coverage": {
+          "k": 31,
+          "n": 200,
+          "value": 0.155,
+          "ci95": [
+            0.11139636927689314,
+            0.21160690592342077
+          ]
+        },
+        "accuracy": {
+          "k": 31,
+          "n": 31,
+          "value": 1,
+          "ci95": [
+            0.889744604539564,
+            1
+          ]
+        },
+        "sensitivity": {
+          "k": 18,
+          "n": 100,
+          "value": 0.18,
+          "ci95": [
+            0.1170022549894635,
+            0.2666735838630073
+          ]
+        },
+        "specificity": {
+          "k": 13,
+          "n": 100,
+          "value": 0.13,
+          "ci95": [
+            0.07757167427240512,
+            0.20980351440076428
+          ]
+        },
+        "falseReassurance": {
+          "k": 0,
+          "n": 100,
+          "value": 0,
+          "ci95": [
+            3.469446951953614e-18,
+            0.03699349820698568
+          ]
+        },
+        "falseAlarm": {
+          "k": 0,
+          "n": 100,
+          "value": 0,
+          "ci95": [
+            3.469446951953614e-18,
+            0.03699349820698568
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 18,
+            "VUS": 82,
+            "B/LB": 0,
+            "no-call": 0
+          },
+          "B/LB": {
+            "P/LP": 0,
+            "VUS": 87,
+            "B/LB": 13,
+            "no-call": 0
+          }
+        }
+      },
+      "missense": {
+        "n": 120,
+        "coverage": {
+          "k": 8,
+          "n": 120,
+          "value": 0.06666666666666667,
+          "ci95": [
+            0.03416530686090633,
+            0.12605130403530337
+          ]
+        },
+        "accuracy": {
+          "k": 8,
+          "n": 8,
+          "value": 1,
+          "ci95": [
+            0.6755924351161198,
+            1
+          ]
+        },
+        "sensitivity": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "specificity": {
+          "k": 8,
+          "n": 70,
+          "value": 0.11428571428571428,
+          "ci95": [
+            0.059061289466376454,
+            0.20964221582154374
+          ]
+        },
+        "falseReassurance": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "falseAlarm": {
+          "k": 0,
+          "n": 70,
+          "value": 0,
+          "ci95": [
+            0,
+            0.05202306241026692
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 0,
+            "VUS": 50,
+            "B/LB": 0,
+            "no-call": 0
+          },
+          "B/LB": {
+            "P/LP": 0,
+            "VUS": 62,
+            "B/LB": 8,
+            "no-call": 0
+          }
+        }
+      },
+      "lof": {
+        "n": 80,
+        "coverage": {
+          "k": 23,
+          "n": 80,
+          "value": 0.2875,
+          "ci95": [
+            0.19986924292269914,
+            0.3946034621298997
+          ]
+        },
+        "accuracy": {
+          "k": 23,
+          "n": 23,
+          "value": 1,
+          "ci95": [
+            0.8568833815495731,
+            1
+          ]
+        },
+        "sensitivity": {
+          "k": 18,
+          "n": 50,
+          "value": 0.36,
+          "ci95": [
+            0.24138749651846741,
+            0.49858983123887307
+          ]
+        },
+        "specificity": {
+          "k": 5,
+          "n": 30,
+          "value": 0.16666666666666666,
+          "ci95": [
+            0.0733654237184855,
+            0.3356435050641603
+          ]
+        },
+        "falseReassurance": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "falseAlarm": {
+          "k": 0,
+          "n": 30,
+          "value": 0,
+          "ci95": [
+            0,
+            0.11351339317396876
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 18,
+            "VUS": 32,
+            "B/LB": 0,
+            "no-call": 0
+          },
+          "B/LB": {
+            "P/LP": 0,
+            "VUS": 25,
+            "B/LB": 5,
+            "no-call": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "alphamissense",
+      "name": "Baseline A: AlphaMissense alone",
+      "rule": "Missense only. Max score > 0.564 = P/LP, < 0.34 = B/LB, otherwise VUS (Cheng et al. 2023). No score or not missense = no call.",
+      "overall": {
+        "n": 200,
+        "coverage": {
+          "k": 117,
+          "n": 200,
+          "value": 0.585,
+          "ci95": [
+            0.5157391490134403,
+            0.6510571455024242
+          ]
+        },
+        "accuracy": {
+          "k": 109,
+          "n": 117,
+          "value": 0.9316239316239316,
+          "ci95": [
+            0.8708575754228228,
+            0.9649482894324245
+          ]
+        },
+        "sensitivity": {
+          "k": 43,
+          "n": 100,
+          "value": 0.43,
+          "ci95": [
+            0.33733298524110106,
+            0.5278461045078768
+          ]
+        },
+        "specificity": {
+          "k": 66,
+          "n": 100,
+          "value": 0.66,
+          "ci95": [
+            0.5627772885472462,
+            0.7453847920265184
+          ]
+        },
+        "falseReassurance": {
+          "k": 5,
+          "n": 100,
+          "value": 0.05,
+          "ci95": [
+            0.02154367915436796,
+            0.11175046923191913
+          ]
+        },
+        "falseAlarm": {
+          "k": 3,
+          "n": 100,
+          "value": 0.03,
+          "ci95": [
+            0.010254524024038925,
+            0.0845193642905276
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 43,
+            "VUS": 2,
+            "B/LB": 5,
+            "no-call": 50
+          },
+          "B/LB": {
+            "P/LP": 3,
+            "VUS": 1,
+            "B/LB": 66,
+            "no-call": 30
+          }
+        }
+      },
+      "missense": {
+        "n": 120,
+        "coverage": {
+          "k": 117,
+          "n": 120,
+          "value": 0.975,
+          "ci95": [
+            0.9290699666721339,
+            0.9914618252300978
+          ]
+        },
+        "accuracy": {
+          "k": 109,
+          "n": 117,
+          "value": 0.9316239316239316,
+          "ci95": [
+            0.8708575754228228,
+            0.9649482894324245
+          ]
+        },
+        "sensitivity": {
+          "k": 43,
+          "n": 50,
+          "value": 0.86,
+          "ci95": [
+            0.7381380628941446,
+            0.9304916657298371
+          ]
+        },
+        "specificity": {
+          "k": 66,
+          "n": 70,
+          "value": 0.9428571428571428,
+          "ci95": [
+            0.8620804952516177,
+            0.9775562208992887
+          ]
+        },
+        "falseReassurance": {
+          "k": 5,
+          "n": 50,
+          "value": 0.1,
+          "ci95": [
+            0.04347576493189041,
+            0.21360231437479654
+          ]
+        },
+        "falseAlarm": {
+          "k": 3,
+          "n": 70,
+          "value": 0.04285714285714286,
+          "ci95": [
+            0.014681541004111405,
+            0.11859668748527552
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 43,
+            "VUS": 2,
+            "B/LB": 5,
+            "no-call": 0
+          },
+          "B/LB": {
+            "P/LP": 3,
+            "VUS": 1,
+            "B/LB": 66,
+            "no-call": 0
+          }
+        }
+      },
+      "lof": {
+        "n": 80,
+        "coverage": {
+          "k": 0,
+          "n": 80,
+          "value": 0,
+          "ci95": [
+            0,
+            0.0458181295355271
+          ]
+        },
+        "accuracy": {
+          "k": 0,
+          "n": 0,
+          "value": null,
+          "ci95": null
+        },
+        "sensitivity": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "specificity": {
+          "k": 0,
+          "n": 30,
+          "value": 0,
+          "ci95": [
+            0,
+            0.11351339317396876
+          ]
+        },
+        "falseReassurance": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "falseAlarm": {
+          "k": 0,
+          "n": 30,
+          "value": 0,
+          "ci95": [
+            0,
+            0.11351339317396876
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 0,
+            "VUS": 0,
+            "B/LB": 0,
+            "no-call": 50
+          },
+          "B/LB": {
+            "P/LP": 0,
+            "VUS": 0,
+            "B/LB": 0,
+            "no-call": 30
+          }
+        }
+      }
+    },
+    {
+      "id": "frequency",
+      "name": "Baseline B: population frequency alone",
+      "rule": "gnomAD max AF > 5% = B/LB (BA1); > 1% = B/LB (BS1); otherwise VUS. Rarity alone cannot argue pathogenic.",
+      "overall": {
+        "n": 200,
+        "coverage": {
+          "k": 23,
+          "n": 200,
+          "value": 0.115,
+          "ci95": [
+            0.07786373232561955,
+            0.16664716898487572
+          ]
+        },
+        "accuracy": {
+          "k": 23,
+          "n": 23,
+          "value": 1,
+          "ci95": [
+            0.8568833815495731,
+            1
+          ]
+        },
+        "sensitivity": {
+          "k": 0,
+          "n": 100,
+          "value": 0,
+          "ci95": [
+            3.469446951953614e-18,
+            0.03699349820698568
+          ]
+        },
+        "specificity": {
+          "k": 23,
+          "n": 100,
+          "value": 0.23,
+          "ci95": [
+            0.15843265880303448,
+            0.3215438302287378
+          ]
+        },
+        "falseReassurance": {
+          "k": 0,
+          "n": 100,
+          "value": 0,
+          "ci95": [
+            3.469446951953614e-18,
+            0.03699349820698568
+          ]
+        },
+        "falseAlarm": {
+          "k": 0,
+          "n": 100,
+          "value": 0,
+          "ci95": [
+            3.469446951953614e-18,
+            0.03699349820698568
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 0,
+            "VUS": 100,
+            "B/LB": 0,
+            "no-call": 0
+          },
+          "B/LB": {
+            "P/LP": 0,
+            "VUS": 77,
+            "B/LB": 23,
+            "no-call": 0
+          }
+        }
+      },
+      "missense": {
+        "n": 120,
+        "coverage": {
+          "k": 14,
+          "n": 120,
+          "value": 0.11666666666666667,
+          "ci95": [
+            0.0707811780783005,
+            0.18633351617603885
+          ]
+        },
+        "accuracy": {
+          "k": 14,
+          "n": 14,
+          "value": 1,
+          "ci95": [
+            0.7846891972623643,
+            1
+          ]
+        },
+        "sensitivity": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "specificity": {
+          "k": 14,
+          "n": 70,
+          "value": 0.2,
+          "ci95": [
+            0.12304739248362952,
+            0.30816644496253065
+          ]
+        },
+        "falseReassurance": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "falseAlarm": {
+          "k": 0,
+          "n": 70,
+          "value": 0,
+          "ci95": [
+            0,
+            0.05202306241026692
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 0,
+            "VUS": 50,
+            "B/LB": 0,
+            "no-call": 0
+          },
+          "B/LB": {
+            "P/LP": 0,
+            "VUS": 56,
+            "B/LB": 14,
+            "no-call": 0
+          }
+        }
+      },
+      "lof": {
+        "n": 80,
+        "coverage": {
+          "k": 9,
+          "n": 80,
+          "value": 0.1125,
+          "ci95": [
+            0.060326869466304764,
+            0.20018218092372875
+          ]
+        },
+        "accuracy": {
+          "k": 9,
+          "n": 9,
+          "value": 1,
+          "ci95": [
+            0.7008549515804559,
+            1
+          ]
+        },
+        "sensitivity": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "specificity": {
+          "k": 9,
+          "n": 30,
+          "value": 0.3,
+          "ci95": [
+            0.16664748268243793,
+            0.47875787458714947
+          ]
+        },
+        "falseReassurance": {
+          "k": 0,
+          "n": 50,
+          "value": 0,
+          "ci95": [
+            6.938893903907228e-18,
+            0.07134759913335872
+          ]
+        },
+        "falseAlarm": {
+          "k": 0,
+          "n": 30,
+          "value": 0,
+          "ci95": [
+            0,
+            0.11351339317396876
+          ]
+        },
+        "confusion": {
+          "P/LP": {
+            "P/LP": 0,
+            "VUS": 50,
+            "B/LB": 0,
+            "no-call": 0
+          },
+          "B/LB": {
+            "P/LP": 0,
+            "VUS": 21,
+            "B/LB": 9,
+            "no-call": 0
+          }
+        }
+      }
+    }
+  ],
+  "omittedMethods": [
+    {
+      "id": "cadd",
+      "reason": "No variant in the benchmark carries a CADD score: MyVariant.info serves CADD for hg19 only, and the evidence layer queries hg38."
+    }
+  ],
+  "sigmafold": {
+    "confusion5": {
+      "Likely Benign": {
+        "Pathogenic": 0,
+        "Likely Pathogenic": 0,
+        "Uncertain Significance": 58,
+        "Likely Benign": 0,
+        "Benign": 1
+      },
+      "Benign": {
+        "Pathogenic": 0,
+        "Likely Pathogenic": 0,
+        "Uncertain Significance": 29,
+        "Likely Benign": 0,
+        "Benign": 12
+      },
+      "Likely Pathogenic": {
+        "Pathogenic": 2,
+        "Likely Pathogenic": 0,
+        "Uncertain Significance": 53,
+        "Likely Benign": 0,
+        "Benign": 0
+      },
+      "Pathogenic": {
+        "Pathogenic": 16,
+        "Likely Pathogenic": 0,
+        "Uncertain Significance": 29,
+        "Likely Benign": 0,
+        "Benign": 0
+      }
+    },
+    "criteriaFired": {
+      "BA1": 13,
+      "PM2": 122,
+      "BS1": 10,
+      "PVS1": 18,
+      "PP3": 44,
+      "BP4": 68
+    },
+    "lofPathogenicInCuratedGenes": {
+      "k": 18,
+      "n": 50,
+      "value": 0.36,
+      "ci95": [
+        0.24138749651846741,
+        0.49858983123887307
+      ]
+    },
+    "referenceCheck": {
+      "majorFlags": 82,
+      "decisiveErrors": 0,
+      "decisiveErrorsFlagged": 0,
+      "pathogenicAbstentions": 82,
+      "pathogenicAbstentionsFlagged": 82,
+      "benignAbstentionsUnflagged": 87
+    }
+  },
+  "falseReassurance": {
+    "sigmafold": [],
+    "alphamissense": [
+      {
+        "id": "chr12:g.102840465T>C",
+        "gene": "PAH",
+        "hgvs": "NP_000268.1:p.Tyr417Cys",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "P/LP",
+        "clinvarConsensus": "Likely Pathogenic",
+        "stars": 3,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1327551/",
+        "maxAf": 0.00000397697,
+        "alphaMissense": 0.1769,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "B/LB",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 1,
+          "criteria": [
+            "PM2",
+            "BP4"
+          ],
+          "referenceSeverity": "major"
+        }
+      },
+      {
+        "id": "chr4:g.177439624G>A",
+        "gene": "AGA",
+        "hgvs": "NP_000018.2:p.Arg116Trp",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "P/LP",
+        "clinvarConsensus": "Likely Pathogenic",
+        "stars": 2,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/55942/",
+        "maxAf": 0.00000397706,
+        "alphaMissense": 0.3071,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "B/LB",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 2,
+          "criteria": [
+            "PM2"
+          ],
+          "referenceSeverity": "major"
+        }
+      },
+      {
+        "id": "chr12:g.120978866C>T",
+        "gene": "HNF1A",
+        "hgvs": "NP_000536.6:p.Pro33Leu",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "P/LP",
+        "clinvarConsensus": "Likely Pathogenic",
+        "stars": 3,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1676707/",
+        "maxAf": null,
+        "alphaMissense": 0.1082,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "B/LB",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 1,
+          "criteria": [
+            "PM2",
+            "BP4"
+          ],
+          "referenceSeverity": "major"
+        }
+      },
+      {
+        "id": "chr15:g.45362143C>T",
+        "gene": "GATM",
+        "hgvs": "NP_001473.1:p.Arg413Gln",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "P/LP",
+        "clinvarConsensus": "Likely Pathogenic",
+        "stars": 3,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2446451/",
+        "maxAf": 0.00000657402,
+        "alphaMissense": 0.2942,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "B/LB",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 1,
+          "criteria": [
+            "PM2",
+            "BP4"
+          ],
+          "referenceSeverity": "major"
+        }
+      },
+      {
+        "id": "chr2:g.240868972G>A",
+        "gene": "AGXT",
+        "hgvs": "NP_000021.1:p.Arg36His",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "P/LP",
+        "clinvarConsensus": "Likely Pathogenic",
+        "stars": 2,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/204072/",
+        "maxAf": 0.0000121047,
+        "alphaMissense": 0.1889,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "B/LB",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 1,
+          "criteria": [
+            "PM2",
+            "BP4"
+          ],
+          "referenceSeverity": "major"
+        }
+      }
+    ],
+    "frequency": []
+  },
+  "falseAlarm": {
+    "sigmafold": [],
+    "alphamissense": [
+      {
+        "id": "chr10:g.87960974T>G",
+        "gene": "PTEN",
+        "hgvs": "NP_000305.3:p.Ser294Arg",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "B/LB",
+        "clinvarConsensus": "Likely Benign",
+        "stars": 3,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/127693/",
+        "maxAf": 0.000256775,
+        "alphaMissense": 0.8157,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "P/LP",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 3,
+          "criteria": [
+            "PM2",
+            "PP3"
+          ],
+          "referenceSeverity": "minor"
+        }
+      },
+      {
+        "id": "chr14:g.88596758C>T",
+        "gene": "ZC3H14",
+        "hgvs": "NP_001153575.1:p.Ser435Phe",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "B/LB",
+        "clinvarConsensus": "Likely Benign",
+        "stars": 2,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/212620/",
+        "maxAf": 0.00411033,
+        "alphaMissense": 0.7084,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "P/LP",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 1,
+          "criteria": [
+            "PP3"
+          ],
+          "referenceSeverity": "minor"
+        }
+      },
+      {
+        "id": "chr17:g.10418726C>G",
+        "gene": "MYH8",
+        "hgvs": "NP_002463.2:p.Ala144Pro",
+        "consequence": "missense",
+        "group": "missense",
+        "truth": "B/LB",
+        "clinvarConsensus": "Likely Benign",
+        "stars": 2,
+        "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/783772/",
+        "maxAf": 0.000630882,
+        "alphaMissense": 0.9362,
+        "caddPhred": null,
+        "calls": {
+          "sigmafold": "VUS",
+          "alphamissense": "P/LP",
+          "frequency": "VUS",
+          "cadd": "no-call"
+        },
+        "sigmafold": {
+          "classification": "Uncertain Significance",
+          "points": 1,
+          "criteria": [
+            "PP3"
+          ],
+          "referenceSeverity": "minor"
+        }
+      }
+    ],
+    "frequency": []
+  },
+  "variants": [
+    {
+      "id": "chr1:g.67093187_67093191del",
+      "gene": "C1orf141",
+      "hgvs": "NP_001263280.1:p.Met340fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/778232/",
+      "maxAf": 0.00686454,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr19:g.52416134C>T",
+      "gene": "ZNF528",
+      "hgvs": "NP_115799.2:p.Arg428Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/778175/",
+      "maxAf": 0.00266549,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr19:g.21727323G>T",
+      "gene": "ZNF100",
+      "hgvs": "NP_775802.2:p.Ser330Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/790885/",
+      "maxAf": 0.00902664,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr1:g.152350656G>T",
+      "gene": "CCDST",
+      "hgvs": "NP_001014364.1:p.Ser2377Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1287657/",
+      "maxAf": 0.236113,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": 0,
+        "criteria": [
+          "BA1"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr1:g.161525967C>T",
+      "gene": "HSPA6",
+      "hgvs": "NP_002146.2:p.Gln437Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/782232/",
+      "maxAf": 0.00231125,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr11:g.102772873G>T",
+      "gene": "MMP10",
+      "hgvs": "NP_002416.1:p.Tyr400Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1317643/",
+      "maxAf": 0.0024513,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr12:g.52317765G>T",
+      "gene": "KRT83",
+      "hgvs": "NP_002273.3:p.Cys222Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/309526/",
+      "maxAf": 0.00666781,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr9:g.35810994G>A",
+      "gene": "SPAG8",
+      "hgvs": "NP_001034681.1:p.Arg310Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/730582/",
+      "maxAf": 0.00356518,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr7:g.130381111C>T",
+      "gene": "CPA1",
+      "hgvs": "NP_001859.1:p.Arg27Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/734818/",
+      "maxAf": 0.000443844,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.58206041del",
+      "gene": "MKS1",
+      "hgvs": "NM_017777.4:c.*38del",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1187069/",
+      "maxAf": 0.00293874,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr7:g.16462577del",
+      "gene": "SOSTDC1",
+      "hgvs": "NP_056279.1:p.Ser198fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/791269/",
+      "maxAf": 0.00394064,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr9:g.12709125T>G",
+      "gene": "LURAP1L-AS1",
+      "hgvs": "NP_000541.1:p.Tyr519Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/198743/",
+      "maxAf": 0.010463,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -4,
+        "criteria": [
+          "BS1"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr2:g.208161034G>A",
+      "gene": "CRYGA",
+      "hgvs": "NP_055432.2:p.Arg99Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/709075/",
+      "maxAf": 0.00330529,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr19:g.14028325C>T",
+      "gene": "RLN3",
+      "hgvs": "NP_001298126.1:p.Arg41Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/734211/",
+      "maxAf": 0.00132884,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.89646589G>A",
+      "gene": "CHMP1A",
+      "hgvs": "NP_002759.2:p.Pro169=",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/384618/",
+      "maxAf": 0.004002,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr11:g.62614391C>T",
+      "gene": "ROM1",
+      "hgvs": "NP_000318.2:p.Arg242Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/879754/",
+      "maxAf": 0.000202825,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr15:g.69035397G>A",
+      "gene": "NOX5",
+      "hgvs": "NP_078781.3:p.Trp300Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/785498/",
+      "maxAf": 0.0228058,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -4,
+        "criteria": [
+          "BS1"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr3:g.190388283del",
+      "gene": "CLDN16",
+      "hgvs": "NM_006580.4:c.-45del",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/282608/",
+      "maxAf": 0.193048,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": 0,
+        "criteria": [
+          "BA1"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr5:g.75666988G>A",
+      "gene": "ANKDD1B",
+      "hgvs": "NP_001263642.1:p.Trp463Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/718612/",
+      "maxAf": 0.00353695,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr11:g.112214843C>T",
+      "gene": "BCO2",
+      "hgvs": "NP_114144.5:p.Arg472Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/778561/",
+      "maxAf": 0.00155102,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.4933908_4933923del",
+      "gene": "GP1BA",
+      "hgvs": "NP_000164.5:p.Thr436fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/435345/",
+      "maxAf": 0.308189,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": 0,
+        "criteria": [
+          "BA1"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr4:g.3007809C>T",
+      "gene": "GRK4",
+      "hgvs": "NP_001004057.1:p.Gln173Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/773153/",
+      "maxAf": 0.0109624,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -4,
+        "criteria": [
+          "BS1"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr19:g.11832410C>T",
+      "gene": "ZNF440",
+      "hgvs": "NP_689570.2:p.Arg412Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/780069/",
+      "maxAf": 0.00304713,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr9:g.37777623C>A",
+      "gene": "EXOSC3",
+      "hgvs": "NP_659401.2:p.Tyr289Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/801362/",
+      "maxAf": 0.00210427,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chrX:g.100850218G>A",
+      "gene": "NOX1",
+      "hgvs": "NP_008983.2:p.Arg356Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/748999/",
+      "maxAf": 0.000229138,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr12:g.2940631G>T",
+      "gene": "TULP3",
+      "hgvs": "NM_003324.5:c.*1187G>T",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/784227/",
+      "maxAf": 0.0115856,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -4,
+        "criteria": [
+          "BS1"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr2:g.98121411G>T",
+      "gene": "VWA3B",
+      "hgvs": "NP_659429.4:p.Glu219Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/756020/",
+      "maxAf": 0.00058503,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr6:g.53287885G>A",
+      "gene": "ELOVL5",
+      "hgvs": "NM_021814.5:c.246+3891C>T",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/691282/",
+      "maxAf": 0.00690439,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chrX:g.104040193C>T",
+      "gene": "H2BW2",
+      "hgvs": "NP_001157888.2:p.Gln67Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1264833/",
+      "maxAf": 0.366179,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": 0,
+        "criteria": [
+          "BA1"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr17:g.41724714G>T",
+      "gene": "HAP1",
+      "hgvs": "NP_817084.2:p.Ser616Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1287515/",
+      "maxAf": 0.0615005,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "no-call",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": 0,
+        "criteria": [
+          "BA1"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr8:g.42459925_42459926del",
+      "gene": "SLC20A2",
+      "hgvs": "NP_001244109.1:p.Val195fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/75233/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr13:g.108211049G>A",
+      "gene": "LIG4",
+      "hgvs": "NP_001091738.1:p.Gln74Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2504115/",
+      "maxAf": 0.00000412896,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr16:g.28902629C>A",
+      "gene": "ATP2A1",
+      "hgvs": "NP_004311.1:p.Tyr858Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1323957/",
+      "maxAf": 0.00000795963,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr13:g.32363182T>A",
+      "gene": "BRCA2",
+      "hgvs": "NP_000050.2:p.Tyr2660Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/431339/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr12:g.102852858G>A",
+      "gene": "PAH",
+      "hgvs": "NP_000268.1:p.Gln267Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/665198/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr13:g.32339986del",
+      "gene": "BRCA2",
+      "hgvs": "NP_000050.3:p.Asn1877fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/37981/",
+      "maxAf": 0.00000402781,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr13:g.32337638C>T",
+      "gene": "BRCA2",
+      "hgvs": "NP_000050.2:p.Gln1095Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/51444/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr1:g.99915422del",
+      "gene": "AGL",
+      "hgvs": "NP_000019.2:p.Ala1400fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/188970/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr11:g.64746934_64746937del",
+      "gene": "PYGM",
+      "hgvs": "NP_005600.1:p.Val788fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1074725/",
+      "maxAf": 0.00000397633,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.68440880_68440881del",
+      "gene": "RPE65",
+      "hgvs": "NP_000320.1:p.Ile206fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/98880/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.117627658del",
+      "gene": "CFTR",
+      "hgvs": "NP_000483.3:p.Asp1202fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/53777/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr13:g.32355017_32355021del",
+      "gene": "BRCA2",
+      "hgvs": "NP_000050.3:p.Thr2388_Arg2389insTer",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/418086/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr8:g.140458527_140458528del",
+      "gene": "TRAPPC9",
+      "hgvs": "NM_031466.8:c.-258_-257del",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1424373/",
+      "maxAf": 0.0000197366,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.43094683A>C",
+      "gene": "BRCA1",
+      "hgvs": "NP_001394510.1:p.Leu283Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/55737/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr17:g.43091931_43091932del",
+      "gene": "BRCA1",
+      "hgvs": "NP_001394510.1:p.Gln1200fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/91609/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr12:g.32822477_32822499del",
+      "gene": "PKP2",
+      "hgvs": "NP_001005242.2:p.Cys603fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/423349/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr2:g.1903137G>A",
+      "gene": "MYT1L",
+      "hgvs": "NP_001289981.1:p.Arg659Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/988393/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.31226596T>A",
+      "gene": "NF1",
+      "hgvs": "NP_000258.1:p.Cys721Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/488882/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr1:g.216048538del",
+      "gene": "USH2A",
+      "hgvs": "NP_996816.3:p.Glu2054fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/497726/",
+      "maxAf": 0.0000318223,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr11:g.68047564C>T",
+      "gene": "TCIRG1",
+      "hgvs": "NP_006010.2:p.Gln433Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/305804/",
+      "maxAf": 0.0000478816,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr2:g.47478353G>A",
+      "gene": "MSH2",
+      "hgvs": "NP_000242.1:p.Trp764Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/90949/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr13:g.32336977_32336978del",
+      "gene": "BRCA2",
+      "hgvs": "NP_000050.2:p.Val875fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/231054/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr10:g.98418190del",
+      "gene": "HPS1",
+      "hgvs": "NP_000186.2:p.Gly642fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1068714/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr3:g.42688936C>T",
+      "gene": "KLHL40",
+      "hgvs": "NP_689606.2:p.Gln497Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1029196/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr15:g.55450272G>A",
+      "gene": "DNAAF4-CCPG1",
+      "hgvs": "NP_001028731.1:p.Arg245Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/988447/",
+      "maxAf": 0.000013146,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr4:g.158682288T>A",
+      "gene": "ETFDH",
+      "hgvs": "NP_004444.2:p.Leu90Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1455566/",
+      "maxAf": 0.0000197112,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr4:g.112647780_112647781del",
+      "gene": "LARP7",
+      "hgvs": "NP_001253968.2:p.His363fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/817225/",
+      "maxAf": 0.0000212518,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr16:g.56899555C>T",
+      "gene": "SLC12A3",
+      "hgvs": "NP_001119580.2:p.Arg887Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1338995/",
+      "maxAf": 0.0000039763,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.43094635_43094636del",
+      "gene": "BRCA1",
+      "hgvs": "NP_001394510.1:p.Val299fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/55744/",
+      "maxAf": 0.00000656883,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr17:g.43091749del",
+      "gene": "BRCA1",
+      "hgvs": "NP_001394510.1:p.Leu1261fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/55004/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr17:g.43094602del",
+      "gene": "BRCA1",
+      "hgvs": "NP_001394510.1:p.Gln310fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/37708/",
+      "maxAf": 0.00000397817,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chrX:g.154030889_154030994del",
+      "gene": "MECP2",
+      "hgvs": "NP_001104262.1:p.Ala291fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/189726/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.117611745A>T",
+      "gene": "CFTR",
+      "hgvs": "NP_000483.3:p.Arg1102Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/53713/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr4:g.109761616G>A",
+      "gene": "CFI",
+      "hgvs": "NP_000195.3:p.Arg187Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/631934/",
+      "maxAf": 0.0000394633,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr22:g.30607369del",
+      "gene": "LOC121853040",
+      "hgvs": "NP_000346.2:p.Val13fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2796652/",
+      "maxAf": 0.0000039781,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr6:g.39913410G>A",
+      "gene": "MOCS1",
+      "hgvs": "NP_001068566.1:p.Arg222Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2676644/",
+      "maxAf": 0.00000657073,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.31265247_31265248del",
+      "gene": "NF1",
+      "hgvs": "NP_001035957.1:p.Glu1582fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/547649/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.68810302G>T",
+      "gene": "CDH1",
+      "hgvs": "NP_001304113.1:p.Glu265Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/406633/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr8:g.31111644_31111645del",
+      "gene": "WRN",
+      "hgvs": "NP_000544.2:p.Ser707fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3240736/",
+      "maxAf": 0.0000198889,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr3:g.150972696G>A",
+      "gene": "CLRN1-AS1",
+      "hgvs": "NP_001182723.1:p.Gln5Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/371376/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.61780307del",
+      "gene": "BRIP1",
+      "hgvs": "NP_114432.2:p.Thr630fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/419076/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr9:g.134818743C>T",
+      "gene": "COL5A1",
+      "hgvs": "NP_000084.3:p.Arg1440Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1074188/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.47287084G>A",
+      "gene": "ITGB3",
+      "hgvs": "NP_000203.2:p.Trp264Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2498356/",
+      "maxAf": 0.00000795798,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.44145216C>A",
+      "gene": "GCK",
+      "hgvs": "NP_000153.1:p.Glu440Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2571652/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.155295173_155295185del",
+      "gene": "PKLR",
+      "hgvs": "NP_000289.1:p.Arg209fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2575478/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.80118254del",
+      "gene": "GAA",
+      "hgvs": "NP_000143.2:p.Lys849fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/92480/",
+      "maxAf": 0.00000401797,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr16:g.2076512_2076513del",
+      "gene": "TSC2",
+      "hgvs": "NP_000539.2:p.Leu922fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/438794/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr2:g.189007569C>T",
+      "gene": "COL3A1",
+      "hgvs": "NP_000081.1:p.Arg1109Ter",
+      "consequence": "stop_gained",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/101427/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.117536663_117536667del",
+      "gene": "CFTR",
+      "hgvs": "NP_000483.3:p.Asn287fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/54072/",
+      "maxAf": 0.00000401487,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "P/LP",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Pathogenic",
+        "points": 10,
+        "criteria": [
+          "PVS1",
+          "PM2"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr9:g.37784747_37784748insC",
+      "gene": "LOC130001814",
+      "hgvs": "NP_001002269.1:p.Tyr100fs",
+      "consequence": "frameshift",
+      "group": "lof",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2908421/",
+      "maxAf": null,
+      "alphaMissense": null,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "no-call",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr14:g.67725189T>C",
+      "gene": "GPHN",
+      "hgvs": "NP_689656.2:p.Leu93Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1067256/",
+      "maxAf": 0.0000591226,
+      "alphaMissense": 0.8107,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr20:g.44622906G>A",
+      "gene": "ADA",
+      "hgvs": "NP_000013.2:p.Arg235Trp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/468281/",
+      "maxAf": 0.0000159048,
+      "alphaMissense": 0.8977,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.102840465T>C",
+      "gene": "PAH",
+      "hgvs": "NP_000268.1:p.Tyr417Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1327551/",
+      "maxAf": 0.00000397697,
+      "alphaMissense": 0.1769,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chrX:g.153694347G>A",
+      "gene": "SLC6A8",
+      "hgvs": "NP_005620.1:p.Gly466Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/804101/",
+      "maxAf": null,
+      "alphaMissense": 0.9968,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.44380911C>T",
+      "gene": "ITGA2B",
+      "hgvs": "NP_000410.2:p.Gly454Asp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/977127/",
+      "maxAf": 0.00000656918,
+      "alphaMissense": 0.8239,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.25124041G>A",
+      "gene": "CYCS",
+      "hgvs": "NP_061820.1:p.His27Tyr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1210164/",
+      "maxAf": null,
+      "alphaMissense": 0.597,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.171636000G>T",
+      "gene": "MYOC",
+      "hgvs": "NP_000252.1:p.Asn480Lys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/7951/",
+      "maxAf": null,
+      "alphaMissense": 0.9374,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr10:g.97601925T>G",
+      "gene": "HOGA1",
+      "hgvs": "NP_612422.2:p.Cys257Gly",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/34/",
+      "maxAf": 0.0000641134,
+      "alphaMissense": 0.5425,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "VUS",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr9:g.130458575G>A",
+      "gene": "ASS1",
+      "hgvs": "NP_000041.2:p.Gly117Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/556029/",
+      "maxAf": 0.000012132,
+      "alphaMissense": 0.9895,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.44145228T>A",
+      "gene": "GCK",
+      "hgvs": "NP_000153.1:p.Ile436Phe",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2691824/",
+      "maxAf": null,
+      "alphaMissense": 0.705,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr3:g.37050535A>C",
+      "gene": "MLH1",
+      "hgvs": "NP_000240.1:p.His718Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/90071/",
+      "maxAf": null,
+      "alphaMissense": 0.9833,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr21:g.34859477G>C",
+      "gene": "RUNX1",
+      "hgvs": "NP_001745.2:p.Arg204Gly",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2177591/",
+      "maxAf": null,
+      "alphaMissense": 0.9993,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.44145603A>G",
+      "gene": "GCK",
+      "hgvs": "NP_000153.1:p.Ser383Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1256306/",
+      "maxAf": null,
+      "alphaMissense": 0.9829,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.120993702A>C",
+      "gene": "HNF1A",
+      "hgvs": "NP_000536.6:p.Asn237His",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1334143/",
+      "maxAf": null,
+      "alphaMissense": 0.9954,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr4:g.177439624G>A",
+      "gene": "AGA",
+      "hgvs": "NP_000018.2:p.Arg116Trp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/55942/",
+      "maxAf": 0.00000397706,
+      "alphaMissense": 0.3071,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr19:g.11111520A>C",
+      "gene": "LDLR",
+      "hgvs": "NP_000518.1:p.Asp356Ala",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/251645/",
+      "maxAf": null,
+      "alphaMissense": 0.8601,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.120978866C>T",
+      "gene": "HNF1A",
+      "hgvs": "NP_000536.6:p.Pro33Leu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1676707/",
+      "maxAf": null,
+      "alphaMissense": 0.1082,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.97740456G>A",
+      "gene": "DPYD",
+      "hgvs": "NP_000101.2:p.Pro86Leu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1028072/",
+      "maxAf": 0.0000517772,
+      "alphaMissense": 0.8676,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.120994220A>C",
+      "gene": "HNF1A",
+      "hgvs": "NP_000536.5:p.Asn257Thr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3383934/",
+      "maxAf": null,
+      "alphaMissense": 0.9805,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr15:g.45362143C>T",
+      "gene": "GATM",
+      "hgvs": "NP_001473.1:p.Arg413Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2446451/",
+      "maxAf": 0.00000657402,
+      "alphaMissense": 0.2942,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr2:g.240868972G>A",
+      "gene": "AGXT",
+      "hgvs": "NP_000021.1:p.Arg36His",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/204072/",
+      "maxAf": 0.0000121047,
+      "alphaMissense": 0.1889,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.50189696C>T",
+      "gene": "COL1A1",
+      "hgvs": "NP_000079.2:p.Gly884Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/618019/",
+      "maxAf": null,
+      "alphaMissense": 0.9037,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr10:g.87933148G>A",
+      "gene": "PTEN",
+      "hgvs": "NP_000305.3:p.Arg130Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/7829/",
+      "maxAf": null,
+      "alphaMissense": 0.9996,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr21:g.34880562C>T",
+      "gene": "RUNX1",
+      "hgvs": "NP_001745.2:p.Gly168Glu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3367214/",
+      "maxAf": null,
+      "alphaMissense": 1,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr13:g.20189154C>T",
+      "gene": "GJB2",
+      "hgvs": "NP_003995.2:p.Arg143Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17017/",
+      "maxAf": 0.00000657013,
+      "alphaMissense": 0.8926,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.120989023G>A",
+      "gene": "HNF1A",
+      "hgvs": "NP_000536.5:p.Val173Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2691838/",
+      "maxAf": null,
+      "alphaMissense": 0.8907,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr14:g.75963344G>A",
+      "gene": "TGFB3",
+      "hgvs": "NP_001316867.1:p.Arg300Trp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/203490/",
+      "maxAf": null,
+      "alphaMissense": 0.9578,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.63808757G>A",
+      "gene": "RXYLT1",
+      "hgvs": "NP_055069.1:p.Gly333Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/854859/",
+      "maxAf": 0.0000394348,
+      "alphaMissense": 0.9621,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.68431097A>T",
+      "gene": "RPE65",
+      "hgvs": "NP_000320.1:p.Val473Asp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/98846/",
+      "maxAf": null,
+      "alphaMissense": 0.9929,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.6016592C>A",
+      "gene": "VWF",
+      "hgvs": "NP_000543.3:p.Trp1745Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/100421/",
+      "maxAf": null,
+      "alphaMissense": 0.8821,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.229431506C>G",
+      "gene": "ACTA1",
+      "hgvs": "NP_001091.1:p.Cys376Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3390919/",
+      "maxAf": null,
+      "alphaMissense": 0.9866,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.120988896G>T",
+      "gene": "HNF1A",
+      "hgvs": "NP_000536.5:p.Gln130His",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3238981/",
+      "maxAf": null,
+      "alphaMissense": 0.9999,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.107791226G>A",
+      "gene": "SLC26A3",
+      "hgvs": "NP_000102.1:p.Pro131Leu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/56000/",
+      "maxAf": 0.0000119318,
+      "alphaMissense": 0.8725,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.31181722T>C",
+      "gene": "NF1",
+      "hgvs": "NP_000258.1:p.Trp223Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/547570/",
+      "maxAf": null,
+      "alphaMissense": 0.9997,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.117504278G>A",
+      "gene": "CFTR",
+      "hgvs": "NP_000483.3:p.Gly27Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/54059/",
+      "maxAf": null,
+      "alphaMissense": 0.9823,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr7:g.117627529C>T",
+      "gene": "CFTR",
+      "hgvs": "NP_000483.3:p.Ser1159Phe",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/53757/",
+      "maxAf": 0.00000399128,
+      "alphaMissense": 0.9549,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr19:g.11120471G>C",
+      "gene": "LDLR",
+      "hgvs": "NP_000518.1:p.Ala697Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/252213/",
+      "maxAf": null,
+      "alphaMissense": 0.9858,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr12:g.102855225T>C",
+      "gene": "PAH",
+      "hgvs": "NP_000268.1:p.Tyr206Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/102762/",
+      "maxAf": null,
+      "alphaMissense": 0.3731,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "VUS",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.80113001C>T",
+      "gene": "GAA",
+      "hgvs": "NP_000143.2:p.Arg672Trp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/188773/",
+      "maxAf": 0.0000197166,
+      "alphaMissense": 0.8123,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.173904007G>A",
+      "gene": "SERPINC1",
+      "hgvs": "NP_000479.1:p.Ser426Leu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/18010/",
+      "maxAf": 0.00000657186,
+      "alphaMissense": 0.5673,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.8075670C>T",
+      "gene": "ALOX12B",
+      "hgvs": "NP_001130.1:p.Val527Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/212729/",
+      "maxAf": 0.0000394291,
+      "alphaMissense": 0.7456,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr9:g.6588417C>A",
+      "gene": "GLDC",
+      "hgvs": "NP_000161.2:p.Ser564Ile",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/11982/",
+      "maxAf": 0.000210774,
+      "alphaMissense": 0.9603,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr11:g.14885847A>G",
+      "gene": "CYP2R1",
+      "hgvs": "NP_078790.2:p.Leu99Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2134/",
+      "maxAf": 0.00103147,
+      "alphaMissense": 0.9838,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr17:g.28534365A>G",
+      "gene": "FOXN1",
+      "hgvs": "NP_001356298.1:p.His321Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/392379/",
+      "maxAf": null,
+      "alphaMissense": 0.9999,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr6:g.51934319C>T",
+      "gene": "PKHD1",
+      "hgvs": "NP_619639.3:p.Gly1971Asp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/377269/",
+      "maxAf": 0.0000591522,
+      "alphaMissense": 0.8202,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr19:g.11105570T>C",
+      "gene": "LDLR",
+      "hgvs": "NP_000518.1:p.Cys222Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/226332/",
+      "maxAf": 0.00000800717,
+      "alphaMissense": 0.9973,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr19:g.38455489T>G",
+      "gene": "RYR1",
+      "hgvs": "NP_000531.2:p.Phe539Val",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1210317/",
+      "maxAf": null,
+      "alphaMissense": 0.9868,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr3:g.129532367T>A",
+      "gene": "RHO",
+      "hgvs": "NP_000530.1:p.Met216Lys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/865880/",
+      "maxAf": null,
+      "alphaMissense": 0.9892,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr19:g.38444211C>T",
+      "gene": "RYR1",
+      "hgvs": "NP_000531.2:p.Arg163Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Pathogenic",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/12967/",
+      "maxAf": null,
+      "alphaMissense": 0.8861,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr9:g.34647858C>G",
+      "gene": "GALT",
+      "hgvs": "NP_000146.2:p.Ser135Trp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "P/LP",
+      "clinvarConsensus": "Likely Pathogenic",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/25172/",
+      "maxAf": 0.00000397627,
+      "alphaMissense": 0.8835,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "major"
+      }
+    },
+    {
+      "id": "chr1:g.11139590A>C",
+      "gene": "MTOR",
+      "hgvs": "NP_004949.1:p.His1647Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/408298/",
+      "maxAf": 0.000249711,
+      "alphaMissense": 0.0813,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr6:g.30924387C>T",
+      "gene": "VARS2",
+      "hgvs": "NP_065175.4:p.Arg834Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/377007/",
+      "maxAf": 0.00451196,
+      "alphaMissense": 0.0766,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr12:g.49051609G>T",
+      "gene": "KMT2D",
+      "hgvs": "NP_003473.3:p.Pro692Thr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/134664/",
+      "maxAf": 0.00347831,
+      "alphaMissense": 0.1401,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.1470448G>T",
+      "gene": "MYO1C",
+      "hgvs": "NP_001074248.1:p.Gln785Lys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/516881/",
+      "maxAf": 0.00409383,
+      "alphaMissense": 0.1084,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.61793637T>C",
+      "gene": "BRIP1",
+      "hgvs": "NP_114432.2:p.His478Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/128157/",
+      "maxAf": 0.00198582,
+      "alphaMissense": 0.0949,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr10:g.27022628A>T",
+      "gene": "ANKRD26",
+      "hgvs": "NP_055730.2:p.Phe1382Tyr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/260469/",
+      "maxAf": 0.00508602,
+      "alphaMissense": 0.0756,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr20:g.18532706G>A",
+      "gene": "SEC23B",
+      "hgvs": "NP_001166216.1:p.Val426Ile",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/167666/",
+      "maxAf": 0.0428346,
+      "alphaMissense": 0.0693,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -5,
+        "criteria": [
+          "BS1",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chrX:g.152869081G>A",
+      "gene": "NSDHL",
+      "hgvs": "NP_001123237.1:p.Val363Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2147781/",
+      "maxAf": 0.000158418,
+      "alphaMissense": 0.218,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.18167639G>A",
+      "gene": "MYO15A",
+      "hgvs": "NP_057323.3:p.Arg3333Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/164570/",
+      "maxAf": 0.000274066,
+      "alphaMissense": 0.0581,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.28537195C>A",
+      "gene": "FOXN1",
+      "hgvs": "NP_001356298.1:p.Ser569Tyr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/322435/",
+      "maxAf": 0.000111687,
+      "alphaMissense": 0.1873,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr6:g.43572565C>T",
+      "gene": "XPO5",
+      "hgvs": "NP_065801.1:p.Gly81Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/787830/",
+      "maxAf": 0.0107083,
+      "alphaMissense": 0.0521,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -5,
+        "criteria": [
+          "BS1",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr19:g.11576380C>T",
+      "gene": "ACP5",
+      "hgvs": "NP_001104504.1:p.Val200Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/257479/",
+      "maxAf": 0.0971186,
+      "alphaMissense": 0.2981,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": -1,
+        "criteria": [
+          "BA1",
+          "BP4"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chrX:g.108188637G>T",
+      "gene": "COL4A6",
+      "hgvs": "NP_001274687.1:p.Asn489Lys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1318336/",
+      "maxAf": 0.000111617,
+      "alphaMissense": 0.1806,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr6:g.157167164G>A",
+      "gene": "ARID1B",
+      "hgvs": "NP_001361757.1:p.Ala1072Thr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1302202/",
+      "maxAf": 0.000512517,
+      "alphaMissense": 0.0716,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr15:g.61929659G>C",
+      "gene": "VPS13C",
+      "hgvs": "NP_001018098.1:p.Ala2043Gly",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/732933/",
+      "maxAf": 0.000381971,
+      "alphaMissense": 0.3001,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 2,
+        "criteria": [
+          "PM2"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr21:g.33252732C>G",
+      "gene": "IFNAR2-IL10RB",
+      "hgvs": "NP_000865.2:p.Thr204Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/775442/",
+      "maxAf": 0.0049328,
+      "alphaMissense": 0.2059,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr14:g.104707849C>T",
+      "gene": "INF2",
+      "hgvs": "NP_001026884.3:p.Pro528Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/312689/",
+      "maxAf": 0.00542835,
+      "alphaMissense": 0.0753,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr4:g.106244755T>C",
+      "gene": "TBCK",
+      "hgvs": "NP_001156907.2:p.Asn314Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1416228/",
+      "maxAf": 0.00117028,
+      "alphaMissense": 0.0612,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.2079425C>T",
+      "gene": "TSC2",
+      "hgvs": "NP_000539.2:p.Ser1094Leu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/64856/",
+      "maxAf": 0.00014851,
+      "alphaMissense": 0.0632,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chrX:g.154030949G>C",
+      "gene": "MECP2",
+      "hgvs": "NP_001104262.1:p.Ile305Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/156671/",
+      "maxAf": 0.0000356094,
+      "alphaMissense": 0.1125,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr9:g.105604218G>A",
+      "gene": "FKTN",
+      "hgvs": "NP_001073270.1:p.Gly125Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/3211/",
+      "maxAf": 0.0314813,
+      "alphaMissense": 0.0743,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -5,
+        "criteria": [
+          "BS1",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.75235550C>A",
+      "gene": "BCAR1",
+      "hgvs": "NP_001164189.1:p.Gly450Val",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/787985/",
+      "maxAf": 0.01049,
+      "alphaMissense": 0.118,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -5,
+        "criteria": [
+          "BS1",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr10:g.89003044G>A",
+      "gene": "FAS",
+      "hgvs": "NP_000034.1:p.Ala16Thr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/134371/",
+      "maxAf": 0.0366643,
+      "alphaMissense": 0.1158,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -5,
+        "criteria": [
+          "BS1",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr5:g.35876337A>G",
+      "gene": "IL7R",
+      "hgvs": "NP_002176.2:p.Thr411Ala",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/134534/",
+      "maxAf": 0.00364004,
+      "alphaMissense": 0.0734,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr10:g.87960974T>G",
+      "gene": "PTEN",
+      "hgvs": "NP_000305.3:p.Ser294Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/127693/",
+      "maxAf": 0.000256775,
+      "alphaMissense": 0.8157,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 3,
+        "criteria": [
+          "PM2",
+          "PP3"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr6:g.7582817G>A",
+      "gene": "DSP",
+      "hgvs": "NP_004406.2:p.Arg1852His",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/36022/",
+      "maxAf": 0.000206787,
+      "alphaMissense": 0.1528,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr2:g.214781254T>C",
+      "gene": "BARD1",
+      "hgvs": "NP_000456.2:p.Lys207Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/127741/",
+      "maxAf": 0.00208336,
+      "alphaMissense": 0.0872,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr14:g.77512309G>A",
+      "gene": "SPTLC2",
+      "hgvs": "NP_004854.1:p.Thr555Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/314664/",
+      "maxAf": 0.00493073,
+      "alphaMissense": 0.1598,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr15:g.33154067C>T",
+      "gene": "FMN1",
+      "hgvs": "NP_001264242.1:p.Arg283Lys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1170247/",
+      "maxAf": 0.00157094,
+      "alphaMissense": 0.095,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.88430595G>A",
+      "gene": "ZNF469",
+      "hgvs": "NP_001354553.1:p.Arg1042Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/320902/",
+      "maxAf": 0.0134645,
+      "alphaMissense": 0.16,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -5,
+        "criteria": [
+          "BS1",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr5:g.112844032C>A",
+      "gene": "APC",
+      "hgvs": "NP_000029.2:p.Thr2813Lys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/411374/",
+      "maxAf": null,
+      "alphaMissense": 0.2403,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.47292422G>A",
+      "gene": "ITGB3",
+      "hgvs": "NP_000203.2:p.Arg515Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/13561/",
+      "maxAf": 0.00269595,
+      "alphaMissense": 0.0648,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr3:g.132665860G>A",
+      "gene": "NPHP3-ACAD11",
+      "hgvs": "NP_079094.1:p.Asp67Asn",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1088761/",
+      "maxAf": 0.000624893,
+      "alphaMissense": 0.1143,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr1:g.173914662T>C",
+      "gene": "SERPINC1",
+      "hgvs": "NP_000479.1:p.Asp100Gly",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/635233/",
+      "maxAf": 0.000087487,
+      "alphaMissense": 0.0972,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr11:g.108513895C>T",
+      "gene": "EXPH5",
+      "hgvs": "NP_055880.2:p.Gly538Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/2080824/",
+      "maxAf": 0.00100544,
+      "alphaMissense": 0.1341,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr1:g.68444834C>T",
+      "gene": "RPE65",
+      "hgvs": "NP_000320.1:p.Val99Ile",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/789504/",
+      "maxAf": 0.00027058,
+      "alphaMissense": 0.2014,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr1:g.16134529C>T",
+      "gene": "EPHA2",
+      "hgvs": "NP_004422.2:p.Val541Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/293426/",
+      "maxAf": 0.00719703,
+      "alphaMissense": 0.1182,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.21709924C>G",
+      "gene": "OTOA",
+      "hgvs": "NP_653273.3:p.Gln381Glu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/178846/",
+      "maxAf": 0.00424093,
+      "alphaMissense": 0.0915,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.28524584C>T",
+      "gene": "FOXN1",
+      "hgvs": "NP_001356298.1:p.Arg69Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/322414/",
+      "maxAf": 0.11,
+      "alphaMissense": 0.0783,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": -1,
+        "criteria": [
+          "BA1",
+          "BP4"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr22:g.50625611G>C",
+      "gene": "ARSA",
+      "hgvs": "NP_000478.3:p.Thr393Ser",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/21184/",
+      "maxAf": 0.479853,
+      "alphaMissense": 0.0662,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": -1,
+        "criteria": [
+          "BA1",
+          "BP4"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr4:g.150285975C>T",
+      "gene": "LRBA",
+      "hgvs": "NP_001351834.1:p.Ala2693Thr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/403048/",
+      "maxAf": 0.210496,
+      "alphaMissense": 0.0698,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": -1,
+        "criteria": [
+          "BA1",
+          "BP4"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr5:g.78885654C>T",
+      "gene": "ARSB",
+      "hgvs": "NP_000037.2:p.Val358Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/92350/",
+      "maxAf": 0.398562,
+      "alphaMissense": 0.3123,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": 0,
+        "criteria": [
+          "BA1"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr17:g.8013934T>C",
+      "gene": "GUCY2D",
+      "hgvs": "NP_000171.1:p.Met773Thr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/969309/",
+      "maxAf": 0.000203634,
+      "alphaMissense": 0.0819,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr18:g.55461078C>T",
+      "gene": "TCF4-AS1",
+      "hgvs": "NP_001077431.1:p.Ser82Asn",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1312388/",
+      "maxAf": 0.0000131486,
+      "alphaMissense": 0.1079,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr2:g.18587155G>C",
+      "gene": "NT5C1B",
+      "hgvs": "NM_033253.4:c.120+348C>G",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/710542/",
+      "maxAf": 0.00191161,
+      "alphaMissense": 0.2141,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr6:g.135411511T>C",
+      "gene": "AHI1",
+      "hgvs": "NP_001128302.1:p.Tyr933Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/195518/",
+      "maxAf": 0.004508,
+      "alphaMissense": 0.0875,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr19:g.15174125C>G",
+      "gene": "NOTCH3",
+      "hgvs": "NP_000426.2:p.Arg1560Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/256139/",
+      "maxAf": 0.00459113,
+      "alphaMissense": 0.2147,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr14:g.64146140C>A",
+      "gene": "SYNE2",
+      "hgvs": "NP_055995.4:p.Leu5186Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/130480/",
+      "maxAf": 0.567391,
+      "alphaMissense": 0.063,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": -1,
+        "criteria": [
+          "BA1",
+          "BP4"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr17:g.10409445C>G",
+      "gene": "MYH8",
+      "hgvs": "NP_002463.2:p.Glu577Asp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/321646/",
+      "maxAf": 0.00139977,
+      "alphaMissense": 0.2076,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr14:g.88596758C>T",
+      "gene": "ZC3H14",
+      "hgvs": "NP_001153575.1:p.Ser435Phe",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/212620/",
+      "maxAf": 0.00411033,
+      "alphaMissense": 0.7084,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PP3"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.2079043C>T",
+      "gene": "TSC2",
+      "hgvs": "NP_000539.2:p.Thr993Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/49772/",
+      "maxAf": 0.0000722676,
+      "alphaMissense": 0.1749,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr6:g.43650410C>T",
+      "gene": "RSPH9",
+      "hgvs": "NP_001180270.1:p.Ala88Val",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/241994/",
+      "maxAf": 0.00598063,
+      "alphaMissense": 0.1447,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr1:g.173917231G>T",
+      "gene": "SERPINC1",
+      "hgvs": "NP_000479.1:p.Thr10Asn",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/870846/",
+      "maxAf": 0.000308898,
+      "alphaMissense": 0.0815,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr7:g.100107269C>T",
+      "gene": "TAF6",
+      "hgvs": "NM_004722.4:c.*387C>T",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/781652/",
+      "maxAf": 0.00367394,
+      "alphaMissense": 0.0735,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.68801792A>G",
+      "gene": "CDH1",
+      "hgvs": "NP_001304113.1:p.Ile96Val",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/220611/",
+      "maxAf": 0.000163132,
+      "alphaMissense": 0.1046,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr2:g.151516460C>T",
+      "gene": "NEB",
+      "hgvs": "NP_001157979.2:p.Gly7635Glu",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/194291/",
+      "maxAf": 0.00518526,
+      "alphaMissense": 0.1582,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr22:g.37755560C>T",
+      "gene": "LOC126863145",
+      "hgvs": "NP_001034230.1:p.Ala1863Val",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/177980/",
+      "maxAf": 0.0023002,
+      "alphaMissense": 0.42,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "VUS",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 0,
+        "criteria": [],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr17:g.10418726C>G",
+      "gene": "MYH8",
+      "hgvs": "NP_002463.2:p.Ala144Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/783772/",
+      "maxAf": 0.000630882,
+      "alphaMissense": 0.9362,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "P/LP",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PP3"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr21:g.42383058T>C",
+      "gene": "TMPRSS3",
+      "hgvs": "NP_001243246.1:p.Ile253Val",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/46129/",
+      "maxAf": 0.168556,
+      "alphaMissense": 0.0682,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": -1,
+        "criteria": [
+          "BA1",
+          "BP4"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr16:g.2103277G>A",
+      "gene": "PKD1",
+      "hgvs": "NP_000287.4:p.Thr2927Met",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/811768/",
+      "maxAf": 0.000107106,
+      "alphaMissense": 0.1254,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr16:g.89816599A>T",
+      "gene": "FANCA",
+      "hgvs": "NP_000126.2:p.Val6Asp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/134237/",
+      "maxAf": 0.0766353,
+      "alphaMissense": 0.1245,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "B/LB",
+        "alphamissense": "B/LB",
+        "frequency": "B/LB",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Benign",
+        "points": -1,
+        "criteria": [
+          "BA1",
+          "BP4"
+        ],
+        "referenceSeverity": "none"
+      }
+    },
+    {
+      "id": "chr22:g.50582633T>C",
+      "gene": "CHKB-CPT1B",
+      "hgvs": "NP_005189.2:p.Tyr50Cys",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/342177/",
+      "maxAf": 0.00193118,
+      "alphaMissense": 0.1415,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr5:g.35867423A>C",
+      "gene": "IL7R",
+      "hgvs": "NP_002176.2:p.Glu113Asp",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 3,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/377977/",
+      "maxAf": 0.00117635,
+      "alphaMissense": 0.1267,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr8:g.66429930A>T",
+      "gene": "RRS1",
+      "hgvs": "NP_055984.1:p.Asn267Tyr",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/773505/",
+      "maxAf": 0.00349904,
+      "alphaMissense": 0.1567,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr8:g.42439623C>T",
+      "gene": "SLC20A2",
+      "hgvs": "NP_001244109.1:p.Arg254Gln",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/363087/",
+      "maxAf": 0.0019251,
+      "alphaMissense": 0.0882,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr9:g.138121717G>C",
+      "gene": "CACNA1B",
+      "hgvs": "NP_000709.1:p.Gln2246His",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1600078/",
+      "maxAf": 0.000579916,
+      "alphaMissense": 0.107,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr19:g.35721569T>C",
+      "gene": "KMT2B",
+      "hgvs": "NP_055542.1:p.Leu741Pro",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1462106/",
+      "maxAf": 0.0000121727,
+      "alphaMissense": 0.057,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": 1,
+        "criteria": [
+          "PM2",
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr22:g.42215109G>A",
+      "gene": "TCF20",
+      "hgvs": "NP_001365347.1:p.Ala66Val",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/1599272/",
+      "maxAf": 0.00128143,
+      "alphaMissense": 0.1734,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr20:g.19960713A>G",
+      "gene": "RIN2",
+      "hgvs": "NP_061866.1:p.His122Arg",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/695911/",
+      "maxAf": 0.00185283,
+      "alphaMissense": 0.0537,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    },
+    {
+      "id": "chr22:g.37734475A>G",
+      "gene": "TRIOBP",
+      "hgvs": "NP_001034230.1:p.Glu1380Gly",
+      "consequence": "missense",
+      "group": "missense",
+      "truth": "B/LB",
+      "clinvarConsensus": "Likely Benign",
+      "stars": 2,
+      "clinvarUrl": "https://www.ncbi.nlm.nih.gov/clinvar/variation/178555/",
+      "maxAf": 0.00118317,
+      "alphaMissense": 0.0972,
+      "caddPhred": null,
+      "calls": {
+        "sigmafold": "VUS",
+        "alphamissense": "B/LB",
+        "frequency": "VUS",
+        "cadd": "no-call"
+      },
+      "sigmafold": {
+        "classification": "Uncertain Significance",
+        "points": -1,
+        "criteria": [
+          "BP4"
+        ],
+        "referenceSeverity": "minor"
+      }
+    }
+  ]
+}

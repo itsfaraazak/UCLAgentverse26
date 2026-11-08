@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Cpu, Dna, Moon, RotateCcw, Sparkles, Sun, UserRound } from 'lucide-react';
+import { ChartColumn, Cpu, Dna, Moon, RotateCcw, Sparkles, Sun, UserRound } from 'lucide-react';
 
 import { Logo } from '@/components/brand/Logo';
 import { THEME_STORAGE_KEY } from '@/components/shell/theme-script';
@@ -54,6 +54,11 @@ export function Header({ ai, identity, onIdentity, onReset, resetting, canReset 
       <AiBadge ai={ai} />
 
       <GlossaryButton />
+
+      <Link href="/evaluation" className="wb-chrome-btn">
+        <ChartColumn className="size-3.5" aria-hidden="true" />
+        <span>Evaluation</span>
+      </Link>
 
       <Link href="/classic" className="wb-chrome-btn">
         <Dna className="size-3.5" aria-hidden="true" />

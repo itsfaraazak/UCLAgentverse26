@@ -11,6 +11,8 @@
     "test:visual": "vitest run tests/visual",
     "test:watch": "vitest",
     "snapshot:evidence": "vitest run --config vitest.scripts.config.mts snapshot-evidence",
+    "eval:build": "vitest run --config vitest.scripts.config.mts eval-build",
+    "eval": "vitest run --config vitest.scripts.config.mts eval.test",
     "pretypecheck": "next typegen",
     "typecheck": "tsc --noEmit"
   },

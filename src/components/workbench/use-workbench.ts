@@ -108,6 +108,10 @@ export function useWorkbench(identity: HumanIdentity | null) {
       .snapshot()
       .then((s) => {
         if (!alive) return;
+        if (!snapshotRef.current) {
+          const fromUrl = new URLSearchParams(window.location.search).get('branch');
+          if (fromUrl) setSelected(fromUrl);
+        }
         setSnapshot(s);
         setLoadError(null);
       })
@@ -120,11 +124,6 @@ export function useWorkbench(identity: HumanIdentity | null) {
   }, [reloadKey]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
-
-  useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get('branch');
-    if (fromUrl) setSelected(fromUrl);
-  }, []);
 
   const selected =
     snapshot && snapshot.branches.some((b) => b.name === selectedRaw) ? selectedRaw : MAIN;
