@@ -1,0 +1,23 @@
+{
+  "_disclaimer": "All records below are either (a) well-established public-knowledge reference alleles used purely as teaching examples, never real patient data, or (b) explicitly synthetic fixtures invented to illustrate a documented statistical pattern from the cited literature (see README.md > Data and citations). None of this file represents a real patient, a real ClinVar accession number, or real-world diagnostic performance.",
+  "_source": "Ported from feature/deltagene-prototype deltagene/data/sample_variants.json. Only the HBB entry is carried; the DEMO1/DEMO2 synthetic fixtures are for genes this repo does not model and live inline in tests, labelled synthetic-illustrative.",
+  "_limitation": "acmgInputs are the source prototype's single-field approximations, not curated evidence. priorClassification simulates the call already on record; it is not a live ClinVar query.",
+  "variants": [
+    {
+      "variantId": "HBB_HbS",
+      "provenance": "public-reference",
+      "gene": "HBB",
+      "hgvs": "NM_000518.5(HBB):c.20A>T (p.Glu7Val)",
+      "commonName": "rs334 / HbS allele (sickle cell mutation)",
+      "note": "The well-known public-domain beta-globin missense variant that causes sickle haemoglobin (HbS); used here only as a canonical, pedagogically-clear example of a pathogenic call feeding into a real approved therapy (see therapy_table.json).",
+      "acmgInputs": {
+        "populationFrequency": 0.0003,
+        "isNullVariantInLofGene": false,
+        "matchesKnownPathogenicAaChange": true,
+        "inSilicoDeleteriousScore": 0.91,
+        "segregatesWithDisease": true
+      },
+      "priorClassification": null
+    }
+  ]
+}
