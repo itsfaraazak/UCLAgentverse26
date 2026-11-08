@@ -6,6 +6,7 @@
  * not reading the canvas.
  */
 
+import { useEffect, useRef, useState } from 'react';
 import { Activity, CircleDot, Droplets, Waves } from 'lucide-react';
 import type { SimMetrics } from '@/lib/cellsim';
 import { ArcGauge } from './arc-gauge';
@@ -63,6 +64,26 @@ export function ReadoutStrip({
   const W = 300;
   const H = 54;
 
+  /**
+   * The gauges update several times a second, which a polite live region
+   * cannot keep up with. The summary is sampled every two seconds instead,
+   * so a screen reader gets a settled reading rather than a flood.
+   */
+  const latest = useRef('');
+  const [spoken, setSpoken] = useState('');
+  useEffect(() => {
+    latest.current =
+      `Capillary simulation, genotype ${genotypeLabel}, oxygen tension ${Math.round(pO2)} ${pO2Unit}, step ${tick}. ` +
+      `Occlusion ${metrics.occlusion.toFixed(2)} of 1. ` +
+      `Sickled fraction ${(metrics.sickledFraction * 100).toFixed(0)} percent. ` +
+      `Mean flow ${(flowRatio * 100).toFixed(0)} percent of the reference allele. ` +
+      `Illustrative model, not calibrated haemorheology.`;
+  });
+  useEffect(() => {
+    const id = window.setInterval(() => setSpoken(latest.current), 2000);
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
     <section aria-labelledby="readouts-heading" className="space-y-3">
       <h2
@@ -78,16 +99,16 @@ export function ReadoutStrip({
           label="Occlusion"
           fraction={metrics.occlusion}
           reading={metrics.occlusion.toFixed(3)}
-          dangerAbove={occlusionLimit}
+          alarmWhen="above"
           limitFraction={occlusionLimit}
-          footnote={`limit ${occlusionLimit.toFixed(2)}`}
+          footnote={`guide ${occlusionLimit.toFixed(2)}`}
         />
         <ArcGauge
           label="Mean flow"
           fraction={Math.min(1, flowRatio)}
           reading={(flowRatio * 100).toFixed(1)}
           unit="% ref"
-          dangerAbove={1.1}
+          alarmWhen="below"
           limitFraction={flowFloor}
           footnote={`floor ${(flowFloor * 100).toFixed(0)}%`}
         />
@@ -96,9 +117,9 @@ export function ReadoutStrip({
           fraction={metrics.sickledFraction}
           reading={(metrics.sickledFraction * 100).toFixed(1)}
           unit="%"
-          dangerAbove={sickledLimit}
+          alarmWhen="above"
           limitFraction={sickledLimit}
-          footnote={`limit ${(sickledLimit * 100).toFixed(0)}%`}
+          footnote={`guide ${(sickledLimit * 100).toFixed(0)}%`}
         />
       </div>
 
@@ -169,11 +190,7 @@ export function ReadoutStrip({
 
       {/* Text alternative for the canvas. */}
       <p aria-live="polite" className="sr-only">
-        {`Capillary simulation, genotype ${genotypeLabel}, oxygen tension ${Math.round(pO2)} ${pO2Unit}, step ${tick}. ` +
-          `Occlusion ${metrics.occlusion.toFixed(3)} of 1. ` +
-          `Sickled fraction ${(metrics.sickledFraction * 100).toFixed(1)} percent. ` +
-          `Mean flow ${(flowRatio * 100).toFixed(1)} percent of the reference allele. ` +
-          `Illustrative model, not calibrated haemorheology.`}
+        {spoken}
       </p>
     </section>
   );

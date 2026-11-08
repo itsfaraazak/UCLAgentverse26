@@ -11,9 +11,13 @@ export interface ArcGaugeProps {
   /** Formatted reading, e.g. "0.182" or "41.3%". */
   reading: string;
   unit?: string;
-  /** Fraction above which the gauge reads in the alarm colour. */
-  dangerAbove?: number;
-  /** Optional threshold marker, drawn as a red line on the scale. */
+  /**
+   * Which side of `limitFraction` is the alarm side. 'above' for metrics
+   * where more is worse (occlusion, sickled fraction); 'below' for metrics
+   * where less is worse (flow against its floor).
+   */
+  alarmWhen?: 'above' | 'below';
+  /** Threshold marker, drawn as a red line on the scale. */
   limitFraction?: number;
   footnote?: string;
 }
@@ -39,12 +43,14 @@ export function ArcGauge({
   fraction,
   reading,
   unit,
-  dangerAbove = 1.1,
+  alarmWhen = 'above',
   limitFraction,
   footnote,
 }: ArcGaugeProps) {
   const clamped = Math.min(1, Math.max(0, fraction));
-  const alarm = clamped > dangerAbove;
+  const alarm =
+    limitFraction !== undefined &&
+    (alarmWhen === 'above' ? clamped > limitFraction : clamped < limitFraction);
   const needle = polar(clamped);
 
   return (

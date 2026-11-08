@@ -2,9 +2,10 @@
  * Serializable view types crossing the server → client boundary.
  *
  * This module imports only from the pure, framework-free `lib/genome` and
- * `lib/cellsim` modules. It deliberately does not import `lib/agents` or
- * `lib/vcs` (which reach for `node:crypto`), so client components can depend
- * on it without dragging server-only code into the browser bundle.
+ * `lib/cellsim` modules. It deliberately does not import `lib/agents`,
+ * `lib/vcs` or `lib/safety` (which reach for `node:crypto`), so client
+ * components can depend on it without dragging server-only code into the
+ * browser bundle.
  */
 
 import type { DiffRow } from '@/lib/genome';
@@ -18,8 +19,8 @@ export interface CheckStepView {
   agent: string;
   kind: string;
   status: StepStatus;
+  /** Generic. Never templated with refused request text. */
   summary: string;
-  durationMs: number;
   deltaId: string | null;
 }
 
@@ -34,22 +35,6 @@ export interface DeltaView {
   payload: string;
 }
 
-export interface CheckRunView {
-  id: string;
-  verdict: RunVerdict;
-  steps: CheckStepView[];
-  deltas: DeltaView[];
-  metrics: SimMetrics | null;
-  baselineMeanFlow: number | null;
-  stressPO2: number;
-  requiresSignoff: boolean;
-  signoffRole: string | null;
-  structuralClaim: string | null;
-  verifierNotes: string[];
-  screen: ScreenView;
-  thresholds: { maxOcclusion: number; maxSickledFraction: number; minMeanFlowRatio: number };
-}
-
 /** The only shape a screening result may take on the client. Never any text. */
 export interface ScreenView {
   category: string;
@@ -57,9 +42,36 @@ export interface ScreenView {
   reason: string;
   requiresSignoff: boolean;
   signoffRole: string | null;
+  /** Curated gene symbols only, and empty whenever `redacted` is true. */
   flaggedGenes: string[];
   requestDigest: string;
   redacted: boolean;
+}
+
+export interface CheckRunView {
+  id: string;
+  verdict: RunVerdict;
+  steps: CheckStepView[];
+  deltas: DeltaView[];
+  screen: ScreenView;
+  /** Wall-clock cost of the whole deterministic run, measured server-side. */
+  elapsedMs: number;
+  requestedPO2: number;
+  requiresSignoff: boolean;
+  signoffRole: string | null;
+  mergeAllowed: boolean;
+  verifierReasons: string[];
+  verifierDisagreedWithAssay: boolean;
+  verifierDisagreedWithStructural: boolean;
+  /** The verifier's own independent runs, not the assay agent's numbers. */
+  measuredHighPO2: SimMetrics | null;
+  measuredLowPO2: SimMetrics | null;
+  measuredReferenceLowPO2: SimMetrics | null;
+  /** The functional assay agent's run at the requested oxygen tension. */
+  assayMetrics: SimMetrics | null;
+  assayAssessment: string | null;
+  assayLimitation: string | null;
+  structuralLimitation: string | null;
 }
 
 export interface ExonView {
@@ -132,18 +144,26 @@ export interface SimFixtureView {
   pO2Unit: string;
   pO2Label: string;
   sicklingOnsetBelow: number;
+  assaySteps: number;
+  modelLimitation: string;
+  /**
+   * Mean flow for a genotype with no polymerization tendency, measured by
+   * `runAssay`. Every "% of reference" reading on the bench is against this
+   * one figure, so the gauges and the verifier cannot disagree.
+   */
+  referenceMeanFlow: number;
 }
 
 export interface MergeAttemptView {
   ok: boolean;
-  /** Branch the attempt targeted. */
   into: string;
   from: string;
-  /** Present when the gate or the checks stopped the merge. */
-  blockedBy: string | null;
+  /** 'content-conflict' | 'check-failed' | 'awaiting-signoff' | 'check-missing' */
+  kind: string | null;
   reason: string;
   mergeOid: string | null;
-  conflicts: Array<{ gene: string; ours: string; theirs: string; base: string | null }>;
+  conflicts: Array<{ gene: string; ours: string | null; theirs: string | null; base: string | null }>;
+  blockingReasons: string[];
   requiresSignoff: boolean;
   signoffRole: string | null;
 }

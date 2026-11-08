@@ -26,7 +26,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from 'cn';
 import { screenRequestAction, type RedTeamState } from '@/app/actions';
 
-const INITIAL: RedTeamState = { result: null, submissions: 0, error: null };
+const INITIAL: RedTeamState = {
+  result: null,
+  terminatedAtGate: false,
+  agentsRun: 0,
+  submissions: 0,
+  error: null,
+};
 
 export function RedTeamConsole() {
   const [state, formAction, pending] = useActionState(screenRequestAction, INITIAL);
@@ -181,11 +187,18 @@ export function RedTeamConsole() {
               </p>
             ) : null}
 
-            {result.flaggedGenes.length > 0 ? (
+            {/* Curated gene symbols only, and never present on a refusal. */}
+            {result.flaggedGenes.length > 0 && !result.redacted ? (
               <p className="tnum mt-1.5 font-mono text-[0.6875rem] text-muted-foreground">
                 flagged loci: {result.flaggedGenes.join(', ')}
               </p>
             ) : null}
+
+            <p className="mt-1.5 text-[0.6875rem] text-muted-foreground">
+              {state.terminatedAtGate
+                ? `The gate ended the run at agent 2: ${state.agentsRun} of 7 agents executed, and no edit was planned, annotated or simulated.`
+                : `The gate allowed the run to continue: ${state.agentsRun} deltas recorded.`}
+            </p>
 
             <p className="tnum mt-1.5 flex items-center gap-1.5 font-mono text-[0.625rem] text-muted-foreground">
               <Fingerprint className="size-3" aria-hidden="true" />

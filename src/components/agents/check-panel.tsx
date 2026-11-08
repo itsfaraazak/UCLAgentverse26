@@ -131,7 +131,7 @@ export function CheckPanel({
             {run === null ? 'NOT RUN' : run.verdict.toUpperCase()}
             {run !== null ? (
               <span className="ml-2 text-[0.625rem] font-normal text-muted-foreground">
-                {run.id}
+                {run.id} · {run.elapsedMs.toFixed(1)} ms · pO2 {run.requestedPO2}
               </span>
             ) : null}
           </span>
@@ -156,7 +156,7 @@ export function CheckPanel({
                 <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <span className="min-w-0 flex-1 truncate text-xs">{agent}</span>
                 <span className="tnum shrink-0 font-mono text-[0.625rem] text-muted-foreground">
-                  {step === null ? '—' : `${step.durationMs.toFixed(1)} ms`}
+                  {step?.deltaId ?? '—'}
                 </span>
                 <span
                   className={cn(
@@ -229,18 +229,58 @@ export function CheckPanel({
             </AccordionItem>
           </Accordion>
 
-          {run.verifierNotes.length > 0 ? (
-            <div className="rounded-lg border border-border bg-card p-3">
-              <h3 className="text-[0.625rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                Verifier cross-check
-              </h3>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <h3 className="flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              <BadgeCheck className="size-3" aria-hidden="true" />
+              Verifier cross-check
+            </h3>
+            {run.verifierDisagreedWithAssay || run.verifierDisagreedWithStructural ? (
+              <p className="mt-1.5 text-xs text-signal-warn">
+                The verifier disagreed with
+                {run.verifierDisagreedWithAssay ? ' the functional assay' : ''}
+                {run.verifierDisagreedWithAssay && run.verifierDisagreedWithStructural
+                  ? ' and'
+                  : ''}
+                {run.verifierDisagreedWithStructural ? ' the structural annotation' : ''}. It
+                re-ran the simulation itself rather than taking their word for it.
+              </p>
+            ) : null}
+            {run.verifierReasons.length > 0 ? (
               <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
-                {run.verifierNotes.map((note) => (
+                {run.verifierReasons.map((note) => (
                   <li key={note}>{note}</li>
                 ))}
               </ul>
-            </div>
-          ) : null}
+            ) : (
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Measured metrics agree with the upstream agents.
+              </p>
+            )}
+            {run.measuredLowPO2 !== null && run.measuredReferenceLowPO2 !== null ? (
+              <dl className="tnum mt-2 grid grid-cols-3 gap-x-3 gap-y-1 font-mono text-[0.625rem]">
+                <dt className="col-span-3 font-sans text-muted-foreground">
+                  Independent hypoxic run vs reference allele
+                </dt>
+                <dd>occl {run.measuredLowPO2.occlusion.toFixed(3)}</dd>
+                <dd>flow {run.measuredLowPO2.meanFlow.toFixed(2)}</dd>
+                <dd>sickled {run.measuredLowPO2.sickledFraction.toFixed(3)}</dd>
+                <dd className="text-muted-foreground">
+                  ref {run.measuredReferenceLowPO2.occlusion.toFixed(3)}
+                </dd>
+                <dd className="text-muted-foreground">
+                  ref {run.measuredReferenceLowPO2.meanFlow.toFixed(2)}
+                </dd>
+                <dd className="text-muted-foreground">
+                  ref {run.measuredReferenceLowPO2.sickledFraction.toFixed(3)}
+                </dd>
+              </dl>
+            ) : null}
+            {run.assayLimitation !== null ? (
+              <p className="mt-2 text-[0.625rem] text-muted-foreground italic">
+                {run.assayLimitation}
+              </p>
+            ) : null}
+          </div>
         </>
       ) : (
         <p className="text-xs text-muted-foreground">
@@ -306,18 +346,23 @@ export function CheckPanel({
                 <CircleSlash className="size-3.5" aria-hidden="true" />
               )}
               {merge.ok ? 'Merged' : 'Merge stopped'}
-              {merge.blockedBy !== null ? (
-                <span className="tnum font-mono text-[0.625rem] font-normal">
-                  by {merge.blockedBy}
-                </span>
+              {merge.kind !== null ? (
+                <span className="tnum font-mono text-[0.625rem] font-normal">{merge.kind}</span>
               ) : null}
             </p>
             <p className="mt-1 text-muted-foreground">{merge.reason}</p>
+            {merge.blockingReasons.length > 0 ? (
+              <ul className="mt-1 space-y-0.5 text-[0.6875rem] text-muted-foreground">
+                {merge.blockingReasons.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+            ) : null}
             {merge.conflicts.length > 0 ? (
               <ul className="tnum mt-1 space-y-0.5 font-mono text-[0.625rem]">
                 {merge.conflicts.map((c) => (
                   <li key={c.gene}>
-                    {c.gene}: ours {c.ours} vs theirs {c.theirs}
+                    {c.gene}: ours {c.ours ?? 'absent'} vs theirs {c.theirs ?? 'absent'}
                   </li>
                 ))}
               </ul>

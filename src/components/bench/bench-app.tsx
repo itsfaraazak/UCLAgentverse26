@@ -6,9 +6,9 @@
  * together. All data arrives from the server as plain values.
  */
 
-import { useCallback, useMemo, useState, useTransition } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 import { CircleDot, Droplet, FlaskConical, Microscope, Waves } from 'lucide-react';
-import { run as runHeadless, type SimMetrics } from '@/lib/cellsim';
+import type { SimMetrics } from '@/lib/cellsim';
 import { attemptMergeAction, runChecksAction } from '@/app/actions';
 import type { BenchData, CheckRunView, MergeAttemptView } from '@/app/bench-types';
 import { CellCanvas } from '@/components/cell/cell-canvas';
@@ -41,23 +41,11 @@ export function BenchApp({ data }: { data: BenchData }) {
   const frame = data.frames.find((f) => f.id === frameId) ?? data.frames[0];
 
   /**
-   * Flow reference: the same capillary with no polymerization tendency, run
-   * headless. Independent of pO2, so it is computed once per fixture.
+   * Flow reference: mean flow for a genotype with no polymerization
+   * tendency, measured server-side by `runAssay` once per render. Every
+   * "% of reference" reading on the bench is against this one figure.
    */
-  const baselineMeanFlow = useMemo(
-    () =>
-      runHeadless(
-        {
-          seed: data.simulation.seed,
-          cellCount: data.simulation.cellCount,
-          pO2: data.simulation.pO2Max,
-          polymerizationTendency: 0,
-          capillaryConstriction: data.simulation.capillaryConstriction,
-        },
-        900,
-      ).meanFlow,
-    [data.simulation],
-  );
+  const baselineMeanFlow = data.simulation.referenceMeanFlow;
 
   /** A frame change re-seeds the population, so the old trace goes with it. */
   const selectFrame = useCallback(
@@ -98,10 +86,14 @@ export function BenchApp({ data }: { data: BenchData }) {
 
   const onMerge = useCallback(() => {
     startMerge(async () => {
-      const result = await attemptMergeAction(frame.id, signedOff[frame.id] === true);
+      const result = await attemptMergeAction(
+        frame.id,
+        Math.round(pO2),
+        signedOff[frame.id] === true,
+      );
       setMerges((prev) => ({ ...prev, [frame.id]: result }));
     });
-  }, [frame.id, signedOff]);
+  }, [frame.id, pO2, signedOff]);
 
   const flowRatio = baselineMeanFlow > 0 ? metrics.meanFlow / baselineMeanFlow : 0;
   const run = runs[frame.id] ?? null;
@@ -259,9 +251,9 @@ export function BenchApp({ data }: { data: BenchData }) {
             genotypeLabel={frame.label}
             pO2={pO2}
             pO2Unit={data.simulation.pO2Unit}
-            occlusionLimit={run?.thresholds.maxOcclusion ?? 0.25}
-            sickledLimit={run?.thresholds.maxSickledFraction ?? 0.2}
-            flowFloor={run?.thresholds.minMeanFlowRatio ?? 0.6}
+            occlusionLimit={0.25}
+            sickledLimit={0.2}
+            flowFloor={0.6}
           />
 
           <CheckPanel

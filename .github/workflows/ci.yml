@@ -1,0 +1,148 @@
+name: CI
+
+# Three variant branches land as PRs for the team to review. Each one should
+# arrive with build/lint/test already green or red, so a reviewer spends their
+# time on the design rather than on "does it even run".
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # A new push to the same PR supersedes the previous run.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: build · lint · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        # Variant branches may each have added shadcn components, so a branch's
+        # lockfile can legitimately differ from main's. Don't fail the run on
+        # that -- the merge is where lockfiles get reconciled.
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build (includes typecheck)
+        run: pnpm build
+
+  visual:
+    name: headless render harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # The mock adapter needs no GPU and no Dawn binary, so this is stable on a
+      # standard runner. Be clear about what it proves: vgpu/mock implements
+      # draw() as a no-op, so its frames are all zeros. This gates the encode and
+      # readback pipeline, NOT lighting or geometry. It is a smoke test.
+      - name: Visual harness (mock adapter — pipeline only, not pixels)
+        run: pnpm test:visual
+
+      # Real shaded pixels need vgpu's portable CPU software renderer, which is a
+      # separate install. It is allowed to fail: if it works we get genuine
+      # regression coverage in CI, and if it does not the PR is unaffected. Do not
+      # promote this to a required check until it has proven stable.
+      - name: Install software renderer (best effort)
+        id: swrender
+        continue-on-error: true
+        run: npx vgpu install-software-renderer
+
+      - name: Visual harness (software renderer — real pixels)
+        if: steps.swrender.outcome == 'success'
+        continue-on-error: true
+        run: VGPU_VISUAL_ADAPTER=software pnpm test:visual
+
+      - name: Upload render diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-output
+          path: tests/visual/output/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  safety-boundary:
+    name: safety boundary unchanged
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # SPEC.md §7: the screening policy is a boundary, not ordinary code.
+      # Agents are instructed never to edit it. This makes that enforceable
+      # rather than merely requested -- a PR that touches it must say so out
+      # loud and get a human to override the check.
+      - name: Flag edits to the screening policy
+        run: |
+          BASE="origin/${{ github.base_ref }}"
+          if git diff --name-only "$BASE"...HEAD | grep -q '^src/lib/safety/'; then
+            echo "::error::This PR modifies src/lib/safety/, the screening policy boundary (SPEC.md §7)."
+            echo "::error::That is allowed only as a deliberate, human-reviewed change -- never as a drive-by edit."
+            git diff --stat "$BASE"...HEAD -- src/lib/safety/
+            exit 1
+          fi
+          echo "src/lib/safety/ untouched."
+
+      - name: Safety policy tests must pass
+        run: pnpm vitest run src/lib/safety --reporter=verbose

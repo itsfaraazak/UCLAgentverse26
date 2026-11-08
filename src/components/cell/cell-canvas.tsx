@@ -1,15 +1,16 @@
 'use client';
 
 /**
- * The hero: a live capillary rendered from real `lib/cellsim` state.
+ * The hero: a live capillary rendered from real `lib/cellsim` snapshots.
  *
- * `requestAnimationFrame` drives actual `step()` calls — nothing here is a CSS
- * keyframe pretending to be motion. The loop and the observers are torn down
- * on unmount.
+ * `requestAnimationFrame` drives actual `step()` calls — nothing here is a
+ * CSS keyframe pretending to be motion. The loop and the observers are torn
+ * down on unmount, and the loop is not scheduled at all while paused or when
+ * the viewer has asked for reduced motion.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
-import { CellSim, lumenHalfWidth, type SimMetrics } from '@/lib/cellsim';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+import { CellSim, channelHalfHeight, type SimMetrics, type SimSnapshot } from '@/lib/cellsim';
 
 export interface CellCanvasProps {
   seed: number;
@@ -23,7 +24,25 @@ export interface CellCanvasProps {
   onMetrics: (metrics: SimMetrics, tick: number) => void;
 }
 
-const WALL_SAMPLES = 160;
+const WALL_SAMPLES = 180;
+const SETTLE_STEPS = 90;
+const REPORT_INTERVAL_MS = 180;
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+function subscribeToReducedMotion(onChange: () => void): () => void {
+  const query = window.matchMedia(REDUCED_MOTION_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+
+function readReducedMotion(): boolean {
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
+function readReducedMotionOnServer(): boolean {
+  return false;
+}
 
 function cssVar(el: HTMLElement, name: string, fallback: string): string {
   const value = getComputedStyle(el).getPropertyValue(name).trim();
@@ -46,15 +65,15 @@ export function CellCanvas({
   const sizeRef = useRef({ w: 0, h: 0, dpr: 1 });
   const onMetricsRef = useRef(onMetrics);
   const pO2Ref = useRef(pO2);
-  const runningRef = useRef(running);
+  const reducedMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    readReducedMotion,
+    readReducedMotionOnServer,
+  );
 
   useEffect(() => {
     onMetricsRef.current = onMetrics;
   }, [onMetrics]);
-
-  useEffect(() => {
-    runningRef.current = running;
-  }, [running]);
 
   // pO2 changes must not restart the population: the whole point of the
   // control is watching the same cells respond.
@@ -73,34 +92,39 @@ export function CellCanvas({
     const { w, h, dpr } = sizeRef.current;
     if (w === 0 || h === 0) return;
 
-    const state = sim.state();
-    const styleHost = canvas.parentElement ?? canvas;
-    const lumen = cssVar(styleHost, '--lumen', '#223');
-    const wall = cssVar(styleHost, '--bezel-edge', '#556');
-    const grid = cssVar(styleHost, '--grid-line', 'rgba(255,255,255,0.08)');
-    const discoid = cssVar(styleHost, '--cell-discoid', '#d4553c');
-    const sickled = cssVar(styleHost, '--cell-sickled', '#9a6ad8');
-    const trace = cssVar(styleHost, '--trace', '#5fd');
+    const snapshot: SimSnapshot = sim.snapshot();
+    const geom = snapshot.geom;
+    const host = canvas.parentElement ?? canvas;
+    const lumen = cssVar(host, '--lumen', '#223');
+    const wall = cssVar(host, '--bezel-edge', '#556');
+    const grid = cssVar(host, '--grid-line', 'rgba(255,255,255,0.08)');
+    const discoid = cssVar(host, '--cell-discoid', '#d4553c');
+    const sickled = cssVar(host, '--cell-sickled', '#9a6ad8');
+    const trace = cssVar(host, '--trace', '#5fd');
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    const yAt = (v: number) => v * h;
-    const xAt = (v: number) => v * w;
+    // Simulation space is `geom.width` × `geom.height`; the canvas stretches
+    // it to fill, so one scale per axis.
+    const sx = w / geom.width;
+    const sy = h / geom.height;
+    const rScale = Math.min(sx, sy);
+    const xAt = (x: number) => x * sx;
+    const yAt = (y: number) => y * sy;
 
-    // Lumen: a vessel whose walls pinch in at the constriction.
     ctx.beginPath();
     for (let i = 0; i <= WALL_SAMPLES; i += 1) {
-      const t = i / WALL_SAMPLES;
-      const hw = lumenHalfWidth(t, capillaryConstriction);
-      const y = yAt(0.5 - hw);
-      if (i === 0) ctx.moveTo(xAt(t), y);
-      else ctx.lineTo(xAt(t), y);
+      const x = (i / WALL_SAMPLES) * geom.width;
+      const half = channelHalfHeight(x, geom.opening, geom.height);
+      const y = yAt(geom.height / 2 - half);
+      if (i === 0) ctx.moveTo(xAt(x), y);
+      else ctx.lineTo(xAt(x), y);
     }
     for (let i = WALL_SAMPLES; i >= 0; i -= 1) {
-      const t = i / WALL_SAMPLES;
-      const hw = lumenHalfWidth(t, capillaryConstriction);
-      ctx.lineTo(xAt(t), yAt(0.5 + hw));
+      const x = (i / WALL_SAMPLES) * geom.width;
+      const half = channelHalfHeight(x, geom.opening, geom.height);
+      ctx.lineTo(xAt(x), yAt(geom.height / 2 + half));
     }
     ctx.closePath();
     ctx.fillStyle = lumen;
@@ -112,15 +136,15 @@ export function CellCanvas({
     ctx.strokeStyle = grid;
     ctx.lineWidth = 1;
     for (let i = 1; i < 20; i += 1) {
-      const x = Math.round(xAt(i / 20)) + 0.5;
+      const x = Math.round(xAt((i / 20) * geom.width)) + 0.5;
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, h);
       ctx.stroke();
     }
     ctx.beginPath();
-    ctx.moveTo(0, Math.round(yAt(0.5)) + 0.5);
-    ctx.lineTo(w, Math.round(yAt(0.5)) + 0.5);
+    ctx.moveTo(0, Math.round(yAt(geom.height / 2)) + 0.5);
+    ctx.lineTo(w, Math.round(yAt(geom.height / 2)) + 0.5);
     ctx.stroke();
     ctx.restore();
 
@@ -130,29 +154,28 @@ export function CellCanvas({
     for (const side of [-1, 1]) {
       ctx.beginPath();
       for (let i = 0; i <= WALL_SAMPLES; i += 1) {
-        const t = i / WALL_SAMPLES;
-        const hw = lumenHalfWidth(t, capillaryConstriction);
-        const y = yAt(0.5 + side * hw);
-        if (i === 0) ctx.moveTo(xAt(t), y);
-        else ctx.lineTo(xAt(t), y);
+        const x = (i / WALL_SAMPLES) * geom.width;
+        const half = channelHalfHeight(x, geom.opening, geom.height);
+        const y = yAt(geom.height / 2 + side * half);
+        if (i === 0) ctx.moveTo(xAt(x), y);
+        else ctx.lineTo(xAt(x), y);
       }
       ctx.stroke();
     }
 
-    // Cells. A sickled cell is drawn elongated and tilted; a discoid cell is
-    // a disc with a pale centre, the way one looks down a microscope.
-    const scale = Math.min(w, h);
-    for (const cell of state.cells) {
+    // Cells. A sickled cell is drawn elongated along its own heading; a
+    // discoid cell is a disc with a pale centre, as down a microscope.
+    for (const cell of snapshot.cells) {
       const cx = xAt(cell.x);
       const cy = yAt(cell.y);
-      const r = cell.radius * scale;
+      const r = cell.radius * rScale;
 
-      if (cell.vx > 0) {
+      if (cell.vx > 0.05) {
         ctx.strokeStyle = trace;
-        ctx.globalAlpha = Math.min(0.35, cell.vx * 40);
-        ctx.lineWidth = Math.max(1, r * 0.35);
+        ctx.globalAlpha = Math.min(0.32, cell.vx * 0.09);
+        ctx.lineWidth = Math.max(1, r * 0.3);
         ctx.beginPath();
-        ctx.moveTo(cx - Math.min(60, cell.vx * 9000), cy);
+        ctx.moveTo(cx - Math.min(48, cell.vx * sx * 6), cy);
         ctx.lineTo(cx, cy);
         ctx.stroke();
         ctx.globalAlpha = 1;
@@ -161,10 +184,10 @@ export function CellCanvas({
       ctx.save();
       ctx.translate(cx, cy);
       if (cell.state === 'sickled') {
-        ctx.rotate(((cell.id % 7) - 3) * 0.18);
+        ctx.rotate(cell.theta);
         ctx.fillStyle = sickled;
         ctx.beginPath();
-        ctx.ellipse(0, 0, r * 1.9, r * 0.52, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, r * 1.75, r * 0.5, 0, 0, Math.PI * 2);
         ctx.fill();
       } else {
         ctx.fillStyle = discoid;
@@ -180,30 +203,27 @@ export function CellCanvas({
       }
       ctx.restore();
     }
-  }, [capillaryConstriction]);
+  }, []);
+
+  const report = useCallback((snapshot: SimSnapshot) => {
+    onMetricsRef.current(snapshot.metrics, snapshot.tick);
+  }, []);
 
   // Build / rebuild the simulation when the genotype or fixture changes.
   useEffect(() => {
-    simRef.current = new CellSim({
+    const sim = new CellSim({
       seed,
       cellCount,
       pO2: pO2Ref.current,
       polymerizationTendency,
       capillaryConstriction,
     });
+    simRef.current = sim;
     // Settle the population into the channel before the first paint.
-    simRef.current.run(120);
+    const settled = sim.run(SETTLE_STEPS);
     draw();
-    const settled = simRef.current.state();
-    onMetricsRef.current(
-      {
-        occlusion: settled.occlusion,
-        meanFlow: settled.meanFlow,
-        sickledFraction: settled.sickledFraction,
-      },
-      settled.tick,
-    );
-  }, [seed, cellCount, polymerizationTendency, capillaryConstriction, generation, draw]);
+    report(settled);
+  }, [seed, cellCount, polymerizationTendency, capillaryConstriction, generation, draw, report]);
 
   // Size the backing store to the element and the device pixel ratio.
   useEffect(() => {
@@ -229,26 +249,20 @@ export function CellCanvas({
     return () => observer.disconnect();
   }, [draw]);
 
-  // The animation loop: real steps, real metrics, cleaned up on unmount.
+  // The animation loop: real steps, real metrics, and no frames scheduled
+  // while paused or when reduced motion is requested.
   useEffect(() => {
+    if (!running || reducedMotion) return;
     let lastReport = 0;
 
     const tick = (time: number) => {
       const sim = simRef.current;
-      if (sim !== null && runningRef.current) {
-        sim.step();
+      if (sim !== null) {
+        const snapshot = sim.step();
         draw();
-        if (time - lastReport > 180) {
+        if (time - lastReport > REPORT_INTERVAL_MS) {
           lastReport = time;
-          const state = sim.state();
-          onMetricsRef.current(
-            {
-              occlusion: state.occlusion,
-              meanFlow: state.meanFlow,
-              sickledFraction: state.sickledFraction,
-            },
-            state.tick,
-          );
+          report(snapshot);
         }
       }
       frameRef.current = requestAnimationFrame(tick);
@@ -259,7 +273,18 @@ export function CellCanvas({
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
       frameRef.current = null;
     };
-  }, [draw]);
+  }, [running, reducedMotion, draw, report]);
+
+  // With reduced motion the simulation still advances on demand, in one
+  // deliberate jump per oxygen-tension change, rather than continuously.
+  useEffect(() => {
+    if (!reducedMotion) return;
+    const sim = simRef.current;
+    if (sim === null) return;
+    const snapshot = sim.run(60);
+    draw();
+    report(snapshot);
+  }, [reducedMotion, pO2, draw, report]);
 
   return <canvas ref={canvasRef} aria-hidden="true" className="block h-full w-full" />;
 }

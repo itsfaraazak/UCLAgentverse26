@@ -7,16 +7,17 @@
       "provenance": "public-reference",
       "name": "Haemoglobin subunit beta",
       "chromosome": "11",
-      "note": "The worked example for this prototype. Only the first 30 codons of the coding sequence are included — enough to diff and translate the classic codon-7 substitution. This is standard textbook reference material.",
+      "note": "The worked example for this prototype. Only the first 31 codons of the coding sequence are included — enough to diff and translate the classic codon-7 substitution. This is standard textbook reference material. The included region translates to MVHLTPEEKSAVTALWGKVNVDEVGGEALGR.",
       "cdsReference": {
         "label": "HbA (reference allele)",
         "startCodon": 1,
-        "codonCount": 30,
+        "codonCount": 31,
+        "lengthNt": 93,
         "bases": "ATGGTGCATCTGACTCCTGAGGAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAACGTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGG"
       },
       "exons": [
-        { "index": 1, "label": "Exon 1", "codonStart": 1, "codonEnd": 30, "note": "Truncated to the modelled region." },
-        { "index": 2, "label": "Exon 2", "codonStart": 31, "codonEnd": 104, "note": "Not modelled; shown greyed on the gene track for context." },
+        { "index": 1, "label": "Exon 1", "codonStart": 1, "codonEnd": 30, "note": "Exon 1 encodes codons 1-30 plus the first base of codon 31, so codon 31 straddles the exon 1 / exon 2 boundary. The 93 nt modelled region therefore extends one codon past the end of exon 1." },
+        { "index": 2, "label": "Exon 2", "codonStart": 31, "codonEnd": 104, "note": "Only the first codon is modelled; the remainder is shown greyed on the gene track for context." },
         { "index": 3, "label": "Exon 3", "codonStart": 105, "codonEnd": 147, "note": "Not modelled; shown greyed on the gene track for context." }
       ],
       "variants": [

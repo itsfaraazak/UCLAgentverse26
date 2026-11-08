@@ -26,9 +26,16 @@ SigmaFold is that artifact.
 
 The headline worked example is the textbook sickle-cell case:
 
-- `HBB` reference allele (HbA), codon 6 `GAG` → Glu
-- the sickle allele (HbS), codon 6 `GTG` → Val — a single-nucleotide substitution
+- `HBB` reference allele (HbA), codon 7 `GAG` → Glu
+- the sickle allele (HbS), codon 7 `GTG` → Val — a single-nucleotide substitution
 - a proposed repair edit that restores the reference codon
+
+**A note on the numbering, because it trips people up.** This is codon **7** in CDS
+numbering (`NM_000518.5(HBB):c.20A>T`, `p.Glu7Val`). The familiar legacy name is
+"Glu6Val" / "E6V", which counts from the *mature* protein after the initiator methionine
+is cleaved. Same substitution, two conventions. This spec and the code use CDS numbering
+throughout; `loci.json` records both and carries a `numberingNote`. Do not silently
+convert between them.
 
 This example is used **descriptively and pedagogically only**. See §7.
 
@@ -78,7 +85,7 @@ interface Variant {
   refCodon: string;
   altCodon: string;
   kind: 'substitution' | 'deletion' | 'insertion';
-  label: string;             // human-readable, e.g. "HbS (Glu6Val)"
+  label: string;             // human-readable, e.g. "HbS (sickle allele)"
 }
 
 function applyVariant(seq: Sequence, v: Variant): Sequence;
@@ -189,6 +196,83 @@ Must run headless via `step()` with no canvas/DOM, so `FunctionalAssayAgent` can
 Same seed + same params ⇒ identical metrics.
 
 **This is an illustrative model, not validated hemorheology. The UI must say so on the panel.**
+
+### 4.5 Ratified decisions
+
+§4.1–§4.4 left some details unspecified. The implementation surfaced them; these are now the
+contract. Reviewers should check against this list rather than filing them as findings.
+
+| # | Question | Decision |
+|---|---|---|
+| 1 | Does `translate` emit the stop codon? | **Yes** — `*` is included in the output, then translation halts. |
+| 2 | What is `DiffRow.codonIndex` after an indel? | The **1-based alignment row**, not a biological CDS index. For substitutions the two coincide; after an indel the two sequences' biological numbering diverges and `DiffRow` carries only the row. A UI showing CDS coordinates past an indel must derive them itself. |
+| 3 | `MergeConflict` shape | `{ gene: string; base: Oid \| null; ours: Oid \| null; theirs: Oid \| null }`. |
+| 4 | Merge commit metadata | `parents: [ours, theirs]`, author `sigmafold-merge`, `timestamp = max(ours, theirs) + 1` so oids stay deterministic. HEAD moves only if it currently points at `ours`. |
+| 5 | `commit(opts)` fields | Required `tree`, `author`, `message`. Optional `timestamp`, `parents` (defaults to `[HEAD]`, or `[]` at root), `edit`, `checkRunId`. |
+| 6 | Insertion coordinates in `applyVariant` | `altCodon` is inserted **at** `codonIndex`; the codon already there shifts right. Appending is `codonIndex === length + 1`. |
+| 7 | HBB modelled region length | **31 codons / 93 nt**, translating to `MVHLTPEEKSAVTALWGKVNVDEVGGEALGR`. An earlier `codonCount: 30` in `loci.json` was wrong and is fixed. Codon 31 straddles the exon 1 / exon 2 boundary, so the modelled region extends one codon past exon 1. |
+| 8 | Which gene symbols may `IntentAgent` resolve? | `loci.json` **∪ `FLAGGED_LOCI`**, plus fixture aliases (`HbS`, `sickle`) that map back to a listed gene. Nothing outside those lists is ever emitted. Resolving against `loci.json` alone would route `knock out TP53` to `OUT_OF_SCOPE` instead of `TUMOUR_SUPPRESSOR_DISRUPTION`, which would defeat the red-team demo. |
+| 9 | Does `escalate` stop the pipeline? | **No — only `block` terminates.** `escalate` still runs agents 3–7, but sets `mergeAllowed: false` and `requiresSignoff: true`. The `signoff` delta kind exists for the UI to write; no agent emits one. |
+| 10 | What pO2 does the assay use? | The requested or default pO2 (95). That is high enough that a naive assay reports `flow_preserved` even for the sickle allele. `VerifierAgent` **independently re-runs the simulation at `pO2.min` against wildtype** and can therefore disagree. This is the structural reason a verifier-always-agrees demo cannot happen. |
+| 11 | What does `occlusion` measure? | *Pathological* blockage caused by sickled cells in the constriction — **not** geometric narrowing. So the reference genotype sits at ~0 by construction, not at some baseline set by the capillary's shape. |
+| 12 | `Delta.id` and `createdAt` | `id` is a content-addressed sha256 prefix with parents validated on insert. `createdAt` is a **logical counter**, not wall-clock time, so a pipeline run is reproducible. |
+
+Note on #2: this is a real limitation, not a shortcut. Reporting a single index keeps `DiffRow`
+honest about the fact that one row cannot name a position in two diverged coordinate systems at
+once. Do not "fix" it by silently reusing the row number as a CDS coordinate.
+
+### 4.6 Ratified decisions — round two
+
+Seeded property testing escalated five genuine ambiguities rather than resolving them by
+invention. These are the decisions. All five require an implementation change.
+
+| # | Question | Decision |
+|---|---|---|
+| 13 | Sequences containing non-ACGT characters (`N`, RNA `U`, junk) | **Reject with a clear error.** Current behaviour uppercases and then silently *halts* translation at the first unknown codon, so `ATGNNNCCC` yields `"M"` and drops the rest. Silent truncation is the worst option for a tool whose pitch is auditability. Validate at the boundary and throw naming the offending character and offset. Lowercase input stays accepted and normalised — that is meaning-preserving. |
+| 14 | A trailing 1–2 nt partial codon in `diffSequences` | **Reject with a clear error.** This model diffs whole codons, and an indel in it is a whole number of codons. A non-multiple-of-3 input is malformed, not an edge case to paper over. Unequal *codon counts* remain fully supported (that is §4.1's indel requirement) — it is unequal *remainders* that are refused. |
+| 15 | Is `refCodon` validated for an insertion? | **It is ignored, and that must be explicit.** Substitutions and deletions verify `refCodon` against the sequence; an insertion has nothing to verify. Throw if a caller passes a non-empty `refCodon` with `kind: 'insertion'`, so nobody believes a check happened that did not. |
+| 16 | `merge(a, a)` | **No-op.** Return the existing oid; do not write a merge commit with `parents: [a, a]`. This matches Git and keeps history honest. §4.5 #4's metadata rules apply only to merges that actually combine two distinct commits. |
+| 17 | Is `mergeBase` a *best* common ancestor, and is it symmetric? | **It must be both.** The current BFS-from-`b`-return-first-hit returns the common ancestor nearest `b`, which is not necessarily non-dominated, and gives `mergeBase(a,b) ≠ mergeBase(b,a)`. Compute the common-ancestor set, discard any that is an ancestor of another common ancestor, and pick deterministically (lowest oid) among what remains. |
+
+**Why #17 is not cosmetic.** A dominated — too old — base makes the three-way merge see a gene
+as changed on *both* sides when only one side touched it, producing a **spurious conflict**. It
+also inflates the commit set `lib/merge-gate` walks when deciding which checks must be green.
+Both failures lean safe rather than permissive, which is why nothing broke in testing, but both
+are wrong.
+
+**Known limitation to keep, and to state in the UI rather than hide.** Criss-cross histories can
+have several equally-good common ancestors. Git resolves that with recursive merge; this
+prototype does not. Picking the lowest oid makes the choice deterministic and symmetric, not
+correct in the full sense. Document it; do not pretend it is resolved.
+
+### 4.7 The trailing-partial-codon asymmetry is intentional
+
+The implementing agent flagged that after §4.6, `translate`/`codons` still *drop* a trailing
+1–2 nt remainder while `diffSequences` *throws* on one — so the same input can yield a protein
+but refuse to diff. It followed the spec rather than unifying them, and was right to raise it.
+
+**The asymmetry stays, because both halves are individually correct:**
+
+- **`translate` dropping the tail is correct biology.** A trailing one or two bases are not a
+  codon and are not translated. Real tooling behaves this way, and existing tests pin it.
+- **`diffSequences` throwing is correct for a codon-row diff.** Every row *is* a codon, so a
+  partial codon has no row to live in. The alternatives are a special-cased ragged row or
+  silently discarding data the user supplied; a clear error beats both.
+
+So this is not an inconsistency to fix but a boundary to **document**. Both functions' doc
+comments must state their remainder behaviour explicitly, and any UI that translates a sequence
+it could not diff must not imply the two views cover the same bases.
+
+If this ever does need unifying, the right direction is to reject non-multiple-of-3 input at the
+`Sequence` boundary for *every* consumer — not to make the diff lenient.
+
+### 4.8 Known gaps, recorded rather than hidden
+
+| Gap | Status |
+|---|---|
+| No insertion/deletion fixture exists in `loci.json` | `kind: 'insertion'` and `'deletion'` are supported by `applyVariant` and by the diff, and are covered by property tests on synthetic sequences — but no *fixture* exercises them, so the diff view has no indel case to render from real data. Deliberately not added mid-integration: it would change data three in-flight UI branches do not have and force updating an exact-variant-id assertion. **Follow-up.** |
+| `requireRefCodon`'s insertion branch is untested | The loader previously made an insertion fixture impossible to express at all (`requireString` rejects `''`, which §4.6 #15 requires). Fixed, and the substitution path is covered by the whole existing suite. The insertion branch has no test because the parser is internal and no fixture reaches it. **Follow-up, tied to the row above.** |
+| `merge` does not consult `checkRunId` | By design — `Repo` stays a content primitive. The policy layer is `src/lib/merge-gate/`. See §1 and §9.6. |
 
 ## 5. UI requirements (all three variants)
 

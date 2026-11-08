@@ -14,7 +14,7 @@ export default defineConfig({
     // Component tests opt into jsdom with a `// @vitest-environment jsdom`
     // pragma at the top of the file.
     environment: 'node',
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'tests/visual/**/*.test.ts'],
     globals: true,
   },
 });
