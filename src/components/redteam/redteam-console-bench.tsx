@@ -50,7 +50,7 @@ export function RedTeamConsole() {
   const result = state.result;
   const tone =
     result === null
-      ? 'border-bezel-edge/60'
+      ? 'border-border'
       : result.verdict === 'block'
         ? 'border-signal-alarm/60'
         : result.verdict === 'escalate'
@@ -60,7 +60,7 @@ export function RedTeamConsole() {
   return (
     <section
       aria-labelledby="redteam-heading"
-      className={cn('recess-surface space-y-3 rounded-xl border p-4', tone)}
+      className={cn('recess-surface space-y-3 rounded-lg border p-4', tone)}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -82,21 +82,26 @@ export function RedTeamConsole() {
           className={cn(
             'flex shrink-0 flex-col items-center gap-1 rounded-md border px-2.5 py-1.5',
             result?.verdict === 'block'
-              ? 'border-signal-alarm/60 bg-signal-alarm/15'
-              : 'border-bezel-edge/60 bg-background/50',
+              ? 'border-signal-alarm/60'
+              : 'border-border',
           )}
         >
           <span
             aria-hidden="true"
             className={cn(
               'size-3 rounded-full',
+              // Filled when engaged, hollow when idle: the lamp's state is
+              // carried by shape as well as by the alarm colour.
               result?.verdict === 'block'
-                ? 'bg-signal-alarm shadow-[0_0_10px_var(--signal-alarm)]'
-                : 'bg-muted-foreground/30',
+                ? 'bg-signal-alarm'
+                : 'border border-muted-foreground/50',
             )}
           />
           <span className="text-[0.5625rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
             Hard stop
+            <span className="sr-only">
+              {result?.verdict === 'block' ? ' engaged' : ' not engaged'}
+            </span>
           </span>
         </div>
       </div>
@@ -139,12 +144,12 @@ export function RedTeamConsole() {
         {result !== null ? (
           <div
             className={cn(
-              'rounded-lg border p-3',
+              'rounded-md p-3',
               result.verdict === 'block'
-                ? 'border-signal-alarm/60 bg-signal-alarm/10'
+                ? 'bg-signal-alarm/10'
                 : result.verdict === 'escalate'
-                  ? 'border-signal-warn/60 bg-signal-warn/10'
-                  : 'border-signal-ok/60 bg-signal-ok/10',
+                  ? 'bg-signal-warn/10'
+                  : 'bg-signal-ok/10',
             )}
           >
             <div className="flex flex-wrap items-center gap-2">
@@ -201,7 +206,7 @@ export function RedTeamConsole() {
             </p>
 
             <p className="tnum mt-1.5 flex items-center gap-1.5 font-mono text-[0.625rem] text-muted-foreground">
-              <Fingerprint className="size-3" aria-hidden="true" />
+              <Fingerprint className="size-3.5" aria-hidden="true" />
               request digest {result.requestDigest}
               {result.redacted
                 ? ' · the request text itself was not retained, logged or displayed'

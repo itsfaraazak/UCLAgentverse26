@@ -44,10 +44,10 @@ export function BranchTree({
 }: BranchTreeProps) {
   return (
     <nav aria-label="Branches" className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-      <h2 className="sticky top-0 z-10 flex shrink-0 items-center gap-1.5 border-b border-chrome-border bg-chrome/95 px-2.5 py-1.5 text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase backdrop-blur">
-        <GitBranch className="size-3" aria-hidden />
+      <h2 className="sticky top-0 z-10 flex shrink-0 items-center gap-1.5 border-b border-chrome-border bg-chrome px-2.5 py-1.5 text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        <GitBranch className="size-3.5" aria-hidden />
         Branches
-        <span className="nums ml-auto font-mono text-[10px] font-normal">{branches.length}</span>
+        <span className="nums ml-auto text-[10px] font-normal">{branches.length}</span>
       </h2>
 
       <ul className="flex-1 py-1">
@@ -73,7 +73,7 @@ export function BranchTree({
                   className="grid size-4 shrink-0 place-items-center rounded-sm text-muted-foreground hover:text-foreground"
                 >
                   <ChevronRight
-                    className={`size-3 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+                    className={`size-3.5 transition-transform ${isOpen ? 'rotate-90' : ''}`}
                     aria-hidden
                   />
                 </button>
@@ -98,7 +98,7 @@ export function BranchTree({
                   </span>
                   {branch.isDefault && (
                     <Star
-                      className="size-3 shrink-0 text-muted-foreground"
+                      className="size-3.5 shrink-0 text-muted-foreground"
                       aria-label="default branch"
                     />
                   )}
@@ -132,7 +132,7 @@ export function BranchTree({
                   {branch.commits.map((commit) => (
                     <li key={commit.oid} className="flex items-start gap-1.5 py-[3px] pl-2 pr-2">
                       <GitCommitHorizontal
-                        className="mt-[3px] size-3 shrink-0 text-muted-foreground"
+                        className="mt-px size-3.5 shrink-0 text-muted-foreground"
                         aria-hidden
                       />
                       <span className="min-w-0 flex-1">
@@ -142,7 +142,7 @@ export function BranchTree({
                         <span className="nums block font-mono text-[10px] leading-tight text-muted-foreground">
                           {commit.short}
                           {commit.parents.length > 1 && (
-                            <GitMerge className="ml-1 inline size-2.5" aria-label="merge commit" />
+                            <GitMerge className="ml-1 inline size-3 align-[-2px]" aria-label="merge commit" />
                           )}
                           {commit.editCodonIndex !== null && ` · codon ${commit.editCodonIndex}`}
                         </span>
@@ -158,7 +158,7 @@ export function BranchTree({
                     </span>
                     <span className="block">
                       polymerisation tendency{' '}
-                      <span className={`nums font-mono ${tendencyTone(branch.polymerizationTendency)}`}>
+                      <span className={`nums ${tendencyTone(branch.polymerizationTendency)}`}>
                         {branch.polymerizationTendency.toFixed(2)}
                       </span>
                     </span>

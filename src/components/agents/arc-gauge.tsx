@@ -54,7 +54,7 @@ export function ArcGauge({
   const needle = polar(clamped);
 
   return (
-    <div className="bezel-surface flex flex-col items-center gap-1 rounded-lg border border-bezel-edge/70 px-3 py-3">
+    <div className="bezel-surface flex flex-col items-center gap-1 rounded-lg border border-border px-3 py-3">
       <svg viewBox="0 0 100 72" className="w-full max-w-[150px]" role="img" aria-hidden="true">
         <path
           d={arcPath(0, 1)}

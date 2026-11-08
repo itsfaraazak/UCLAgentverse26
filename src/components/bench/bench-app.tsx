@@ -120,14 +120,14 @@ export function BenchApp({ data }: { data: BenchData }) {
           {/* Hero: the live capillary. */}
           <section
             aria-labelledby="canvas-heading"
-            className="bezel-surface overflow-hidden rounded-xl border border-bezel-edge/70 p-1.5"
+            className="bezel-surface overflow-hidden rounded-lg border border-border"
           >
             <h2 id="canvas-heading" className="sr-only">
               Live capillary simulation
             </h2>
             {/* The channel is 480 × 100 in simulation units; the hero keeps that
                 aspect so the capillary is not stretched out of shape. */}
-            <div className="engraved-grid relative aspect-[24/5] max-h-[52vh] min-h-[240px] w-full overflow-hidden rounded-lg bg-background">
+            <div className="engraved-grid relative aspect-[24/5] max-h-[52vh] min-h-[240px] w-full overflow-hidden bg-background">
               <CellCanvas
                 seed={data.simulation.seed}
                 cellCount={data.simulation.cellCount}
@@ -141,7 +141,7 @@ export function BenchApp({ data }: { data: BenchData }) {
 
               <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="vibrancy-surface rounded-lg border border-border/70 px-3 py-2">
+                  <div className="rounded-md border border-border bg-card px-3 py-2">
                     <p className="flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                       <Microscope className="size-3" aria-hidden="true" />
                       Genotype
@@ -152,7 +152,7 @@ export function BenchApp({ data }: { data: BenchData }) {
                     </p>
                   </div>
 
-                  <dl className="vibrancy-surface tnum grid grid-cols-3 gap-x-4 rounded-lg border border-border/70 px-3 py-2 font-mono">
+                  <dl className="tnum flex divide-x divide-border rounded-md border border-border bg-card py-2 [&>div]:px-3">
                     <div>
                       <dt className="text-[0.5625rem] tracking-[0.1em] text-muted-foreground uppercase">
                         Occl
@@ -183,7 +183,7 @@ export function BenchApp({ data }: { data: BenchData }) {
                 </div>
 
                 <div className="flex flex-wrap items-end justify-between gap-2">
-                  <ul className="vibrancy-surface flex flex-wrap items-center gap-3 rounded-lg border border-border/70 px-3 py-1.5 text-[0.625rem]">
+                  <ul className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-card px-3 py-1.5 text-[0.625rem]">
                     <li className="flex items-center gap-1.5">
                       <Droplet
                         className="size-3 text-[var(--cell-discoid)]"
@@ -206,7 +206,7 @@ export function BenchApp({ data }: { data: BenchData }) {
                       seed {data.simulation.seed} · step {tick}
                     </li>
                   </ul>
-                  <Badge variant="outline" className="vibrancy-surface">
+                  <Badge variant="outline" className="bg-card">
                     <FlaskConical className="size-3" aria-hidden="true" />
                     Illustrative model — not calibrated haemorheology
                   </Badge>

@@ -3,7 +3,7 @@
  * this variant foregrounds simulation output (SPEC.md §7.7).
  */
 
-import { FileWarning, Info } from 'lucide-react';
+import { FileWarning } from 'lucide-react';
 
 export interface LimitsNoteProps {
   disclaimer: string;
@@ -25,7 +25,7 @@ export function LimitsNote({
   return (
     <section
       aria-labelledby="limits-heading"
-      className="rounded-xl border border-border bg-card p-4"
+      className="rounded-lg border border-border p-4"
     >
       <h2
         id="limits-heading"
@@ -37,31 +37,28 @@ export function LimitsNote({
 
       <p className="mt-2 text-xs text-muted-foreground">{disclaimer}</p>
 
-      <ul className="mt-2 space-y-1.5 text-xs text-muted-foreground">
-        <li className="flex gap-2">
-          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+      <ul className="mt-2 divide-y divide-border text-xs leading-relaxed text-muted-foreground">
+        <li className="py-1.5 last:pb-0">
           <span>
             The capillary view is a 2D particle model: {cellCount} cells, seed{' '}
-            <span className="tnum font-mono">{seed}</span>, constriction{' '}
-            <span className="tnum font-mono">{constriction}</span> of the lumen, sickling onset
+            <span className="tnum text-foreground">{seed}</span>, constriction{' '}
+            <span className="tnum text-foreground">{constriction}</span> of the lumen, sickling onset
             below{' '}
-            <span className="tnum font-mono">
+            <span className="tnum text-foreground">
               {onsetBelow} {unit}
             </span>
             . Occlusion, mean flow and sickled fraction are properties of that model only. They
             are not predictions about a patient, a cell line or a therapy.
           </span>
         </li>
-        <li className="flex gap-2">
-          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+        <li className="py-1.5 last:pb-0">
           <span>
             The structural annotations are public, textbook teaching summaries of a
             well-documented mechanism. They are not output from a structure-prediction model, and
             carry no clinical performance claim.
           </span>
         </li>
-        <li className="flex gap-2">
-          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+        <li className="py-1.5 last:pb-0">
           <span>
             The biosafety screen is a deterministic keyword-and-registry check, chosen so a
             reviewer can re-derive every verdict by hand. It over-blocks on innocent phrasing and
@@ -69,8 +66,7 @@ export function LimitsNote({
             review, never in place of one.
           </span>
         </li>
-        <li className="flex gap-2">
-          <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+        <li className="py-1.5 last:pb-0">
           <span>
             This tool models edits at the sequence-diff level. It contains no guide, primer,
             vector or protocol detail, and will not produce any.

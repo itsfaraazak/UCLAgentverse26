@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import {
   BadgeCheck,
+  CircleDashed,
   CircleSlash,
   FlaskConical,
   GitMerge,
@@ -29,6 +30,7 @@ import {
   ShieldAlert,
   Signature,
   Target,
+  TriangleAlert,
 } from 'lucide-react';
 import { useId } from 'react';
 import type { ComponentType } from 'react';
@@ -62,10 +64,10 @@ const AGENT_ICONS: Readonly<Record<string, ComponentType<{ className?: string }>
 };
 
 const LAMP: Readonly<Record<StepStatus, string>> = {
-  pass: 'bg-signal-ok shadow-[0_0_8px_var(--signal-ok)]',
-  fail: 'bg-signal-alarm shadow-[0_0_8px_var(--signal-alarm)]',
-  blocked: 'bg-signal-alarm shadow-[0_0_10px_var(--signal-alarm)]',
-  escalated: 'bg-signal-warn shadow-[0_0_8px_var(--signal-warn)]',
+  pass: 'bg-signal-ok',
+  fail: 'bg-signal-alarm',
+  blocked: 'bg-signal-alarm',
+  escalated: 'bg-signal-warn',
   skipped: 'bg-muted-foreground/35',
 };
 
@@ -131,12 +133,23 @@ export function CheckPanel({
         </Button>
       </div>
 
-      <div className="bezel-surface rounded-lg border border-bezel-edge/70 p-3">
+      <div className="bezel-surface rounded-lg border border-border p-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <span className="text-xs text-muted-foreground">
             {frameLabel} · <span className="font-mono">{branch}</span>
           </span>
-          <span className={cn('tnum font-mono text-sm font-semibold', verdictTone)}>
+          <span
+            className={cn('tnum flex items-center gap-1.5 font-mono text-sm font-semibold', verdictTone)}
+          >
+            {run === null ? (
+              <CircleDashed className="size-3.5" aria-hidden="true" />
+            ) : run.verdict === 'pass' ? (
+              <BadgeCheck className="size-3.5" aria-hidden="true" />
+            ) : run.verdict === 'escalated' ? (
+              <TriangleAlert className="size-3.5" aria-hidden="true" />
+            ) : (
+              <CircleSlash className="size-3.5" aria-hidden="true" />
+            )}
             {run === null ? 'NOT RUN' : run.verdict.toUpperCase()}
             {run !== null ? (
               <span className="ml-2 text-[0.625rem] font-normal text-muted-foreground">
@@ -211,9 +224,9 @@ export function CheckPanel({
                 Delta trail · {run.deltas.length} attributed entries
               </AccordionTrigger>
               <AccordionContent className="px-3">
-                <ol className="space-y-2">
+                <ol className="divide-y divide-border">
                   {run.deltas.map((d) => (
-                    <li key={d.id} className="rounded-md border border-border/70 p-2">
+                    <li key={d.id} className="py-2 first:pt-0 last:pb-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline" className="tnum font-mono">
                           {d.id}
@@ -240,7 +253,7 @@ export function CheckPanel({
 
           <div className="rounded-lg border border-border bg-card p-3">
             <h3 className="flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-              <BadgeCheck className="size-3" aria-hidden="true" />
+              <BadgeCheck className="size-3.5" aria-hidden="true" />
               Verifier cross-check
             </h3>
             {run.verifierDisagreedWithAssay || run.verifierDisagreedWithStructural ? (
@@ -298,10 +311,10 @@ export function CheckPanel({
         </p>
       )}
 
-      <div className="recess-surface space-y-2 rounded-lg border border-bezel-edge/60 p-3">
+      <div className="recess-surface space-y-2 rounded-lg border border-border p-3">
         <div className="flex items-center justify-between gap-2">
           <h3 className="flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-            <GitMerge className="size-3" aria-hidden="true" />
+            <GitMerge className="size-3.5" aria-hidden="true" />
             Merge gate
           </h3>
           <Button
@@ -321,10 +334,13 @@ export function CheckPanel({
         </div>
 
         {run !== null && run.requiresSignoff ? (
-          <div className="flex flex-col gap-2 rounded-md border border-signal-warn/40 bg-signal-warn/10 p-2">
-            <span className="text-xs">
+          <div className="flex flex-col gap-2 rounded-md bg-signal-warn/10 p-2">
+            <span className="flex items-start gap-1.5 text-xs">
+              <ShieldAlert className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+              <span>
               Escalated. Named human sign-off required
               {run.signoffRole !== null ? `: ${run.signoffRole}` : ''}.
+              </span>
             </span>
             {/*
               The name is the sign-off. It is sent to the server and the gate
@@ -353,7 +369,7 @@ export function CheckPanel({
                 onClick={onSignOff}
                 disabled={signedOff || approver.trim().length < 2}
               >
-                <Signature className="size-3" aria-hidden="true" />
+                <Signature className="size-3.5" aria-hidden="true" />
                 {signedOff ? 'Sign-off recorded' : 'Record sign-off'}
               </Button>
             </div>
@@ -363,10 +379,8 @@ export function CheckPanel({
         {merge !== null ? (
           <div
             className={cn(
-              'rounded-md border p-2 text-xs',
-              merge.ok
-                ? 'border-signal-ok/40 bg-signal-ok/10'
-                : 'border-signal-alarm/40 bg-signal-alarm/10',
+              'rounded-md p-2 text-xs',
+              merge.ok ? 'bg-signal-ok/10' : 'bg-signal-alarm/10',
             )}
           >
             <p className="flex items-center gap-1.5 font-semibold">

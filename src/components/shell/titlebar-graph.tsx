@@ -75,7 +75,7 @@ export function Titlebar({ repoName, headBranch, commitCount, branchCount }: Tit
       <Separator orientation="vertical" className="h-5" />
       <div className="flex min-w-0 items-center gap-2">
         <Dna className="size-4 shrink-0 text-primary" aria-hidden="true" />
-        <h1 className="truncate text-[13px] font-semibold tracking-tight">SigmaFold</h1>
+        <h1 className="font-display truncate text-[13px]">SigmaFold</h1>
         <span className="text-muted-foreground/60" aria-hidden="true">
           /
         </span>
@@ -83,7 +83,7 @@ export function Titlebar({ repoName, headBranch, commitCount, branchCount }: Tit
       </div>
       <VariantSwitcher current="/graph" />
 
-        <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-3">
         <span className="hidden items-center gap-1.5 text-[12px] text-muted-foreground tnum sm:flex">
           <GitBranch className="size-3.5" aria-hidden="true" />
           <span>
@@ -91,9 +91,9 @@ export function Titlebar({ repoName, headBranch, commitCount, branchCount }: Tit
           </span>
         </span>
         <Separator orientation="vertical" className="hidden h-5 sm:block" />
-        <span className="flex items-center gap-1.5 rounded-md border bg-card/60 px-2 py-0.5 font-mono text-[11px]">
+        <span className="flex items-center gap-1.5 hairline rounded-sm border px-2 py-0.5 font-mono text-[11px]">
           <span className="sr-only">Checked out branch:</span>
-          <GitBranch className="size-3 text-primary" aria-hidden="true" />
+          <GitBranch className="size-3 text-muted-foreground" aria-hidden="true" />
           {headBranch}
         </span>
         <ThemeToggle />

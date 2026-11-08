@@ -51,9 +51,9 @@ function Readout({
 }) {
   return (
     <div className="flex min-w-0 items-center gap-1.5">
-      <Icon className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+      <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
       <span className="text-[10px] tracking-wide text-muted-foreground uppercase">{label}</span>
-      <span className={`nums font-mono text-[12px] font-semibold ${tone ?? ''}`}>{value}</span>
+      <span className={`nums text-[12px] font-semibold ${tone ?? ''}`}>{value}</span>
     </div>
   );
 }
@@ -229,7 +229,7 @@ function CellCanvasRun({
           value={`${(metrics.sickledFraction * 100).toFixed(1)}%`}
           tone={metrics.sickledFraction > 0.3 ? 'text-status-fail' : undefined}
         />
-        <span className="nums ml-auto font-mono text-[10px] text-muted-foreground">
+        <span className="nums ml-auto text-[10px] text-muted-foreground">
           {genotypeLabel} · tendency {polymerizationTendency.toFixed(2)} · seed {defaults.seed} ·{' '}
           {defaults.cellCount} cells · step {tick}
         </span>
@@ -237,7 +237,7 @@ function CellCanvasRun({
 
       <canvas
         ref={canvasRef}
-        className="min-h-[110px] w-full flex-1 rounded-md border border-border bg-cell-plasma"
+        className="min-h-28 w-full flex-1 rounded-md border border-border bg-cell-plasma"
         role="img"
         aria-label={`Capillary flow simulation for ${genotypeLabel}. At pO2 ${pO2} ${pO2Control.unit}, ${(
           metrics.sickledFraction * 100
@@ -247,7 +247,7 @@ function CellCanvasRun({
       />
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex min-w-[15rem] flex-1 items-center gap-2">
+        <div className="flex min-w-60 flex-1 items-center gap-2">
           <span id={po2LabelId} className="shrink-0 text-[11px] text-muted-foreground">
             {pO2Control.label}
           </span>
@@ -266,7 +266,7 @@ function CellCanvasRun({
             }}
             aria-labelledby={po2LabelId}
           />
-          <span className="nums w-[5.5rem] shrink-0 font-mono text-[11px]">
+          <span className="nums w-[5.5rem] shrink-0 text-[11px]">
             {pO2} {pO2Control.unit}
           </span>
         </div>
@@ -286,7 +286,7 @@ function CellCanvasRun({
       <p className="text-[10px] leading-snug text-muted-foreground">
         <span className="font-semibold">Illustrative model, not validated haemorheology.</span>{' '}
         {simulationNote} Sickling becomes likely below{' '}
-        <span className="nums font-mono">
+        <span className="nums">
           {pO2Control.sicklingOnsetBelow} {pO2Control.unit}
         </span>
         ; above it, cells re-oxygenate and relax. These numbers describe this simulation only.

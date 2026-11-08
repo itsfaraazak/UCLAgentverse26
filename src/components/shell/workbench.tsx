@@ -339,11 +339,11 @@ export function Workbench({ workspace }: WorkbenchProps) {
                 {/* Gene-track minimap strip, always visible above the diff. */}
                 <div className="shrink-0 border-b border-border bg-gutter">
                   <div className="flex items-center gap-2 px-2.5 pt-1.5">
-                    <Dna className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+                    <Dna className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
                     <h2 className="text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                       {workspace.gene} locus
                     </h2>
-                    <span className="truncate font-mono text-[10px] text-muted-foreground">
+                    <span className="nums truncate text-[10px] text-muted-foreground">
                       chr{workspace.chromosome} · {workspace.exons.length} exons ·{' '}
                       {workspace.totalCodonCount} codons · {workspace.provenance}
                     </span>
@@ -405,14 +405,14 @@ export function Workbench({ workspace }: WorkbenchProps) {
                     {trackExpanded && (
                       <div className="mt-1 space-y-1">
                         <p className="flex items-start gap-1.5 text-[10px] leading-snug text-muted-foreground">
-                          <Info className="mt-[1px] size-3 shrink-0" aria-hidden />
+                          <Info className="size-3.5 shrink-0" aria-hidden />
                           <span>
                             {workspace.locusNote} Exon boundaries and codon positions come from the
                             curated fixture; the structural annotations attached to each variant are
                             illustrative teaching summaries, not predictions from a validated model.
                           </span>
                         </p>
-                        <p className="pl-[1.125rem] text-[10px] leading-snug text-muted-foreground">
+                        <p className="pl-5 text-[10px] leading-snug text-muted-foreground">
                           {workspace.fixtureDisclaimer}
                         </p>
                       </div>
@@ -422,7 +422,7 @@ export function Workbench({ workspace }: WorkbenchProps) {
 
                 {/* Diff toolbar. */}
                 <div className="flex shrink-0 items-center gap-2 border-b border-border px-2.5 py-1">
-                  <GitBranch className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+                  <GitBranch className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
                   <span className="truncate font-mono text-[11px]">
                     {branch.refSequence.label}
                     <span className="text-muted-foreground"> → </span>
@@ -520,12 +520,12 @@ export function Workbench({ workspace }: WorkbenchProps) {
                           : 'border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      <Icon className="size-3" aria-hidden />
+                      <Icon className="size-3.5" aria-hidden />
                       {tab.label}
                     </button>
                   );
                 })}
-                <span className="nums ml-auto pr-1.5 font-mono text-[10px] text-muted-foreground">
+                <span className="ml-auto pr-1.5 text-[10px] text-muted-foreground">
                   ⌘J toggles this panel
                 </span>
               </div>
@@ -559,12 +559,12 @@ export function Workbench({ workspace }: WorkbenchProps) {
       </ResizablePanelGroup>
 
       {/* Status bar. */}
-      <footer className="flex h-6 shrink-0 items-center gap-3 border-t border-chrome-border bg-chrome px-2.5 font-mono text-[10px] text-muted-foreground">
+      <footer className="flex h-6 shrink-0 items-center gap-3 border-t border-chrome-border bg-chrome px-2.5 text-[10px] text-muted-foreground">
         <span className="inline-flex items-center gap-1">
-          <GitBranch className="size-2.5" aria-hidden />
-          {branch.name}
+          <GitBranch className="size-3" aria-hidden />
+          <span className="font-mono">{branch.name}</span>
         </span>
-        <span className="nums">{branch.headShort}</span>
+        <span className="font-mono">{branch.headShort}</span>
         <span className="nums">
           {branch.diff.filter((r: DiffRow) => r.status !== 'same').length} changed /{' '}
           {branch.diff.length} codons
@@ -579,7 +579,7 @@ export function Workbench({ workspace }: WorkbenchProps) {
           </span>
         )}
         <span className="ml-auto inline-flex items-center gap-1">
-          <CircleDot className="size-2.5" aria-hidden />
+          <CircleDot className="size-3" aria-hidden />
           illustrative simulation — not a clinical tool
         </span>
       </footer>
@@ -633,18 +633,18 @@ function DeltaTrail({ run }: { readonly run: RunView | null }) {
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
       <p className="mb-2 flex items-start gap-1.5 text-[10px] leading-snug text-muted-foreground">
-        <ScanSearch className="mt-[1px] size-3 shrink-0" aria-hidden />
+        <ScanSearch className="size-3.5 shrink-0" aria-hidden />
         <span>
           {run.deltas.length} deltas for <span className="font-mono">{run.id}</span>. Each is
           attributed and parented; no delta is ever rewritten. Refused request text appears nowhere
           in this trail by construction — the gate records a category and a one-way digest instead.
         </span>
       </p>
-      <ol className="space-y-1.5">
+      <ol className="divide-y divide-border border-y border-border">
         {run.deltas.map((delta: DeltaView) => (
-          <li key={delta.id} className="rounded-md border border-border bg-gutter/60 px-2 py-1.5">
+          <li key={delta.id} className="py-1.5">
             <p className="nums flex flex-wrap items-center gap-x-2 font-mono text-[10.5px]">
-              <span className="rounded-sm border border-border bg-card px-1 text-[9.5px] uppercase">
+              <span className="rounded-sm bg-muted px-1 text-[9.5px] uppercase">
                 {delta.kind}
               </span>
               <span className="text-foreground">{delta.author}</span>

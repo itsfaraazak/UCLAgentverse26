@@ -123,10 +123,10 @@ export function ReadoutStrip({
         />
       </div>
 
-      <div className="recess-surface rounded-lg border border-bezel-edge/60 p-3">
+      <div className="recess-surface rounded-lg border border-border p-3">
         <div className="mb-1.5 flex items-center justify-between text-[0.625rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
           <span className="flex items-center gap-1.5">
-            <Waves className="size-3" aria-hidden="true" />
+            <Waves className="size-3.5" aria-hidden="true" />
             Trace
           </span>
           <span className="tnum font-mono">t = {tick}</span>
@@ -174,15 +174,15 @@ export function ReadoutStrip({
         </svg>
         <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[0.625rem] text-muted-foreground">
           <li className="flex items-center gap-1.5">
-            <CircleDot className="size-3 text-signal" aria-hidden="true" />
+            <CircleDot className="size-3.5 text-signal" aria-hidden="true" />
             flow / reference
           </li>
           <li className="flex items-center gap-1.5">
-            <CircleDot className="size-3 text-signal-alarm" aria-hidden="true" />
+            <CircleDot className="size-3.5 text-signal-alarm" aria-hidden="true" />
             occlusion
           </li>
           <li className="flex items-center gap-1.5">
-            <Droplets className="size-3 text-signal-warn" aria-hidden="true" />
+            <Droplets className="size-3.5 text-signal-warn" aria-hidden="true" />
             sickled fraction
           </li>
         </ul>

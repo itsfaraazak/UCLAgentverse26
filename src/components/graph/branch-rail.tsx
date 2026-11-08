@@ -45,7 +45,7 @@ export function BranchRail({
           return (
             <li key={branch.name}>
               <div
-                className={`group/ref flex items-start gap-2 rounded-lg px-1.5 py-1.5 transition-colors ${
+                className={`group/ref flex items-start gap-2 rounded-md px-1.5 py-1.5 transition-colors ${
                   isSelected ? 'bg-accent' : 'hover:bg-accent/60'
                 }`}
               >
@@ -65,7 +65,7 @@ export function BranchRail({
                       {branch.name}
                     </span>
                     {branch.isHead && (
-                      <span className="ml-auto shrink-0 rounded border bg-card px-1 text-[9px] font-semibold tracking-wide text-muted-foreground uppercase">
+                      <span className="hairline ml-auto shrink-0 rounded-sm border px-1 text-[9px] font-semibold tracking-wide text-muted-foreground uppercase">
                         head
                       </span>
                     )}
@@ -74,7 +74,7 @@ export function BranchRail({
                     <span
                       className={`inline-flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-px text-[9.5px] font-semibold tracking-wide uppercase ${look.pill}`}
                     >
-                      <look.Icon className="size-2.5" aria-hidden="true" />
+                      <look.Icon className="size-3" aria-hidden="true" />
                       {look.short}
                     </span>
                     <code className="shrink-0 font-mono text-[10px] text-muted-foreground tnum">
@@ -87,7 +87,7 @@ export function BranchRail({
                     ) : (
                       !branch.isHead && (
                         <span className="inline-flex shrink-0 items-center gap-0.5 text-[10px] text-pass">
-                          <Check className="size-2.5" aria-hidden="true" />
+                          <Check className="size-3" aria-hidden="true" />
                           merged
                         </span>
                       )
@@ -95,7 +95,7 @@ export function BranchRail({
                   </span>
                   {branch.mergeBlockedReason !== null && (
                     <span className="flex items-start gap-1 text-[10.5px] leading-snug text-muted-foreground">
-                      <Lock className="mt-px size-2.5 shrink-0" aria-hidden="true" />
+                      <Lock className="mt-px size-3.5 shrink-0" aria-hidden="true" />
                       <span className="line-clamp-2">{branch.mergeBlockedReason}</span>
                     </span>
                   )}
